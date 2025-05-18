@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 /**
  * @title IMonetaryPolicyRegistry
- * @dev Interface for the  Monetary Policy Registry that defines
+ * @dev Interface for the Monetary Policy Registry that defines
  * transaction policies and quotas for the GOFS CBDC system.
  */
 interface IMonetaryPolicyRegistry {
@@ -18,6 +18,9 @@ interface IMonetaryPolicyRegistry {
      * @param allowedToEntities Whitelist of specific addresses allowed as receivers
      * @param blockedFromEntities Blacklist of specific addresses blocked as senders
      * @param blockedToEntities Blacklist of specific addresses blocked as receivers
+     * @param minValue Minimum transaction value allowed
+     * @param maxValue Maximum transaction value allowed
+     * @param settlementPeriod Time in seconds until transaction settlement (0 = immediate)
      */
     struct TxPolicy {
         uint256 allowedFromEntityTypesBitmap; // Bitmap for sender entity types
@@ -26,6 +29,9 @@ interface IMonetaryPolicyRegistry {
         address[] allowedToEntities; // Explicit whitelist for receivers
         address[] blockedFromEntities; // Explicit blacklist for senders
         address[] blockedToEntities; // Explicit blacklist for receivers
+        uint256 minValue; // Minimum transaction value allowed
+        uint256 maxValue; // Maximum transaction value allowed
+        uint256 settlementPeriod; // Time in seconds until settlement (0 = immediate)
     }
 
     /**
@@ -50,7 +56,7 @@ interface IMonetaryPolicyRegistry {
         uint256 limit
     );
     event EntityTypeQuotaPolicyUpdated(
-        TxType indexed entityType,
+        EntityType indexed entityType,
         uint256 rate,
         uint256 limit
     );
@@ -69,6 +75,9 @@ interface IMonetaryPolicyRegistry {
      * @param allowedToEntities Array of specific addresses allowed to receive
      * @param blockedFromEntities Array of specific addresses blocked from sending
      * @param blockedToEntities Array of specific addresses blocked from receiving
+     * @param minValue Minimum transaction value allowed (0 for no minimum)
+     * @param maxValue Maximum transaction value allowed (0 for no maximum)
+     * @param settlementPeriod Time in seconds until settlement (0 for immediate)
      */
     function setTxPolicy(
         TxType txType,
@@ -77,7 +86,10 @@ interface IMonetaryPolicyRegistry {
         address[] memory allowedFromEntities,
         address[] memory allowedToEntities,
         address[] memory blockedFromEntities,
-        address[] memory blockedToEntities
+        address[] memory blockedToEntities,
+        uint256 minValue,
+        uint256 maxValue,
+        uint256 settlementPeriod
     ) external;
 
     /**
@@ -143,43 +155,4 @@ interface IMonetaryPolicyRegistry {
     function getEntityQuotaPolicy(
         address entity
     ) external view returns (QuotaPolicy memory);
-
-    /**
-     * @dev Check if a transaction is allowed based on policy
-     * @param from The sender address
-     * @param to The recipient address
-     * @param txType The transaction type
-     * @return isAllowed True if the transaction is allowed
-     */
-    function checkTxPolicy(
-        address from,
-        address to,
-        TxType txType
-    ) external view returns (bool);
-
-    /**
-     * @dev Check if a transaction exceeds quota limits
-     * @param from The sender address
-     * @param amount The transaction amount
-     * @param txType The transaction type
-     * @return isExceeding True if the transaction exceeds quota limits
-     */
-    function checkQuotaPolicy(
-        address from,
-        uint256 amount,
-        TxType txType
-    ) external view returns (bool);
-
-    /**
-     * @dev Update quota usage for an entity
-     * @param txType The transaction type
-     * @param from The entity address
-     * @param amount The transaction amount
-     * @return success True if update successful
-     */
-    function updateQuotaUsage(
-        EntityType txType,
-        address from,
-        uint256 amount
-    ) external returns (bool);
 }
