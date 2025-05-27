@@ -11,12 +11,7 @@ interface ITypedERC20 is IERC20 {
      * @param amount The amount of tokens to transfer
      * @return bool Returns true if the transfer was successful
      */
-    function transfer(
-        address to,
-        uint256 amount
-    ) external virtual override returns (bool) {
-        return transferWithType(to, amount, TxType(0));
-    }
+    function transfer(address to, uint256 amount) external returns (bool);
 
     /**
      * @notice Approves the specified amount of tokens for the given spender
@@ -25,12 +20,7 @@ interface ITypedERC20 is IERC20 {
      * @param amount The amount of tokens to approve
      * @return bool Returns true if the approval was successful
      */
-    function approve(
-        address spender,
-        uint256 amount
-    ) external virtual override returns (bool) {
-        return approveWithType(spender, amount, TxType(0));
-    }
+    function approve(address spender, uint256 amount) external returns (bool);
 
     /**
      * @dev Function to transfer tokens with transaction type
