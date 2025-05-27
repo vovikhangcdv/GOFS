@@ -99,12 +99,3 @@ graph TB
 
 ### 🌌 Design Rationale
 > The **Identity Registry** and **FDS** ensure robust KYC/AML compliance and real-time monitoring, fostering a transparent and secure environment that attracts foreign direct investment (FDI) and venture capital by mitigating risks of unregulated flows. The **CBDC-Token**, governed by the **Central Monetary Policy Registry**, enables dynamic economic policies, enhancing financial stability and supporting Vietnam's monetary sovereignty. The **External Exchange Portal** bridges DeFi and traditional finance by facilitating seamless currency swaps, unlocking global liquidity to fuel economic expansion. **ERC-4337 Wallets** simplify user access, driving widespread adoption across diverse populations. Guided by **Governors**, the system ensures strategic oversight, aligning with national priorities. Together, these components empower Vietnam to lead as a blockchain hub, promote transparency, integrate traditional and decentralized finance, and catalyze economic growth through increased liquidity and global investment.
-
-
-
-
-
-
-
-
-
