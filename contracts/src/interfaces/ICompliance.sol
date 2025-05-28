@@ -13,4 +13,13 @@ interface ICompliance {
         address _to,
         uint256 _amount
     ) external view returns (bool);
+
+    /// @notice Checks if a transfer can be made with a reason for failure
+    /// @dev Returns a boolean indicating if the transfer is allowed,
+    /// and a string with the reason if it is not allowed.
+    function canTransferWithFailureReason(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external view returns (bool, string memory);
 }
