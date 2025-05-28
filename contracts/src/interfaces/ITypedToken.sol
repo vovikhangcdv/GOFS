@@ -1,3 +1,10 @@
+/**
+ * @title ITypedERC20
+ * @dev Extension of ERC20 interface that adds transaction type support
+ * @notice This interface extends the standard ERC20 interface by adding transaction type
+ * functionality to transfers and approvals
+ * @custom:txtype For standard ERC20 operations (transfer, transferFrom, approve), use TxType(0)
+ */
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
@@ -5,30 +12,26 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {TxType} from "./ITypes.sol";
 interface ITypedERC20 is IERC20 {
     /**
-     * @notice Transfers the specified amount of tokens to the given address
-     * @dev This is a standard ERC20 transfer function that defaults to TxType(0)
-     * @param to The address to transfer tokens to
-     * @param amount The amount of tokens to transfer
-     * @return bool Returns true if the transfer was successful
-     */
-    function transfer(address to, uint256 amount) external returns (bool);
-
-    /**
-     * @notice Approves the specified amount of tokens for the given spender
-     * @dev This is a standard ERC20 approve function that defaults to TxType(0)
-     * @param spender The address to approve tokens for
-     * @param amount The amount of tokens to approve
-     * @return bool Returns true if the approval was successful
-     */
-    function approve(address spender, uint256 amount) external returns (bool);
-
-    /**
      * @dev Function to transfer tokens with transaction type
      * @param to The recipient address
      * @param amount Amount of tokens to transfer
      * @param txType Type of transaction
      */
     function transferWithType(
+        address to,
+        uint256 amount,
+        TxType txType
+    ) external returns (bool);
+
+    /**
+     * @dev Function to transfer tokens from one address to another with transaction type
+     * @param from The sender address
+     * @param to The recipient address
+     * @param amount Amount of tokens to transfer
+     * @param txType Type of transaction
+     */
+    function transferFromWithType(
+        address from,
         address to,
         uint256 amount,
         TxType txType

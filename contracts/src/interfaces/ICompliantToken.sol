@@ -7,11 +7,12 @@ import {IEntityRegistry} from "./IEntityRegistry.sol";
 
 /**
  * @title ICompliantToken
- * @dev Interface for the compliant token that implements
- * ERC20 standard with additional policy controls.
+ * @dev Interface for a compliant ERC20 token that enforces regulatory compliance and entity verification.
+ * Any implementation of transfer-based functions (transfer, transferFrom) must:
+ * 1. Check compliance rules via ICompliance.canTransfer()
+ * 2. Verify entities via IEntityRegistry.isVerifiedEntity()
  */
 interface ICompliantToken is IERC20 {
-    // compliance should be
-    function compliance() external view returns (ICompliance);
     function entityRegistry() external view returns (IEntityRegistry);
+    function compliance() external view returns (ICompliance);
 }
