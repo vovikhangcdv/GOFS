@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
-import {EntityInfo, EntityType} from "./ITypes.sol";
+import {Entity, EntityType} from "./ITypes.sol";
 
 /// @notice Interface for managing entity verifiers
 /// @dev Handles the addition, removal, and update of verifiers who can validate entities
