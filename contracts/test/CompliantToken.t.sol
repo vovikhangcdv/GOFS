@@ -233,4 +233,33 @@ contract CompliantTokenTest is Test {
         assertEq(token.balanceOf(user1), 500);
         vm.stopPrank();
     }
+
+    function test_setComplianceAddress() public {
+        // Owner can set a new compliance address
+        address newCompliance = makeAddr("newCompliance");
+        vm.startPrank(owner);
+        token.setCompliance(newCompliance);
+        vm.stopPrank();
+
+        assertEq(address(token.compliance()), newCompliance);
+    }
+    function test_setComplianceAddressRevertsForNonOwner() public {
+        // Non-owner cannot set compliance address
+        address newCompliance = makeAddr("newCompliance");
+        vm.startPrank(user1);
+        vm.expectRevert(
+            abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, user1)
+        );
+        token.setCompliance(newCompliance);
+        vm.stopPrank();
+    }
+
+    function test_setComplianceAddressRevertsOnZeroAddress() public {
+        // Owner cannot set compliance to zero address
+        vm.startPrank(owner);
+        vm.expectRevert(CompliantToken.ZeroAddressCompliance.selector);
+        token.setCompliance(address(0));
+        vm.stopPrank();
+        assertEq(address(token.compliance()), address(compliance));
+    }
 }

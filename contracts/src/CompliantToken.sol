@@ -15,7 +15,7 @@ import {ICompliance} from "./interfaces/ICompliance.sol";
  */
 contract CompliantToken is ICompliantToken, ERC20, Ownable {
     // Immutable compliance reference
-    ICompliance public immutable override compliance;
+    ICompliance public override compliance;
 
     // Custom errors
     error ComplianceCheckFailed(
@@ -81,5 +81,14 @@ contract CompliantToken is ICompliantToken, ERC20, Ownable {
      */
     function burn(address from, uint256 amount) external onlyOwner {
         _burn(from, amount);
+    }
+
+    /**
+     * @dev Change the compliance contract. Only callable by the owner (governance)
+     * @param newCompliance The address of the new compliance contract
+     */
+    function setCompliance(address newCompliance) external onlyOwner {
+        if (newCompliance == address(0)) revert ZeroAddressCompliance();
+        compliance = ICompliance(newCompliance);
     }
 }
