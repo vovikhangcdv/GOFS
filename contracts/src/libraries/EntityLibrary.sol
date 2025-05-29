@@ -17,7 +17,7 @@ library EntityLibrary {
     /// @param domainSeparator The EIP712 domain separator
     /// @return The EIP712-compatible hash of the Entity
     function hash(
-        Entity calldata entity,
+        Entity memory entity,
         bytes32 domainSeparator
     ) internal pure returns (bytes32) {
         bytes32 structHash = keccak256(
