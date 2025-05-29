@@ -35,7 +35,7 @@ contract AddressRestrictionComplianceTest is Test {
         complianceModule = new AddressRestrictionCompliance();
     }
 
-    function testInitialState() public {
+    function test_InitialState() public {
         assertTrue(
             complianceModule.hasRole(
                 complianceModule.DEFAULT_ADMIN_ROLE(),
@@ -49,7 +49,7 @@ contract AddressRestrictionComplianceTest is Test {
         assertFalse(complianceModule.isBlacklisted(user1));
     }
 
-    function testBlacklistFrom() public {
+    function test_BlacklistFrom() public {
         address[] memory users = new address[](2);
         users[0] = user1;
         users[1] = user2;
@@ -63,7 +63,7 @@ contract AddressRestrictionComplianceTest is Test {
         assertFalse(complianceModule.isBlacklisted(user2));
     }
 
-    function testBlacklistTo() public {
+    function test_BlacklistTo() public {
         address[] memory users = new address[](2);
         users[0] = user1;
         users[1] = user2;
@@ -77,7 +77,7 @@ contract AddressRestrictionComplianceTest is Test {
         assertFalse(complianceModule.isBlacklisted(user2));
     }
 
-    function testBlacklistBoth() public {
+    function test_BlacklistBoth() public {
         address[] memory users = new address[](2);
         users[0] = user1;
         users[1] = user2;
@@ -91,34 +91,34 @@ contract AddressRestrictionComplianceTest is Test {
         assertTrue(complianceModule.isBlacklisted(user2));
     }
 
-    function testBlacklistFromRevertEmptyList() public {
+    function test_BlacklistFromRevertEmptyList() public {
         address[] memory users = new address[](0);
         vm.expectRevert(AddressRestrictionCompliance.EmptyAddressList.selector);
         complianceModule.blacklistFrom(users);
     }
 
-    function testBlacklistFromRevertZeroAddress() public {
+    function test_BlacklistFromRevertZeroAddress() public {
         address[] memory users = new address[](1);
         users[0] = address(0);
         vm.expectRevert(AddressRestrictionCompliance.ZeroAddress.selector);
         complianceModule.blacklistFrom(users);
     }
 
-    function testBlacklistToRevertZeroAddress() public {
+    function test_BlacklistToRevertZeroAddress() public {
         address[] memory users = new address[](1);
         users[0] = address(0);
         vm.expectRevert(AddressRestrictionCompliance.ZeroAddress.selector);
         complianceModule.blacklistTo(users);
     }
 
-    function testBlacklistRevertZeroAddress() public {
+    function test_BlacklistRevertZeroAddress() public {
         address[] memory users = new address[](1);
         users[0] = address(0);
         vm.expectRevert(AddressRestrictionCompliance.ZeroAddress.selector);
         complianceModule.blacklist(users);
     }
 
-    function testBlacklistFromRevertAlreadyBlacklisted() public {
+    function test_BlacklistFromRevertAlreadyBlacklisted() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -134,7 +134,7 @@ contract AddressRestrictionComplianceTest is Test {
         complianceModule.blacklistFrom(users);
     }
 
-    function testBlacklistToRevertAlreadyBlacklisted() public {
+    function test_BlacklistToRevertAlreadyBlacklisted() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -150,7 +150,7 @@ contract AddressRestrictionComplianceTest is Test {
         complianceModule.blacklistTo(users);
     }
 
-    function testBlacklistRevertNonAdmin() public {
+    function test_BlacklistRevertNonAdmin() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -166,7 +166,7 @@ contract AddressRestrictionComplianceTest is Test {
         vm.stopPrank();
     }
 
-    function testUnblacklistFrom() public {
+    function test_UnblacklistFrom() public {
         address[] memory users = new address[](2);
         users[0] = user1;
         users[1] = user2;
@@ -177,7 +177,7 @@ contract AddressRestrictionComplianceTest is Test {
         assertFalse(complianceModule.isBlacklistedFrom(user2));
     }
 
-    function testUnblacklistTo() public {
+    function test_UnblacklistTo() public {
         address[] memory users = new address[](2);
         users[0] = user1;
         users[1] = user2;
@@ -188,7 +188,7 @@ contract AddressRestrictionComplianceTest is Test {
         assertFalse(complianceModule.isBlacklistedTo(user2));
     }
 
-    function testUnblacklistBoth() public {
+    function test_UnblacklistBoth() public {
         address[] memory users = new address[](2);
         users[0] = user1;
         users[1] = user2;
@@ -203,7 +203,7 @@ contract AddressRestrictionComplianceTest is Test {
         assertFalse(complianceModule.isBlacklisted(user2));
     }
 
-    function testUnblacklistFromRevertNotBlacklisted() public {
+    function test_UnblacklistFromRevertNotBlacklisted() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -216,7 +216,7 @@ contract AddressRestrictionComplianceTest is Test {
         complianceModule.unblacklistFrom(users);
     }
 
-    function testUnblacklistToRevertNotBlacklisted() public {
+    function test_UnblacklistToRevertNotBlacklisted() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -229,11 +229,11 @@ contract AddressRestrictionComplianceTest is Test {
         complianceModule.unblacklistTo(users);
     }
 
-    function testCanTransferAllowedAddresses() public {
+    function test_CanTransferAllowedAddresses() public {
         assertTrue(complianceModule.canTransfer(user1, user2, 100));
     }
 
-    function testCanTransferBlockedSender() public {
+    function test_CanTransferBlockedSender() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -241,7 +241,7 @@ contract AddressRestrictionComplianceTest is Test {
         assertFalse(complianceModule.canTransfer(user1, user2, 100));
     }
 
-    function testCanTransferBlockedRecipient() public {
+    function test_CanTransferBlockedRecipient() public {
         address[] memory users = new address[](1);
         users[0] = user2;
 
@@ -249,7 +249,7 @@ contract AddressRestrictionComplianceTest is Test {
         assertFalse(complianceModule.canTransfer(user1, user2, 100));
     }
 
-    function testCanTransferCompletelyBlocked() public {
+    function test_CanTransferCompletelyBlocked() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -258,14 +258,14 @@ contract AddressRestrictionComplianceTest is Test {
         assertFalse(complianceModule.canTransfer(user2, user1, 100));
     }
 
-    function testCanTransferWithFailureReasonAllowedAddresses() public {
+    function test_CanTransferWithFailureReasonAllowedAddresses() public {
         (bool success, string memory reason) = complianceModule
             .canTransferWithFailureReason(user1, user2, 100);
         assertTrue(success);
         assertEq(reason, "");
     }
 
-    function testCanTransferWithFailureReasonBlockedSender() public {
+    function test_CanTransferWithFailureReasonBlockedSender() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -276,7 +276,7 @@ contract AddressRestrictionComplianceTest is Test {
         assertEq(reason, "Sender address is blacklisted from sending");
     }
 
-    function testCanTransferWithFailureReasonBlockedRecipient() public {
+    function test_CanTransferWithFailureReasonBlockedRecipient() public {
         address[] memory users = new address[](1);
         users[0] = user2;
 
@@ -287,7 +287,7 @@ contract AddressRestrictionComplianceTest is Test {
         assertEq(reason, "Recipient address is blacklisted from receiving");
     }
 
-    function testEvents() public {
+    function test_Events() public {
         address[] memory fromUsers = new address[](1);
         fromUsers[0] = user1;
 
@@ -331,7 +331,7 @@ contract AddressRestrictionComplianceTest is Test {
     }
 
     // Test double blacklisting
-    function testDoubleBlacklistFromFails() public {
+    function test_DoubleBlacklistFromFails() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -348,7 +348,7 @@ contract AddressRestrictionComplianceTest is Test {
     }
 
     // Test double blacklistTo
-    function testDoubleBlacklistToFails() public {
+    function test_DoubleBlacklistToFails() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -365,7 +365,7 @@ contract AddressRestrictionComplianceTest is Test {
     }
 
     // Test unblacklist non-blacklisted address
-    function testUnblacklistFromNonBlacklistedFails() public {
+    function test_UnblacklistFromNonBlacklistedFails() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -379,7 +379,7 @@ contract AddressRestrictionComplianceTest is Test {
     }
 
     // Test unblacklistTo non-blacklisted address
-    function testUnblacklistToNonBlacklistedFails() public {
+    function test_UnblacklistToNonBlacklistedFails() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -393,7 +393,7 @@ contract AddressRestrictionComplianceTest is Test {
     }
 
     // Test blacklist with non-admin
-    function testBlacklistFromNonAdminFails() public {
+    function test_BlacklistFromNonAdminFails() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -410,7 +410,7 @@ contract AddressRestrictionComplianceTest is Test {
     }
 
     // Test partial blacklist/unblacklist transitions
-    function testPartialBlacklistStates() public {
+    function test_PartialBlacklistStates() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -434,7 +434,7 @@ contract AddressRestrictionComplianceTest is Test {
     }
 
     // Test transfer restrictions with various blacklist states
-    function testCanTransferRestrictionsComprehensive() public {
+    function test_CanTransferRestrictionsComprehensive() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -469,7 +469,7 @@ contract AddressRestrictionComplianceTest is Test {
         assertEq(reason, "Sender address is blacklisted from sending");
     }
 
-    function testDoubleBlacklistFromToCase() public {
+    function test_DoubleBlacklistFromToCase() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -491,7 +491,7 @@ contract AddressRestrictionComplianceTest is Test {
         assertFalse(complianceModule.isBlacklisted(user1));
     }
 
-    function testBlacklistAlreadyBlacklistedBoth() public {
+    function test_BlacklistAlreadyBlacklistedBoth() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -515,7 +515,7 @@ contract AddressRestrictionComplianceTest is Test {
         assertFalse(complianceModule.isBlacklisted(user1));
     }
 
-    function testUnblacklistAlreadyUnblacklisted() public {
+    function test_UnblacklistAlreadyUnblacklisted() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
@@ -535,7 +535,7 @@ contract AddressRestrictionComplianceTest is Test {
         complianceModule.unblacklistFrom(users);
     }
 
-    function testEmptyArrayCases() public {
+    function test_EmptyArrayCases() public {
         address[] memory emptyArray = new address[](0);
 
         // Test all functions with empty array
@@ -558,7 +558,7 @@ contract AddressRestrictionComplianceTest is Test {
         complianceModule.unblacklist(emptyArray);
     }
 
-    function testCanTransferWithFailureReasonComprehensive() public {
+    function test_CanTransferWithFailureReasonComprehensive() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 

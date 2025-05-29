@@ -98,7 +98,7 @@ contract EntityTypeComplianceTest is Test {
         vm.stopPrank();
     }
 
-    function testInitialization() public {
+    function test_Initialization() public {
         // Test correct initialization
         assertEq(address(compliance.entityRegistry()), address(entityRegistry));
         assertTrue(
@@ -106,7 +106,7 @@ contract EntityTypeComplianceTest is Test {
         );
     }
 
-    function testSetSingleTransferPolicy() public {
+    function test_SetSingleTransferPolicy() public {
         EntityType fromType = EntityType.wrap(1);
         EntityType toType = EntityType.wrap(2);
 
@@ -143,7 +143,7 @@ contract EntityTypeComplianceTest is Test {
         vm.stopPrank();
     }
 
-    function testSetBatchTransferPolicy() public {
+    function test_SetBatchTransferPolicy() public {
         // Create test addresses
         address sender = address(0x1111);
         address receiver1 = address(0x3333);
@@ -190,7 +190,7 @@ contract EntityTypeComplianceTest is Test {
         vm.stopPrank();
     }
 
-    function testOnlyAdminCanSetPolicy() public {
+    function test_OnlyAdminCanSetPolicy() public {
         EntityType fromType = EntityType.wrap(1);
         EntityType toType = EntityType.wrap(2);
 
@@ -201,7 +201,7 @@ contract EntityTypeComplianceTest is Test {
         vm.stopPrank();
     }
 
-    function testCanTransfer() public {
+    function test_CanTransfer() public {
         EntityType fromType = EntityType.wrap(1);
         EntityType toType = EntityType.wrap(2);
 
@@ -225,7 +225,7 @@ contract EntityTypeComplianceTest is Test {
         assertFalse(compliance.canTransfer(sender, otherReceiver, 1000));
     }
 
-    function testCanTransferWithFailureReason() public {
+    function test_CanTransferWithFailureReason() public {
         EntityType fromType = EntityType.wrap(1);
         EntityType toType = EntityType.wrap(2);
 
@@ -253,7 +253,7 @@ contract EntityTypeComplianceTest is Test {
         assertEq(reason, "");
     }
 
-    function testMintingAndBurning() public {
+    function test_MintingAndBurning() public {
         address receiver = address(0x1111);
         address sender = address(0x2222);
 
@@ -278,7 +278,7 @@ contract EntityTypeComplianceTest is Test {
     }
 
     // Test minting (from zero address)
-    function testCanTransferFromZeroAddress() public {
+    function test_CanTransferFromZeroAddress() public {
         // Minting (from zero address) should be allowed regardless of recipient's type
         _registerEntity(alice, 1);
         (bool success, string memory reason) = compliance
@@ -288,7 +288,7 @@ contract EntityTypeComplianceTest is Test {
     }
 
     // Test burning (to zero address)
-    function testCanTransferToZeroAddress() public {
+    function test_CanTransferToZeroAddress() public {
         // Burning (to zero address) should be allowed regardless of sender's type
         _registerEntity(alice, 1);
         (bool success, string memory reason) = compliance
@@ -298,7 +298,7 @@ contract EntityTypeComplianceTest is Test {
     }
 
     // Test invalid array lengths
-    function testSetTransferPolicyInvalidLengths() public {
+    function test_SetTransferPolicyInvalidLengths() public {
         EntityType fromType = EntityType.wrap(1);
         EntityType[] memory toTypes = new EntityType[](2);
         toTypes[0] = EntityType.wrap(2);
@@ -313,7 +313,7 @@ contract EntityTypeComplianceTest is Test {
     }
 
     // Test invalid entity registry address
-    function testConstructorZeroAddress() public {
+    function test_ConstructorZeroAddress() public {
         vm.expectRevert(
             EntityTypeCompliance.InvalidEntityRegistryAddress.selector
         );
@@ -321,7 +321,7 @@ contract EntityTypeComplianceTest is Test {
     }
 
     // Test disallowed transfer between types
-    function testCanTransferDisallowed() public {
+    function test_CanTransferDisallowed() public {
         // Register entities of different types
         _registerEntity(alice, 1);
         _registerEntity(bob, 2);
@@ -334,12 +334,12 @@ contract EntityTypeComplianceTest is Test {
     }
 
     // Test entity registry immutability
-    function testEntityRegistryImmutability() public {
+    function test_EntityRegistryImmutability() public {
         address storedRegistry = address(compliance.entityRegistry());
         assertEq(storedRegistry, address(entityRegistry));
     }
 
-    function testIsTransferAllowed() public {
+    function test_IsTransferAllowed() public {
         EntityType fromType = EntityType.wrap(1);
         EntityType toType = EntityType.wrap(2);
 
