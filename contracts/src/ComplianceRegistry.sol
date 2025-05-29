@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
-
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "./interfaces/ICompliance.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {ICompliance} from "./interfaces/ICompliance.sol";
 
 /**
  * @title ComplianceRegistry
@@ -90,13 +89,8 @@ contract ComplianceRegistry is ICompliance, AccessControl {
         address _to,
         uint256 _amount
     ) public view override returns (bool) {
-        uint256 length = _modules.length();
-        for (uint256 i = 0; i < length; i++) {
-            if (!ICompliance(_modules.at(i)).canTransfer(_from, _to, _amount)) {
-                return false;
-            }
-        }
-        return true;
+        (bool success, ) = canTransferWithFailureReason(_from, _to, _amount);
+        return success;
     }
 
     /**
