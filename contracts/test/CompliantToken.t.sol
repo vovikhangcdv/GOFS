@@ -9,6 +9,14 @@ import {ICompliance} from "../src/interfaces/ICompliance.sol";
 contract MockCompliance is ICompliance {
     bool private allowTransfer;
     string private failureMessage;
+    bool private allowMinting;
+    bool private allowBurning;
+
+    constructor() {
+        // By default allow minting and burning for most tests
+        allowMinting = true;
+        allowBurning = true;
+    }
 
     // Set whether transfers should be allowed in tests
     function setTransferAllowed(bool allowed, string memory message) external {
@@ -16,19 +24,39 @@ contract MockCompliance is ICompliance {
         failureMessage = message;
     }
 
+    function setMintingAllowed(bool allowed) external {
+        allowMinting = allowed;
+    }
+
+    function setBurningAllowed(bool allowed) external {
+        allowBurning = allowed;
+    }
+
     function canTransfer(
-        address,
-        address,
+        address from,
+        address to,
         uint256
     ) external view returns (bool) {
+        if (from == address(0)) {
+            return allowMinting;
+        }
+        if (to == address(0)) {
+            return allowBurning;
+        }
         return allowTransfer;
     }
 
     function canTransferWithFailureReason(
-        address,
-        address,
-        uint256
+        address from,
+        address to,
+        uint256 amount
     ) external view returns (bool, string memory) {
+        if (from == address(0)) {
+            return (allowMinting, allowMinting ? "" : "Minting not allowed");
+        }
+        if (to == address(0)) {
+            return (allowBurning, allowBurning ? "" : "Burning not allowed");
+        }
         return (allowTransfer, failureMessage);
     }
 }
@@ -219,18 +247,60 @@ contract CompliantTokenTest is Test {
         assertEq(token.allowance(user1, user2), 500);
     }
 
-    function test_MintingAndBurningBypassCompliance() public {
-        // Setup compliance to disallow transfers
+    function test_MintingAndBurningWithCompliance() public {
+        // Setup compliance to disallow transfers but allow minting/burning
         compliance.setTransferAllowed(false, "Transfer not allowed");
+        compliance.setMintingAllowed(true);
+        compliance.setBurningAllowed(true);
 
-        // Minting should work regardless of compliance
+        // Minting should work when compliance allows it
         vm.startPrank(owner);
         token.mint(user1, 1000);
         assertEq(token.balanceOf(user1), 1000);
 
-        // Burning should work regardless of compliance
+        // Burning should work when compliance allows it
         token.burn(user1, 500);
         assertEq(token.balanceOf(user1), 500);
+        vm.stopPrank();
+    }
+
+    function test_MintingFailsWhenComplianceDisallows() public {
+        compliance.setMintingAllowed(false);
+
+        vm.startPrank(owner);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CompliantToken.ComplianceCheckFailed.selector,
+                address(0),
+                user1,
+                1000,
+                "Minting not allowed"
+            )
+        );
+        token.mint(user1, 1000);
+        vm.stopPrank();
+    }
+
+    function test_BurningFailsWhenComplianceDisallows() public {
+        // First allow minting to setup the test
+        compliance.setMintingAllowed(true);
+        vm.prank(owner);
+        token.mint(user1, 1000);
+
+        // Now test burning compliance
+        compliance.setBurningAllowed(false);
+
+        vm.startPrank(owner);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CompliantToken.ComplianceCheckFailed.selector,
+                user1,
+                address(0),
+                500,
+                "Burning not allowed"
+            )
+        );
+        token.burn(user1, 500);
         vm.stopPrank();
     }
 

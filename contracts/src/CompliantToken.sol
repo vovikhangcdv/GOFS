@@ -52,14 +52,11 @@ contract CompliantToken is ICompliantToken, ERC20, Ownable {
         address to,
         uint256 value
     ) internal virtual override {
-        // Skip checks for minting and burning
-        if (from != address(0) && to != address(0)) {
-            // Check compliance with failure reason (includes entity verification)
-            (bool isCompliant, string memory failureReason) = compliance
-                .canTransferWithFailureReason(from, to, value);
-            if (!isCompliant) {
-                revert ComplianceCheckFailed(from, to, value, failureReason);
-            }
+        // Check compliance with failure reason (includes entity verification)
+        (bool isCompliant, string memory failureReason) = compliance
+            .canTransferWithFailureReason(from, to, value);
+        if (!isCompliant) {
+            revert ComplianceCheckFailed(from, to, value, failureReason);
         }
 
         super._update(from, to, value);
