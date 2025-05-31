@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import {Test, console2} from "forge-std/Test.sol";
 import {CompliantToken} from "../src/CompliantToken.sol";
 import {ICompliance} from "../src/interfaces/ICompliance.sol";
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 
 // Mock compliance contract for testing
 contract MockCompliance is ICompliance {
@@ -89,7 +90,6 @@ contract CompliantTokenTest is Test {
         assertEq(token.name(), "Test Token");
         assertEq(token.symbol(), "TEST");
         assertEq(address(token.compliance()), address(compliance));
-        assertEq(token.owner(), owner);
     }
 
     function test_ConstructorRevertsOnZeroComplianceAddress() public {
@@ -108,10 +108,14 @@ contract CompliantTokenTest is Test {
         assertEq(token.totalSupply(), 1000);
     }
 
-    function test_MintRevertsForNonOwner() public {
+    function test_MintRevertsForNonMinter() public {
         vm.startPrank(user1);
         vm.expectRevert(
-            abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, user1)
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                user1,
+                token.MINTER_ROLE()
+            )
         );
         token.mint(user1, 1000);
         vm.stopPrank();
@@ -128,14 +132,18 @@ contract CompliantTokenTest is Test {
         assertEq(token.totalSupply(), 500);
     }
 
-    function test_BurnRevertsForNonOwner() public {
+    function test_BurnRevertsForNonBurner() public {
         vm.startPrank(owner);
         token.mint(user1, 1000);
         vm.stopPrank();
 
         vm.startPrank(user1);
         vm.expectRevert(
-            abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, user1)
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                user1,
+                token.BURNER_ROLE()
+            )
         );
         token.burn(user1, 500);
         vm.stopPrank();
@@ -313,12 +321,16 @@ contract CompliantTokenTest is Test {
 
         assertEq(address(token.compliance()), newCompliance);
     }
-    function test_setComplianceAddressRevertsForNonOwner() public {
-        // Non-owner cannot set compliance address
+    function test_setComplianceAddressRevertsForNonAdmin() public {
+        // Non-admin cannot set compliance address
         address newCompliance = makeAddr("newCompliance");
         vm.startPrank(user1);
         vm.expectRevert(
-            abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, user1)
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                user1,
+                token.COMPLIANCE_ADMIN_ROLE()
+            )
         );
         token.setCompliance(newCompliance);
         vm.stopPrank();

@@ -43,7 +43,9 @@ contract EntityRegistryTest is Test {
 
     function test_Constructor() public {
         assertTrue(registry.hasRole(registry.DEFAULT_ADMIN_ROLE(), admin));
-        assertTrue(registry.hasRole(registry.ADMIN_ROLE(), admin));
+        assertTrue(
+            registry.hasRole(registry.ENTITY_REGISTRY_ADMIN_ROLE(), admin)
+        );
     }
 
     function test_AddVerifier() public {

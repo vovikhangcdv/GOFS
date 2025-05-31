@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {ICompliantToken} from "./interfaces/ICompliantToken.sol";
 import {ICompliance} from "./interfaces/ICompliance.sol";
 
@@ -13,7 +13,13 @@ import {ICompliance} from "./interfaces/ICompliance.sol";
  * 1. All transfers must pass compliance checks (including entity verification)
  * 2. Token parameters can be managed by governance
  */
-contract CompliantToken is ICompliantToken, ERC20, Ownable {
+contract CompliantToken is ICompliantToken, ERC20, AccessControl {
+    // Role definitions
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
+    bytes32 public constant COMPLIANCE_ADMIN_ROLE =
+        keccak256("COMPLIANCE_ADMIN_ROLE");
+
     // Immutable compliance reference
     ICompliance public override compliance;
 
@@ -36,9 +42,15 @@ contract CompliantToken is ICompliantToken, ERC20, Ownable {
         string memory name_,
         string memory symbol_,
         address compliance_
-    ) ERC20(name_, symbol_) Ownable(msg.sender) {
+    ) ERC20(name_, symbol_) {
         if (compliance_ == address(0)) revert ZeroAddressCompliance();
         compliance = ICompliance(compliance_);
+
+        // Setup roles
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(MINTER_ROLE, msg.sender);
+        _grantRole(BURNER_ROLE, msg.sender);
+        _grantRole(COMPLIANCE_ADMIN_ROLE, msg.sender);
     }
 
     /**
@@ -63,28 +75,30 @@ contract CompliantToken is ICompliantToken, ERC20, Ownable {
     }
 
     /**
-     * @dev Mint new tokens. Only callable by the owner (governance)
+     * @dev Mint new tokens. Only callable by accounts with MINTER_ROLE
      * @param to The address to mint tokens to
      * @param amount The amount of tokens to mint
      */
-    function mint(address to, uint256 amount) external onlyOwner {
+    function mint(address to, uint256 amount) external onlyRole(MINTER_ROLE) {
         _mint(to, amount);
     }
 
     /**
-     * @dev Burn tokens from an address. Only callable by the owner (governance)
+     * @dev Burn tokens from an address. Only callable by accounts with BURNER_ROLE
      * @param from The address to burn tokens from
      * @param amount The amount of tokens to burn
      */
-    function burn(address from, uint256 amount) external onlyOwner {
+    function burn(address from, uint256 amount) external onlyRole(BURNER_ROLE) {
         _burn(from, amount);
     }
 
     /**
-     * @dev Change the compliance contract. Only callable by the owner (governance)
+     * @dev Change the compliance contract. Only callable by accounts with COMPLIANCE_ADMIN_ROLE
      * @param newCompliance The address of the new compliance contract
      */
-    function setCompliance(address newCompliance) external onlyOwner {
+    function setCompliance(
+        address newCompliance
+    ) external onlyRole(COMPLIANCE_ADMIN_ROLE) {
         if (newCompliance == address(0)) revert ZeroAddressCompliance();
         compliance = ICompliance(newCompliance);
     }

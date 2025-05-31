@@ -82,8 +82,8 @@ contract ExchangePortalTest is Test {
 
         // Check roles
         assertTrue(portal.hasRole(portal.DEFAULT_ADMIN_ROLE(), admin));
-        assertTrue(portal.hasRole(portal.RATE_ADMIN_ROLE(), admin));
-        assertTrue(portal.hasRole(portal.FEE_ADMIN_ROLE(), admin));
+        assertTrue(portal.hasRole(portal.EXCHANGE_FEE_ADMIN_ROLE(), admin));
+        assertTrue(portal.hasRole(portal.EXCHANGE_RATE_ADMIN_ROLE(), admin));
     }
 
     function test_Exchange_Token0ToToken1() public {
@@ -209,7 +209,7 @@ contract ExchangePortalTest is Test {
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
                 user,
-                portal.RATE_ADMIN_ROLE()
+                portal.EXCHANGE_RATE_ADMIN_ROLE()
             )
         );
         portal.setExchangeRate(3 * 1e18);
@@ -222,7 +222,7 @@ contract ExchangePortalTest is Test {
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
                 user,
-                portal.FEE_ADMIN_ROLE()
+                portal.EXCHANGE_FEE_ADMIN_ROLE()
             )
         );
         portal.setExchangeFee(200);

@@ -6,10 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IExchange.sol";
 
-/**
- * @title ExchangePortal
- * @dev Implementation of fixed rate IExchangePortal with role-based access control
- */
 contract ExchangePortal is IExchangePortal, AccessControl {
     using SafeERC20 for IERC20;
 
@@ -22,8 +18,10 @@ contract ExchangePortal is IExchangePortal, AccessControl {
     error InvalidFeeConfig();
     error FeeTooHigh();
 
-    bytes32 public constant RATE_ADMIN_ROLE = keccak256("RATE_ADMIN_ROLE");
-    bytes32 public constant FEE_ADMIN_ROLE = keccak256("FEE_ADMIN_ROLE");
+    bytes32 public constant EXCHANGE_RATE_ADMIN_ROLE =
+        keccak256("EXCHANGE_RATE_ADMIN_ROLE");
+    bytes32 public constant EXCHANGE_FEE_ADMIN_ROLE =
+        keccak256("EXCHANGE_FEE_ADMIN_ROLE");
 
     uint256 public constant MAX_FEE = 100_00; // 10% max fee (scaled by 1e4)
     uint256 public constant FEE_DENOMINATOR = 10000;
@@ -46,14 +44,6 @@ contract ExchangePortal is IExchangePortal, AccessControl {
         uint256 feeAmount
     );
 
-    /**
-     * @dev Initializes the exchange portal with token addresses and sets up admin roles
-     * @param _token0 Address of the first token (usually CBDC)
-     * @param _token1 Address of the second token
-     * @param initialRate Initial exchange rate scaled by 1e18
-     * @param _treasury Address where fees will be collected
-     * @param _exchangeFee Initial fee in basis points
-     */
     constructor(
         address _token0,
         address _token1,
@@ -75,49 +65,37 @@ contract ExchangePortal is IExchangePortal, AccessControl {
         exchangeFee = _exchangeFee;
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(RATE_ADMIN_ROLE, msg.sender);
-        _grantRole(FEE_ADMIN_ROLE, msg.sender);
+        _grantRole(EXCHANGE_RATE_ADMIN_ROLE, msg.sender);
+        _grantRole(EXCHANGE_FEE_ADMIN_ROLE, msg.sender);
 
         emit ExchangeRateUpdated(_token0, _token1, initialRate);
         emit FeeUpdated(_exchangeFee);
         emit TreasuryUpdated(_treasury);
     }
 
-    /**
-     * @dev Updates the exchange fee
-     * @param newFee Fee in basis points (1/100 of 1%)
-     */
-    function setExchangeFee(uint256 newFee) external onlyRole(FEE_ADMIN_ROLE) {
+    function setExchangeFee(
+        uint256 newFee
+    ) external onlyRole(EXCHANGE_FEE_ADMIN_ROLE) {
         if (newFee > MAX_FEE) revert FeeTooHigh();
         exchangeFee = newFee;
         emit FeeUpdated(newFee);
     }
 
-    /**
-     * @dev Updates the treasury address
-     * @param newTreasury New treasury address
-     */
     function setTreasury(
         address newTreasury
-    ) external onlyRole(FEE_ADMIN_ROLE) {
+    ) external onlyRole(EXCHANGE_FEE_ADMIN_ROLE) {
         if (newTreasury == address(0)) revert ZeroAddress();
         treasury = newTreasury;
         emit TreasuryUpdated(newTreasury);
     }
 
-    /**
-     * @inheritdoc IExchangePortal
-     */
     function getExchangeRate() external view override returns (uint256) {
         return _exchangeRate;
     }
 
-    /**
-     * @inheritdoc IExchangePortal
-     */
     function setExchangeRate(
         uint256 newRate
-    ) external override onlyRole(RATE_ADMIN_ROLE) {
+    ) external override onlyRole(EXCHANGE_RATE_ADMIN_ROLE) {
         if (newRate == 0) revert InvalidInitialRate();
         _exchangeRate = newRate;
         emit ExchangeRateUpdated(token0, token1, newRate);

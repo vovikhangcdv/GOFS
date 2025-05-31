@@ -115,11 +115,11 @@ contract AddressRestrictionCompliance is ICompliance, AccessControl {
         for (uint256 i = 0; i < accounts.length; i++) {
             address account = accounts[i];
             if (account == address(0)) revert ZeroAddress();
-            if (!_blacklistedFrom[account])
-                revert AddressNotBlacklistedFrom(account);
 
-            _blacklistedFrom[account] = false;
-            emit AddressUnblacklistedFrom(account);
+            if (_blacklistedFrom[account]) {
+                _blacklistedFrom[account] = false;
+                emit AddressUnblacklistedFrom(account);
+            }
         }
     }
 
@@ -135,11 +135,11 @@ contract AddressRestrictionCompliance is ICompliance, AccessControl {
         for (uint256 i = 0; i < accounts.length; i++) {
             address account = accounts[i];
             if (account == address(0)) revert ZeroAddress();
-            if (!_blacklistedTo[account])
-                revert AddressNotBlacklistedTo(account);
 
-            _blacklistedTo[account] = false;
-            emit AddressUnblacklistedTo(account);
+            if (_blacklistedTo[account]) {
+                _blacklistedTo[account] = false;
+                emit AddressUnblacklistedTo(account);
+            }
         }
     }
 

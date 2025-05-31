@@ -31,7 +31,8 @@ contract EntityRegistry is
         return _domainSeparatorV4();
     }
 
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant ENTITY_REGISTRY_ADMIN_ROLE =
+        keccak256("ENTITY_REGISTRY_ADMIN_ROLE");
     bytes32 public ENTITY_TYPE_HASH = EntityLibrary.ENTITY_TYPEHASH;
 
     mapping(address => Entity) private _entities;
@@ -44,7 +45,7 @@ contract EntityRegistry is
 
     constructor() EIP712("EntityRegistry", "1.0.0") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(ADMIN_ROLE, msg.sender);
+        _grantRole(ENTITY_REGISTRY_ADMIN_ROLE, msg.sender);
     }
 
     function getEntity(
@@ -101,7 +102,7 @@ contract EntityRegistry is
     function addVerifier(
         address verifier,
         EntityType[] memory entityTypes
-    ) external onlyRole(ADMIN_ROLE) {
+    ) external onlyRole(ENTITY_REGISTRY_ADMIN_ROLE) {
         if (verifier == address(0)) {
             revert InvalidVerifierAddress();
         }
@@ -121,7 +122,7 @@ contract EntityRegistry is
     function updateVerifier(
         address verifier,
         EntityType[] memory entityTypes
-    ) external onlyRole(ADMIN_ROLE) {
+    ) external onlyRole(ENTITY_REGISTRY_ADMIN_ROLE) {
         if (_verifierAllowedTypes[verifier].length == 0) {
             revert VerifierDoesNotExist();
         }
@@ -134,7 +135,9 @@ contract EntityRegistry is
         emit VerifierUpdated(verifier, entityTypes);
     }
 
-    function removeVerifier(address verifier) external onlyRole(ADMIN_ROLE) {
+    function removeVerifier(
+        address verifier
+    ) external onlyRole(ENTITY_REGISTRY_ADMIN_ROLE) {
         if (_verifierAllowedTypes[verifier].length == 0) {
             revert VerifierDoesNotExist();
         }

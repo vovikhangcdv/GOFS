@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Test} from "forge-std/Test.sol";
+import {Vm, Test} from "forge-std/Test.sol";
 import {AddressRestrictionCompliance} from "../../src/compliances/AddressRestrictionCompliance.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 
@@ -203,30 +203,22 @@ contract AddressRestrictionComplianceTest is Test {
         assertFalse(complianceModule.isBlacklisted(user2));
     }
 
-    function test_UnblacklistFromRevertNotBlacklisted() public {
+    function test_UnblacklistFromAcceptNotBlacklisted() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                AddressRestrictionCompliance.AddressNotBlacklistedFrom.selector,
-                user1
-            )
-        );
+        assertFalse(complianceModule.isBlacklistedFrom(user1));
         complianceModule.unblacklistFrom(users);
+        assertFalse(complianceModule.isBlacklistedFrom(user1));
     }
 
-    function test_UnblacklistToRevertNotBlacklisted() public {
+    function test_UnblacklistToAcceptNotBlacklisted() public {
         address[] memory users = new address[](1);
         users[0] = user1;
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                AddressRestrictionCompliance.AddressNotBlacklistedTo.selector,
-                user1
-            )
-        );
+        assertFalse(complianceModule.isBlacklistedTo(user1));
         complianceModule.unblacklistTo(users);
+        assertFalse(complianceModule.isBlacklistedTo(user1));
     }
 
     function test_CanTransferAllowedAddresses() public {
@@ -369,13 +361,8 @@ contract AddressRestrictionComplianceTest is Test {
         address[] memory users = new address[](1);
         users[0] = user1;
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                AddressRestrictionCompliance.AddressNotBlacklistedFrom.selector,
-                user1
-            )
-        );
         complianceModule.unblacklistFrom(users);
+        assertFalse(complianceModule.isBlacklistedFrom(user1));
     }
 
     // Test unblacklistTo non-blacklisted address
@@ -383,13 +370,9 @@ contract AddressRestrictionComplianceTest is Test {
         address[] memory users = new address[](1);
         users[0] = user1;
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                AddressRestrictionCompliance.AddressNotBlacklistedTo.selector,
-                user1
-            )
-        );
+        assertFalse(complianceModule.isBlacklistedTo(user1));
         complianceModule.unblacklistTo(users);
+        assertFalse(complianceModule.isBlacklistedTo(user1));
     }
 
     // Test blacklist with non-admin
@@ -525,14 +508,10 @@ contract AddressRestrictionComplianceTest is Test {
         // Unblacklist from
         complianceModule.unblacklistFrom(users);
 
-        // Try to unblacklist from again
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                AddressRestrictionCompliance.AddressNotBlacklistedFrom.selector,
-                user1
-            )
-        );
+        // Try to unblacklist from again - should silently succeed
         complianceModule.unblacklistFrom(users);
+        assertFalse(complianceModule.isBlacklistedFrom(user1));
+        assertTrue(complianceModule.isBlacklistedTo(user1));
     }
 
     function test_EmptyArrayCases() public {
@@ -580,5 +559,233 @@ contract AddressRestrictionComplianceTest is Test {
         );
         assertFalse(success);
         assertEq(reason, "Recipient address is blacklisted from receiving");
+    }
+
+    function test_UnblacklistFrom_Partial() public {
+        // Set up a multi-user case where only some addresses are blacklisted
+        address[] memory users = new address[](2);
+        users[0] = user1;
+        users[1] = user2;
+
+        // First blacklist user1
+        address[] memory blacklistUsers = new address[](1);
+        blacklistUsers[0] = user1;
+        complianceModule.blacklistFrom(blacklistUsers);
+
+        // Try to unblacklist both - should not fail for user2
+        complianceModule.unblacklistFrom(users);
+        assertFalse(complianceModule.isBlacklistedFrom(user1));
+        assertFalse(complianceModule.isBlacklistedFrom(user2));
+    }
+
+    function test_UnblacklistTo_Partial() public {
+        // Set up a multi-user case where only some addresses are blacklisted
+        address[] memory users = new address[](2);
+        users[0] = user1;
+        users[1] = user2;
+
+        // First blacklist user1
+        address[] memory blacklistUsers = new address[](1);
+        blacklistUsers[0] = user1;
+        complianceModule.blacklistTo(blacklistUsers);
+
+        // Try to unblacklist both - should not fail for user2
+        complianceModule.unblacklistTo(users);
+        assertFalse(complianceModule.isBlacklistedTo(user1));
+        assertFalse(complianceModule.isBlacklistedTo(user2));
+    }
+
+    function test_Unblacklist_Partial() public {
+        // Set up a multi-user case where addresses have different blacklist states
+        address[] memory users = new address[](2);
+        users[0] = user1;
+        users[1] = user2;
+
+        // First blacklist user1 for sending and user2 for receiving
+        address[] memory sendBlacklist = new address[](1);
+        sendBlacklist[0] = user1;
+        complianceModule.blacklistFrom(sendBlacklist);
+
+        address[] memory receiveBlacklist = new address[](1);
+        receiveBlacklist[0] = user2;
+        complianceModule.blacklistTo(receiveBlacklist);
+
+        // Try to unblacklist both - should handle partial blacklisting
+        complianceModule.unblacklist(users);
+        assertFalse(complianceModule.isBlacklistedFrom(user1));
+        assertFalse(complianceModule.isBlacklistedFrom(user2));
+        assertFalse(complianceModule.isBlacklistedTo(user1));
+        assertFalse(complianceModule.isBlacklistedTo(user2));
+    }
+
+    function test_CanTransferWithFailureReason_BlacklistedBoth() public {
+        address[] memory users = new address[](1);
+        users[0] = user1;
+        complianceModule.blacklist(users);
+
+        (bool success, string memory reason) = complianceModule
+            .canTransferWithFailureReason(user1, user2, 100);
+        assertFalse(success);
+        assertEq(reason, "Sender address is blacklisted from sending");
+
+        (success, reason) = complianceModule.canTransferWithFailureReason(
+            user2,
+            user1,
+            100
+        );
+        assertFalse(success);
+        assertEq(reason, "Recipient address is blacklisted from receiving");
+    }
+
+    function test_UnblacklistFromNoBehaviorChange() public {
+        address[] memory users = new address[](1);
+        users[0] = user1;
+
+        // Check that it's not blacklisted initially
+        assertFalse(complianceModule.isBlacklistedFrom(user1));
+
+        // Unblacklisting a non-blacklisted address should have no effect
+        complianceModule.unblacklistFrom(users);
+        assertFalse(complianceModule.isBlacklistedFrom(user1));
+    }
+
+    function test_UnblacklistToNoBehaviorChange() public {
+        address[] memory users = new address[](1);
+        users[0] = user1;
+
+        // Check that it's not blacklisted initially
+        assertFalse(complianceModule.isBlacklistedTo(user1));
+
+        // Unblacklisting a non-blacklisted address should have no effect
+        complianceModule.unblacklistTo(users);
+        assertFalse(complianceModule.isBlacklistedTo(user1));
+    }
+
+    function test_UnblacklistMultipleTimesNoBehaviorChange() public {
+        address[] memory users = new address[](1);
+        users[0] = user1;
+
+        // Initially blacklist the address in both directions
+        complianceModule.blacklist(users);
+        assertTrue(complianceModule.isBlacklistedFrom(user1));
+        assertTrue(complianceModule.isBlacklistedTo(user1));
+
+        // First unblacklist
+        complianceModule.unblacklistFrom(users);
+        assertFalse(complianceModule.isBlacklistedFrom(user1));
+
+        // Second unblacklist should have no effect
+        complianceModule.unblacklistFrom(users);
+        assertFalse(complianceModule.isBlacklistedFrom(user1));
+
+        // Same for unblacklistTo
+        complianceModule.unblacklistTo(users);
+        assertFalse(complianceModule.isBlacklistedTo(user1));
+
+        complianceModule.unblacklistTo(users);
+        assertFalse(complianceModule.isBlacklistedTo(user1));
+    }
+
+    function test_UnblacklistFromAlreadyUnblacklisted_ComprehensiveScenarios()
+        public
+    {
+        address[] memory users = new address[](2);
+        users[0] = user1;
+        users[1] = user2;
+
+        // Initially blacklist user1 in both directions and user2 only from sending
+        address[] memory singleUser = new address[](1);
+        singleUser[0] = user1;
+        complianceModule.blacklist(singleUser);
+        singleUser[0] = user2;
+        complianceModule.blacklistFrom(singleUser);
+
+        // First unblacklist operation
+        complianceModule.unblacklistFrom(users);
+
+        // Second unblacklist operation on already unblacklisted addresses
+        // This should proceed without errors and emit no events
+        vm.recordLogs();
+        complianceModule.unblacklistFrom(users);
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        assertEq(
+            entries.length,
+            0,
+            "No events should be emitted for already unblacklisted addresses"
+        );
+
+        // Verify final states
+        assertFalse(complianceModule.isBlacklistedFrom(user1));
+        assertTrue(complianceModule.isBlacklistedTo(user1)); // Should still be blacklisted for receiving
+        assertFalse(complianceModule.isBlacklistedFrom(user2));
+        assertFalse(complianceModule.isBlacklistedTo(user2));
+    }
+
+    function test_UnblacklistToAlreadyUnblacklisted_ComprehensiveScenarios()
+        public
+    {
+        address[] memory users = new address[](2);
+        users[0] = user1;
+        users[1] = user2;
+
+        // Initially blacklist user1 in both directions and user2 only for receiving
+        address[] memory singleUser = new address[](1);
+        singleUser[0] = user1;
+        complianceModule.blacklist(singleUser);
+        singleUser[0] = user2;
+        complianceModule.blacklistTo(singleUser);
+
+        // First unblacklist operation
+        complianceModule.unblacklistTo(users);
+
+        // Second unblacklist operation on already unblacklisted addresses
+        // This should proceed without errors and emit no events
+        vm.recordLogs();
+        complianceModule.unblacklistTo(users);
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        assertEq(
+            entries.length,
+            0,
+            "No events should be emitted for already unblacklisted addresses"
+        );
+
+        // Verify final states
+        assertTrue(complianceModule.isBlacklistedFrom(user1)); // Should still be blacklisted from sending
+        assertFalse(complianceModule.isBlacklistedTo(user1));
+        assertFalse(complianceModule.isBlacklistedFrom(user2));
+        assertFalse(complianceModule.isBlacklistedTo(user2));
+    }
+
+    function test_UnblacklistAlreadyUnblacklisted_ComprehensiveScenarios()
+        public
+    {
+        address[] memory users = new address[](2);
+        users[0] = user1;
+        users[1] = user2;
+
+        // Initially blacklist user1 in both directions but leave user2 completely unblacklisted
+        address[] memory singleUser = new address[](1);
+        singleUser[0] = user1;
+        complianceModule.blacklist(singleUser);
+
+        // First unblacklist operation
+        complianceModule.unblacklist(users);
+
+        // Second unblacklist operation on already unblacklisted addresses
+        // This should proceed without errors and emit no events
+        vm.recordLogs();
+        complianceModule.unblacklist(users);
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        assertEq(
+            entries.length,
+            2,
+            "Two events should be emitted for already unblacklisted addresses"
+        );
+
+        // Verify final states
+        assertFalse(complianceModule.isBlacklistedFrom(user1));
+        assertFalse(complianceModule.isBlacklistedTo(user1));
+        assertFalse(complianceModule.isBlacklistedFrom(user2));
+        assertFalse(complianceModule.isBlacklistedTo(user2));
     }
 }
