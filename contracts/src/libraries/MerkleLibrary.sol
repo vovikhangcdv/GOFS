@@ -9,8 +9,7 @@ import {Hashes} from "@openzeppelin/contracts/utils/cryptography/Hashes.sol";
 /// @notice For testing purposes only. In real production, Merkle root is only calculated in off-chain.
 /// @dev Provides functions for calculating the root of a Merkle tree and generating proofs
 library MerkleLibrary {
-
-    event Debug(uint256 index);
+    
     // @notice Calculates the root of a Merkle tree for a given array of infos
     /// @param infos The array of infos to calculate the root for. The length must be a power of 2.
     /// @return The root of the Merkle tree

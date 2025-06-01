@@ -470,10 +470,6 @@ contract EntityRegistryTest is Test {
         // Get proof from the Issuer
         bytes32[] memory proof = MerkleLibrary.getProof(tree, index);
 
-        for (uint256 i = 0; i < proof.length; i++) {
-            emit Debug(proof[i]);
-        }
-
         // Third party verify info
         assertTrue(registry.verifyInfo(entity, hashedInfo, proof));
     }
