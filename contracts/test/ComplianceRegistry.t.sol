@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {ComplianceRegistry} from "../src/ComplianceRegistry.sol";
 import {ICompliance} from "../src/interfaces/ICompliance.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 // Mock compliance module for testing
 contract MockCompliance is ICompliance {
@@ -14,6 +15,14 @@ contract MockCompliance is ICompliance {
     constructor(bool shouldAllow_, string memory failureReason_) {
         _shouldAllow = shouldAllow_;
         _failureReason = failureReason_;
+    }
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) external pure returns (bool) {
+        return
+            interfaceId == type(ICompliance).interfaceId ||
+            interfaceId == type(IERC165).interfaceId;
     }
 
     function canTransfer(
@@ -85,7 +94,7 @@ contract ComplianceRegistryTest is Test {
         registry.addModule(address(allowingModule));
     }
 
-    function test_AddModule_RevertInvalidInterface() public {
+    function test_AddModule_RevertInvalidInterface_EOA() public {
         vm.expectRevert(ComplianceRegistry.InvalidModuleInterface.selector);
         registry.addModule(address(invalidModule));
     }

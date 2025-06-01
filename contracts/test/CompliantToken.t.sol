@@ -5,6 +5,7 @@ import {Test, console2} from "forge-std/Test.sol";
 import {CompliantToken} from "../src/CompliantToken.sol";
 import {ICompliance} from "../src/interfaces/ICompliance.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 // Mock compliance contract for testing
 contract MockCompliance is ICompliance {
@@ -17,6 +18,14 @@ contract MockCompliance is ICompliance {
         // By default allow minting and burning for most tests
         allowMinting = true;
         allowBurning = true;
+    }
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) external pure returns (bool) {
+        return
+            interfaceId == type(ICompliance).interfaceId ||
+            interfaceId == type(IERC165).interfaceId;
     }
 
     // Set whether transfers should be allowed in tests
