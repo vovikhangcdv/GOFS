@@ -11,7 +11,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
  * @title SupplyRestrictionModuleCompliance
  * @dev A compliance module that enforces maximum supply restrictions for minting operations
  */
-contract SupplyCompliance is ICompliance, Context, AccessControl {
+contract SupplyCompliance is ICompliance, AccessControl {
     /// @notice Role for managing supply limits
     bytes32 public constant SUPPLY_ADMIN_ROLE = keccak256("SUPPLY_ADMIN_ROLE");
 
@@ -32,6 +32,18 @@ contract SupplyCompliance is ICompliance, Context, AccessControl {
 
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(SUPPLY_ADMIN_ROLE, _msgSender());
+    }
+
+    /**
+     * @dev Implements IERC165 interface detection
+     */
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(AccessControl, IERC165) returns (bool) {
+        return
+            interfaceId == type(ICompliance).interfaceId ||
+            interfaceId == type(AccessControl).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     /**

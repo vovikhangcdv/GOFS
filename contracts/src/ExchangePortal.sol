@@ -5,8 +5,9 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IExchange.sol";
+import {EntityRegisterable} from "./others/EntityRegisterable.sol";
 
-contract ExchangePortal is IExchangePortal, AccessControl {
+contract ExchangePortal is IExchangePortal, AccessControl, EntityRegisterable {
     using SafeERC20 for IERC20;
 
     error ZeroAddress();
@@ -18,6 +19,8 @@ contract ExchangePortal is IExchangePortal, AccessControl {
     error InvalidFeeConfig();
     error FeeTooHigh();
 
+    bytes32 public constant REGISTER_ADMIN_ROLE =
+        keccak256("REGISTER_ADMIN_ROLE");
     bytes32 public constant EXCHANGE_RATE_ADMIN_ROLE =
         keccak256("EXCHANGE_RATE_ADMIN_ROLE");
     bytes32 public constant EXCHANGE_FEE_ADMIN_ROLE =
@@ -67,11 +70,16 @@ contract ExchangePortal is IExchangePortal, AccessControl {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(EXCHANGE_RATE_ADMIN_ROLE, msg.sender);
         _grantRole(EXCHANGE_FEE_ADMIN_ROLE, msg.sender);
+        _grantRole(REGISTER_ADMIN_ROLE, msg.sender);
 
         emit ExchangeRateUpdated(_token0, _token1, initialRate);
         emit FeeUpdated(_exchangeFee);
         emit TreasuryUpdated(_treasury);
     }
+
+    function _authorizeRegister(
+        address forwarder
+    ) internal virtual override onlyRole(REGISTER_ADMIN_ROLE) {}
 
     function setExchangeFee(
         uint256 newFee

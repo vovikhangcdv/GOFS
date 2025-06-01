@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {ICompliance} from "../interfaces/ICompliance.sol";
 import {EntityRegistry} from "../EntityRegistry.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 /**
  * @title VerificationCompliance
@@ -23,6 +24,15 @@ contract VerificationCompliance is ICompliance {
         if (_entityRegistry == address(0))
             revert InvalidEntityRegistryAddress();
         entityRegistry = EntityRegistry(_entityRegistry);
+    }
+
+    /**
+     * @dev Implements IERC165 interface detection
+     */
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(IERC165) returns (bool) {
+        return interfaceId == type(ICompliance).interfaceId;
     }
 
     /**

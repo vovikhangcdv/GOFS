@@ -34,6 +34,8 @@ contract EntityRegistry is
     bytes32 public constant ENTITY_REGISTRY_ADMIN_ROLE =
         keccak256("ENTITY_REGISTRY_ADMIN_ROLE");
     bytes32 public ENTITY_TYPE_HASH = EntityLibrary.ENTITY_TYPEHASH;
+    bytes32 public constant PROACTIVE_REGISTRY_FOWARDER_ADMIN_ROLE =
+        keccak256("PROACTIVE_REGISTRY_FORWARDER_ADMIN_ROLE");
 
     mapping(address => Entity) private _entities;
     mapping(address => EntityType[]) private _verifierAllowedTypes;
@@ -46,6 +48,7 @@ contract EntityRegistry is
     constructor() EIP712("EntityRegistry", "1.0.0") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(ENTITY_REGISTRY_ADMIN_ROLE, msg.sender);
+        _grantRole(PROACTIVE_REGISTRY_FOWARDER_ADMIN_ROLE, msg.sender);
     }
 
     function getEntity(
@@ -61,7 +64,20 @@ contract EntityRegistry is
         if (entity.entityAddress != msg.sender) {
             revert OnlySelfRegistrationAllowed();
         }
+        _register(entity, verifierSignature);
+    }
 
+    function forwardRegister(
+        Entity calldata entity,
+        bytes memory verifierSignature
+    ) external onlyRole(PROACTIVE_REGISTRY_FOWARDER_ADMIN_ROLE) {
+        _register(entity, verifierSignature);
+    }
+
+    function _register(
+        Entity calldata entity,
+        bytes memory verifierSignature
+    ) internal {
         if (_entities[entity.entityAddress].entityAddress != address(0)) {
             revert EntityAlreadyRegistered();
         }

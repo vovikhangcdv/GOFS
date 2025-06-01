@@ -39,6 +39,18 @@ contract AddressRestrictionCompliance is ICompliance, AccessControl {
     }
 
     /**
+     * @dev Implements IERC165 interface detection
+     */
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(AccessControl, IERC165) returns (bool) {
+        return
+            interfaceId == type(ICompliance).interfaceId ||
+            interfaceId == type(AccessControl).interfaceId ||
+            super.supportsInterface(interfaceId);
+    }
+
+    /**
      * @dev Add addresses to the blacklist for sending tokens
      * @param accounts The addresses to blacklist
      */

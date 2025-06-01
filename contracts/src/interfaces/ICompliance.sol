@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+
 /**
  * @title ICompliance
  * @dev Interface for compliance checks in token transfers.
  * This interface defines the method to check if a transfer is allowed
  * based on compliance rules.
  */
-interface ICompliance {
+interface ICompliance is IERC165 {
     function canTransfer(
         address _from,
         address _to,

@@ -6,6 +6,7 @@ import {EntityRegistry} from "../EntityRegistry.sol";
 import {Entity, EntityType} from "../interfaces/ITypes.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 /**
  * @title EntityTypeCompliance
@@ -48,6 +49,18 @@ contract EntityTypeCompliance is ICompliance, AccessControl {
         entityRegistry = EntityRegistry(_entityRegistry);
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(COMPLIANCE_ADMIN_ROLE, msg.sender);
+    }
+
+    /**
+     * @dev Implements IERC165 interface detection
+     */
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(AccessControl, IERC165) returns (bool) {
+        return
+            interfaceId == type(ICompliance).interfaceId ||
+            interfaceId == type(AccessControl).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     /**
