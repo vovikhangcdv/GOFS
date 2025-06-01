@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Test} from "forge-std/Test.sol";
+import {Test, console} from "forge-std/Test.sol";
 import {EntityRegistry} from "../src/EntityRegistry.sol";
 import {Entity, EntityType} from "../src/interfaces/ITypes.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {MerkleLibrary} from "../src/libraries/MerkleLibrary.sol";
 
 contract EntityRegistryTest is Test {
     EntityRegistry public registry;
@@ -17,6 +18,17 @@ contract EntityRegistryTest is Test {
     // Test Entity data
     string constant TEST_ENTITY_NAME = "Test Entity";
     string constant TEST_ENTITY_INFO = "Test Entity Info";
+
+
+    string constant TEST_ENTITY_INFO_ID_NUMBER = "083200000000";
+    string constant TEST_ENTITY_INFO_BIRTHDAY = "1990-01-01";
+    string constant TEST_ENTITY_INFO_GENDER = "Male";
+    string constant TEST_ENTITY_INFO_EMAIL = "test@example.com";
+    string constant TEST_ENTITY_INFO_PHONE = "0123456789";
+    string constant TEST_ENTITY_INFO_ADDRESS = "123 Main St, Hanoi, Vietnam";
+    string constant TEST_ENTITY_INFO_NATIONALITY = "Vietnam";
+    string constant TEST_ENTITY_INFO_OTHERS = "Others";
+
     EntityType constant TEST_ENTITY_TYPE = EntityType.wrap(0); // Assuming 0 is a valid EntityType
     EntityType constant ENTITY_TYPE_INDIVIDUAL = EntityType.wrap(1); // Example type for testing
     EntityType constant ENTITY_TYPE_ORGANIZATION = EntityType.wrap(2); // Example type for testing
@@ -414,6 +426,58 @@ contract EntityRegistryTest is Test {
         registry.addVerifier(newVerifier, types);
     }
 
+    function test_RegisterEntity_WithMerkleRoot() public {
+        Entity memory entity = Entity({
+            entityAddress: entityAddress,
+            entityType: TEST_ENTITY_TYPE,
+            entityData: _encodeEntityDataWithMerkleRoot(TEST_ENTITY_NAME, _getTestEntityInfo()),
+            verifier: verifier
+        });
+
+        bytes memory signature = _signEntity(verifierPrivateKey, entity);
+
+        vm.prank(entityAddress);
+        registry.register(entity, signature);
+
+        assertTrue(registry.isVerifiedEntity(entityAddress));
+    }
+
+    function test_VerifyInfo_ValidProof(uint256 index) public {
+        vm.assume(index < _getTestEntityInfo().length);
+
+        // Issuer register entity
+        string[] memory infos = _getTestEntityInfo();
+        bytes32[] memory tree = MerkleLibrary.buildTree(infos);
+        bytes32 root = tree[0];
+
+        Entity memory entity = Entity({
+            entityAddress: entityAddress,
+            entityType: TEST_ENTITY_TYPE,
+            entityData: abi.encode(TEST_ENTITY_NAME, root),
+            verifier: verifier
+        });
+
+        bytes memory signature = _signEntity(verifierPrivateKey, entity);
+
+        vm.prank(entityAddress);
+        registry.register(entity, signature);
+
+        assertTrue(registry.isVerifiedEntity(entityAddress));
+
+        // Some third party verify entity's index-th info
+        bytes32 hashedInfo = keccak256(abi.encodePacked(infos[index]));
+
+        // Get proof from the Issuer
+        bytes32[] memory proof = MerkleLibrary.getProof(tree, index);
+
+        for (uint256 i = 0; i < proof.length; i++) {
+            emit Debug(proof[i]);
+        }
+
+        // Third party verify info
+        assertTrue(registry.verifyInfo(entity, hashedInfo, proof));
+    }
+
     // Helper function to sign entity data
     function _signEntity(
         uint256 signerKey,
@@ -451,5 +515,25 @@ contract EntityRegistryTest is Test {
         string memory info
     ) internal pure returns (bytes memory) {
         return abi.encode(name, info);
+    }
+
+    function _getTestEntityInfo() internal pure returns (string[] memory) {
+        string[] memory info = new string[](8);
+        info[0] = TEST_ENTITY_INFO_ID_NUMBER;
+        info[1] = TEST_ENTITY_INFO_BIRTHDAY;
+        info[2] = TEST_ENTITY_INFO_GENDER;
+        info[3] = TEST_ENTITY_INFO_EMAIL;
+        info[4] = TEST_ENTITY_INFO_PHONE;
+        info[5] = TEST_ENTITY_INFO_ADDRESS;
+        info[6] = TEST_ENTITY_INFO_NATIONALITY;
+        info[7] = TEST_ENTITY_INFO_OTHERS;
+        return info;
+    }
+
+    function _encodeEntityDataWithMerkleRoot(
+        string memory name,
+        string[] memory infos
+    ) internal pure returns (bytes memory) {
+        return abi.encode(name, MerkleLibrary.calculateInfoRoot(infos));
     }
 }
