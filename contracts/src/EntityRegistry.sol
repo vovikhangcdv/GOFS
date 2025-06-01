@@ -8,6 +8,7 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {Entity, EntityType} from "./interfaces/ITypes.sol";
 import {EntityLibrary} from "./libraries/EntityLibrary.sol";
+import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract EntityRegistry is
     IEntityRegistry,
@@ -161,6 +162,20 @@ contract EntityRegistry is
         delete _verifierAllowedTypes[verifier];
 
         emit VerifierRemoved(verifier);
+    }
+
+
+    /// @notice Verifies if a given info (hashed) is part of the Entity's info root
+    /// @param entity The Entity struct
+    /// @param hashedInfo The hashed info to verify
+    /// @param proof The Merkle proof to verify the info against
+    /// @return True if the info is valid, false otherwise
+    function verifyInfo(
+        Entity calldata entity,
+        bytes32 hashedInfo,
+        bytes32[] calldata proof
+    ) external view returns (bool) {
+        return MerkleProof.verify(proof, entity.getInfoRoot(), hashedInfo);
     }
 
     function _isAllowedEntityType(

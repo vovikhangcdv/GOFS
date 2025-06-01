@@ -35,4 +35,15 @@ library EntityLibrary {
                 abi.encodePacked("\x19\x01", domainSeparator, structHash)
             );
     }
+
+    /// @notice Returns the info root of an Entity
+    /// @param entity The Entity struct
+    /// @return The info root of the Entity
+    function getInfoRoot(Entity memory entity) internal pure returns (bytes32) {
+        (, bytes32 infoRoot) = abi.decode(
+            entity.entityData,
+            (string, bytes32)
+        );
+        return infoRoot;
+    }
 }
