@@ -2,29 +2,15 @@ package types
 
 import (
 	"math/big"
-	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/vovikhangcdv/GOFS/chainspammer/internal/generated_contracts/entity_registry"
+	"github.com/vovikhangcdv/GOFS/chainspammer/internal/generated_contracts/compliance_registry"
+	"github.com/vovikhangcdv/GOFS/chainspammer/internal/generated_contracts/compliant_token"
+	"github.com/vovikhangcdv/GOFS/chainspammer/internal/generated_contracts/exchange_portal"
+	"github.com/vovikhangcdv/GOFS/chainspammer/internal/generated_contracts/erc20"
 )
-
-type SpammerConfig struct {
-    RPCURL       string         `json:"rpcUrl"`
-    PrivateKey   string         `json:"privateKey"`
-    TokenAddress common.Address `json:"tokenAddress"`
-    TPS          int           `json:"tps"`
-    Duration     time.Duration `json:"duration"`
-}
-
-type SpammerStatus struct {
-    IsRunning    bool      `json:"isRunning"`
-    StartTime    time.Time `json:"startTime"`
-    TPS          int       `json:"tps"`
-    TotalTxs     int64     `json:"totalTxs"`
-    SuccessTxs   int64     `json:"successTxs"`
-    FailedTxs    int64     `json:"failedTxs"`
-    CurrentNonce uint64    `json:"currentNonce"`
-}
 
 type TxConf struct {
 	Rpc      *rpc.Client
@@ -36,4 +22,22 @@ type TxConf struct {
 	GasPrice *big.Int
 	ChainID  *big.Int
 	Code     []byte
+}
+
+type TxType struct {
+	Type string
+	Weight int
+}
+
+type SystemContracts struct {
+	EntityRegistry *entityRegistry.EntityRegistry
+	EntityRegistryAddress common.Address
+	ComplianceRegistry *complianceRegistry.ComplianceRegistry
+	ComplianceRegistryAddress common.Address
+	EVNDToken *compliantToken.CompliantToken
+	EVNDTokenAddress common.Address
+	USDToken *erc20.ERC20
+	USDTokenAddress common.Address
+	ExchangePortal *exchangePortal.ExchangePortal
+	ExchangePortalAddress common.Address
 }

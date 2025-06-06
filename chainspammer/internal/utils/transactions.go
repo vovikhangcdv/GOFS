@@ -2,87 +2,22 @@ package utils
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"fmt"
+	// "log"
 	"math/big"
+	"time"
 
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/log"
-	localtypes "github.com/vovikhangcdv/GOFS/chainspammer/internal/types"
 )
 
-func RandomTx() (*types.Transaction, error) {
-	conf := initDefaultTxConf(nil, common.Address{}, 0, nil, nil)
-	return types.NewTransaction(conf.Nonce, *conf.To, conf.Value, conf.GasLimit, conf.GasPrice, conf.Code), nil
-}
-
-func initDefaultTxConf(
-	rpc *rpc.Client, 
-	sender common.Address, 
-	nonce uint64, 
-	gasPrice, 
-	chainID *big.Int) *localtypes.TxConf {
-	// defaults
-	gasCost := uint64(100000)
-	to := RandomAddress()
-	calldata := RandomCallData(128)
-	value := big.NewInt(0)
-	if len(calldata) > 128 {
-		calldata = calldata[:128]
-	}
-	// Set fields if non-nil
-	if rpc != nil {
-		client := ethclient.NewClient(rpc)
-		var err error
-		if gasPrice == nil {
-			gasPrice, err = client.SuggestGasPrice(context.Background())
-			if err != nil {
-				log.Warn("Error suggesting gas price: %v", err)
-				gasPrice = big.NewInt(1)
-			}
-		}
-		if chainID == nil {
-			chainID, err = client.ChainID(context.Background())
-			if err != nil {
-				log.Warn("Error fetching chain id: %v", err)
-				chainID = big.NewInt(1)
-			}
-		}
-		// Try to estimate gas
-		gas, err := client.EstimateGas(context.Background(), ethereum.CallMsg{
-			From:      sender,
-			To:        &to,
-			Gas:       30_000_000,
-			GasPrice:  gasPrice,
-			GasFeeCap: gasPrice,
-			GasTipCap: gasPrice,
-			Value:     value,
-			Data:      calldata,
-		})
-		if err == nil {
-			gasCost = gas
-		} else {
-			fmt.Printf("Error estimating gas: %v", err)
-		}
-	}
-
-	return &localtypes.TxConf{
-		Rpc:      rpc,
-		Nonce:    nonce,
-		Sender:   sender,
-		To:       &to,
-		Value:    value,
-		GasLimit: gasCost,
-		GasPrice: gasPrice,
-		ChainID:  chainID,
-		Code:     calldata,
-	}
-}
-
-func getCaps(rpc *rpc.Client) (*big.Int, *big.Int, error) {
+func GetCaps(rpc *rpc.Client) (*big.Int, *big.Int, error) {
 	if rpc == nil {
 		return nil, nil, fmt.Errorf("rpc is nil")
 	}
@@ -95,3 +30,85 @@ func getCaps(rpc *rpc.Client) (*big.Int, *big.Int, error) {
 	return tip, feeCap, err
 }
 
+func GetNonce(backend *rpc.Client, addr common.Address) (uint64, error) {
+	client := ethclient.NewClient(backend)
+	nonce, err := client.PendingNonceAt(context.Background(), addr)
+	if err != nil {
+		return 0, err
+	}
+	return nonce, nil
+}
+
+func GetChainID(backend *rpc.Client) *big.Int {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	var chainIDHex string
+	err := backend.CallContext(ctx, &chainIDHex, "eth_chainId")
+	if err != nil {
+		panic(err)
+	}
+	chainID, ok := new(big.Int).SetString(chainIDHex, 0)
+	if !ok {
+		panic(fmt.Errorf("invalid chain id: %s", chainIDHex))
+	}
+	return chainID
+}
+
+func SendNormalTx(backend *rpc.Client, chainId *big.Int, sk *ecdsa.PrivateKey, to common.Address, value *big.Int, gas uint64, data []byte, isUseRPC bool) (common.Hash, error) {
+	if sk == nil {
+		return common.Hash{}, fmt.Errorf("sk is nil")
+	}
+
+	nonce, err := GetNonce(backend, crypto.PubkeyToAddress(sk.PublicKey))
+	if err != nil {
+		return common.Hash{}, err
+	}
+	tx := types.NewTx(&types.LegacyTx{
+		Nonce:    nonce,
+		To:       &to,
+		Value:    value,
+		Gas:      gas,
+		GasPrice: big.NewInt(25_000_000_000),
+		Data:     data,
+	})
+	signedTx, err := types.SignTx(tx, types.NewCancunSigner(chainId), sk)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	// double check the signature
+	recovered, _ := types.Sender(types.NewCancunSigner(chainId), signedTx)
+	if recovered != crypto.PubkeyToAddress(sk.PublicKey) {
+		return common.Hash{}, fmt.Errorf("signature mismatch: recovered %s, expected %s", recovered.Hex(), crypto.PubkeyToAddress(sk.PublicKey).Hex())
+	}
+
+	if err := SendSignedTx(backend, signedTx, isUseRPC); err != nil {
+		return common.Hash{}, err
+	}
+	return signedTx.Hash(), nil
+}
+
+func SendSignedTx(backend *rpc.Client, tx *types.Transaction, isUseRPC bool) error {
+	rlpData, _ := tx.MarshalBinary()
+	// log.Println("rlpData: ", hexutil.Encode(rlpData))
+
+	if isUseRPC {
+		if err := backend.CallContext(context.Background(), nil, "eth_sendRawTransaction", hexutil.Encode(rlpData)); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	client := ethclient.NewClient(backend)
+	if err := client.SendTransaction(context.Background(), tx); err != nil {
+		return err
+	}
+	// Wait for the transaction to be mined
+	receipt, err := bind.WaitMined(context.Background(), client, tx)
+	if err != nil {
+		return fmt.Errorf("Failed to wait for transaction confirmation: %v", err)
+	}
+	if receipt.Status != types.ReceiptStatusSuccessful {
+		return fmt.Errorf("transaction failed, tx_hash: %s", tx.Hash().Hex())
+	}
+	return nil
+}

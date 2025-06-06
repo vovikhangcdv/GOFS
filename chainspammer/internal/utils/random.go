@@ -1,14 +1,15 @@
 package utils
 
 import (
-	"crypto/rand"
 	"crypto/ecdsa"
 	"crypto/elliptic"
+	"crypto/rand"
+	"math/big"
 	mathRand "math/rand"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-
+	localtypes "github.com/vovikhangcdv/GOFS/chainspammer/internal/types"
 )
 
 func RandomCallData(length uint64) []byte {
@@ -21,6 +22,10 @@ func RandomCallData(length uint64) []byte {
 		panic(err)
 	}
 	return b
+}
+
+func RandomIdx(max int) int {
+	return mathRand.Intn(max)
 }
 
 func RandomSk() *ecdsa.PrivateKey {
@@ -48,10 +53,54 @@ func RandomAddress() common.Address {
 	return common.BytesToAddress(b)
 }
 
-func RandomSkAndAddressFromList(arr []*ecdsa.PrivateKey) (*ecdsa.PrivateKey, common.Address) {
+func RandomAddressFromList(arr []*ecdsa.PrivateKey) common.Address {
 	if len(arr) == 0 {
-		return nil, common.Address{}
+		return common.Address{}
+	}
+	return crypto.PubkeyToAddress(arr[mathRand.Intn(len(arr))].PublicKey)
+}
+
+func RandomSkFromList(arr []*ecdsa.PrivateKey) *ecdsa.PrivateKey {
+	if len(arr) == 0 {
+		return nil
 	}
 	sk := arr[mathRand.Intn(len(arr))]
+	return sk
+}
+
+func RandomSkAndAddressFromList(arr []*ecdsa.PrivateKey) (*ecdsa.PrivateKey, common.Address) {
+	sk := RandomSkFromList(arr)
 	return sk, crypto.PubkeyToAddress(sk.PublicKey)
+}
+
+func SelectTxType(types []localtypes.TxType) string {
+	totalWeight := 0
+	for _, t := range types {
+		totalWeight += t.Weight
+	}
+
+	r := mathRand.Intn(totalWeight)
+	currentWeight := 0
+
+	for _, t := range types {
+		currentWeight += t.Weight
+		if r < currentWeight {
+			return t.Type
+		}
+	}
+
+	return types[0].Type
+}
+
+func GetRandomEntityType() uint8 {
+	return uint8(mathRand.Intn(3))
+}
+
+// RandomBigInt generates a random big.Int between 0 and max (inclusive)
+func RandomBigInt(max *big.Int) *big.Int {
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		panic(err)
+	}
+	return n
 }

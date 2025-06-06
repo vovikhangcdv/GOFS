@@ -1,48 +1,39 @@
 package main
 
 import (
-	"os"
 	"log"
-    "fmt"
+	"os"
 	"time"
-    "github.com/vovikhangcdv/GOFS/chainspammer/internal/flags"
-	"github.com/vovikhangcdv/GOFS/chainspammer/internal/config"
-	"github.com/vovikhangcdv/GOFS/chainspammer/internal/utils"
-	"github.com/vovikhangcdv/GOFS/chainspammer/internal/handlers"
-	"github.com/ethereum/go-ethereum/params"
-	"math/big"
+
 	"github.com/urfave/cli/v2"
+	"github.com/vovikhangcdv/GOFS/chainspammer/internal/config"
+	"github.com/vovikhangcdv/GOFS/chainspammer/internal/flags"
+	"github.com/vovikhangcdv/GOFS/chainspammer/internal/handlers"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var spamCommand = &cli.Command{
-	Name: "spam",
-	Usage: "Spam transactions",
-	Flags: flags.Flags,
+	Name:   "spam",
+	Usage:  "Spam transactions",
+	Flags:  flags.Flags,
 	Action: runSpam,
 }
 
 // TODO: Implement spammer
 func runSpam(c *cli.Context) error {
-	fmt.Println("Spammer targeted RPC URL: ", c.String("rpc"))
+	log.Println("Spammer targeted RPC URL: ", c.String("rpc"))
 	config, err := config.NewConfigFromContext(c)
 	if err != nil {
 		return err
 	}
 	for {
-		sk, addr := utils.RandomSkAndAddressFromList(config.Keys)
-		fmt.Println("Airdropping to: ", addr.Hex())
-		// 1 ETH
-		aidropValue := big.NewInt(params.Ether)
-		if err := handlers.Airdrop(config, addr, aidropValue); err != nil {
-			fmt.Println("Error airdropping: ", err)
-			continue
+		txHash, err := handlers.Spam(config)
+		if txHash == (common.Hash{}) || err != nil {
+			log.Println("❌ Error while spamming: ", err)
+		} else {
+			log.Println("✅ Tx hash: ", txHash.Hex())
 		}
-		fmt.Println("Spamming")
-		if err := handlers.Spam(config, sk); err != nil {
-			fmt.Println("Error spamming: ", err)
-			continue
-		}
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Duration(config.DelayTime) * time.Second)
 	}
 }
 
