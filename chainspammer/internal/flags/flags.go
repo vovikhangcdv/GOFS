@@ -22,7 +22,7 @@ var (
 
 	DelayTime = &cli.Int64Flag{
 		Name:  "delay-time",
-		Value: 3,
+		Value: 1,
 		Usage: "Delay time in seconds",
 	}
 
@@ -50,7 +50,7 @@ var (
 		Usage: "EVND token address",
 	}
 	USDTToken = &cli.StringFlag{
-		Name:  "usdt-token",
+		Name:  "musd-token",
 		Value: "0x9A676e781A523b5d0C0e43731313A708CB607508",
 		Usage: "mUSD token address",
 	}
