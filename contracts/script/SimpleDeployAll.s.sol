@@ -155,6 +155,7 @@ contract SimpleDeployAll is Script {
         console2.log("EntityRegistry:", address(entityRegistry));
         console2.log("ComplianceRegistry:", address(complianceRegistry));
         console2.log("eVND Token:", address(evndToken));
+        console2.log("mUSD Token:", address(mUSD));
         console2.log("Exchange Portal:", address(exchangePortal));
         console2.log(
             "AddressRestrictionCompliance:",
