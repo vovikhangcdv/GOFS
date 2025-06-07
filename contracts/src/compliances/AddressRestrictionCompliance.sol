@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import "../interfaces/ICompliance.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import {TxType} from "../interfaces/ITypes.sol";
 
 /**
  * @title AddressRestrictionCompliance
@@ -240,5 +241,47 @@ contract AddressRestrictionCompliance is ICompliance, AccessControl {
     ) external view override returns (bool) {
         (bool success, ) = this.canTransferWithFailureReason(from, to, amount);
         return success;
+    }
+
+    /**
+     * @dev Compliance check for typed transfers
+     * @param from Address tokens are transferred from
+     * @param to Address tokens are transferred to
+     * @param amount Amount of tokens to transfer
+     * @param txType Type of transaction
+     * @return bool True if the transfer is allowed
+     */
+    function canTransferWithType(
+        address from,
+        address to,
+        uint256 amount,
+        TxType txType
+    ) external view override returns (bool) {
+        (bool success, ) = this.canTransferWithTypeAndFailureReason(
+            from,
+            to,
+            amount,
+            txType
+        );
+        return success;
+    }
+
+    /**
+     * @dev Compliance check for typed transfers with failure reason
+     * @param from Address tokens are transferred from
+     * @param to Address tokens are transferred to
+     * @param amount Amount of tokens to transfer
+     * @param txType Type of transaction
+     * @return (bool, string) Tuple of (success, failure reason)
+     */
+    function canTransferWithTypeAndFailureReason(
+        address from,
+        address to,
+        uint256 amount,
+        TxType txType
+    ) external view override returns (bool, string memory) {
+        // For this compliance module, transaction type doesn't affect the blacklist check
+        // So we just delegate to the standard compliance check
+        return this.canTransferWithFailureReason(from, to, amount);
     }
 }

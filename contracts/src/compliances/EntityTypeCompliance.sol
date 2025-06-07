@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {ICompliance} from "../interfaces/ICompliance.sol";
 import {EntityRegistry} from "../EntityRegistry.sol";
-import {Entity, EntityType} from "../interfaces/ITypes.sol";
+import {Entity, EntityType, TxType} from "../interfaces/ITypes.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
@@ -175,5 +175,47 @@ contract EntityTypeCompliance is ICompliance, AccessControl {
         }
 
         return (true, "");
+    }
+
+    /**
+     * @dev Check if a typed transfer is allowed based on both addresses' entity types
+     * @param _from The sender's address
+     * @param _to The recipient's address
+     * @param _amount The amount to transfer (unused in this module)
+     * @param _txType The type of transaction (unused in this module)
+     * @return bool Whether the transfer is allowed
+     */
+    function canTransferWithType(
+        address _from,
+        address _to,
+        uint256 _amount,
+        TxType _txType
+    ) external view override returns (bool) {
+        (bool success, ) = this.canTransferWithTypeAndFailureReason(
+            _from,
+            _to,
+            _amount,
+            _txType
+        );
+        return success;
+    }
+
+    /**
+     * @dev Check if a typed transfer is allowed based on both addresses' entity types and provide failure reason
+     * @param _from The sender's address
+     * @param _to The recipient's address
+     * @param _amount The amount to transfer (unused in this module)
+     * @param _txType The type of transaction (unused in this module)
+     * @return (bool, string) Whether the transfer is allowed and failure reason if not
+     */
+    function canTransferWithTypeAndFailureReason(
+        address _from,
+        address _to,
+        uint256 _amount,
+        TxType _txType
+    ) external view override returns (bool, string memory) {
+        // For this compliance module, transaction type doesn't affect entity type checks
+        // So we just delegate to the standard compliance check
+        return canTransferWithFailureReason(_from, _to, _amount);
     }
 }

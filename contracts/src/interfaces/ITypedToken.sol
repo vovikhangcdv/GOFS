@@ -36,16 +36,4 @@ interface ITypedERC20 is IERC20 {
         uint256 amount,
         TxType txType
     ) external returns (bool);
-
-    /**
-     * @dev Function for approving spender with transaction type
-     * @param spender Address approved to spend tokens
-     * @param amount Amount of tokens approved
-     * @param txType Type of transaction
-     */
-    function approveWithType(
-        address spender,
-        uint256 amount,
-        TxType txType
-    ) external returns (bool);
 }

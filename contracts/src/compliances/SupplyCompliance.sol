@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "../interfaces/ICompliance.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {TxType} from "../interfaces/ITypes.sol";
 
 /**
  * @title SupplyRestrictionModuleCompliance
@@ -108,5 +109,43 @@ contract SupplyCompliance is ICompliance, AccessControl {
             }
         }
         return (true, "");
+    }
+
+    /**
+     * @dev Check if a typed transfer is allowed based on supply limits
+     * @param from The sender address
+     * @param to The recipient address
+     * @param amount The amount to transfer
+     * @param txType The type of transaction (unused in this module)
+     * @return bool Whether the transfer is allowed
+     */
+    function canTransferWithType(
+        address from,
+        address to,
+        uint256 amount,
+        TxType txType
+    ) external view override returns (bool) {
+        // For this compliance module, transaction type doesn't affect supply checks
+        // So we just delegate to the standard compliance check
+        return this.canTransfer(from, to, amount);
+    }
+
+    /**
+     * @dev Check if a typed transfer is allowed based on supply limits with failure reason
+     * @param from The sender address
+     * @param to The recipient address
+     * @param amount The amount to transfer
+     * @param txType The type of transaction (unused in this module)
+     * @return (bool, string) Whether the transfer is allowed and failure reason if not
+     */
+    function canTransferWithTypeAndFailureReason(
+        address from,
+        address to,
+        uint256 amount,
+        TxType txType
+    ) external view override returns (bool, string memory) {
+        // For this compliance module, transaction type doesn't affect supply checks
+        // So we just delegate to the standard compliance check
+        return this.canTransferWithFailureReason(from, to, amount);
     }
 }

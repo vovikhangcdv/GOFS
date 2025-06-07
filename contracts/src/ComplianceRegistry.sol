@@ -4,6 +4,7 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {ICompliance} from "./interfaces/ICompliance.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {TxType} from "./interfaces/ITypes.sol";
 
 contract ComplianceRegistry is ICompliance, AccessControl {
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -116,5 +117,51 @@ contract ComplianceRegistry is ICompliance, AccessControl {
 
     function isRegisteredModule(address _module) external view returns (bool) {
         return _modules.contains(_module);
+    }
+
+    function canTransferWithType(
+        address _from,
+        address _to,
+        uint256 _amount,
+        TxType _txType
+    ) external view returns (bool) {
+        // Check all modules
+        for (uint256 i = 0; i < _modules.length(); i++) {
+            address module = _modules.at(i);
+            if (
+                !ICompliance(module).canTransferWithType(
+                    _from,
+                    _to,
+                    _amount,
+                    _txType
+                )
+            ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function canTransferWithTypeAndFailureReason(
+        address _from,
+        address _to,
+        uint256 _amount,
+        TxType _txType
+    ) external view returns (bool, string memory) {
+        // Check all modules
+        for (uint256 i = 0; i < _modules.length(); i++) {
+            address module = _modules.at(i);
+            (bool success, string memory reason) = ICompliance(module)
+                .canTransferWithTypeAndFailureReason(
+                    _from,
+                    _to,
+                    _amount,
+                    _txType
+                );
+            if (!success) {
+                return (false, reason);
+            }
+        }
+        return (true, "");
     }
 }

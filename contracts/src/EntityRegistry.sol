@@ -58,6 +58,12 @@ contract EntityRegistry is
         return _entities[entityAddress];
     }
 
+    function getVerifierAllowedTypes(
+        address verifier
+    ) external view returns (EntityType[] memory) {
+        return _verifierAllowedTypes[verifier];
+    }
+
     function register(
         Entity calldata entity,
         bytes memory verifierSignature
@@ -163,7 +169,6 @@ contract EntityRegistry is
 
         emit VerifierRemoved(verifier);
     }
-
 
     /// @notice Verifies if a given info (hashed) is part of the Entity's info root
     /// @param entity The Entity struct

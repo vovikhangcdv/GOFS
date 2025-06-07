@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {ICompliantToken} from "./interfaces/ICompliantToken.sol";
 import {ICompliance} from "./interfaces/ICompliance.sol";
+import {TypedToken} from "./TypedToken.sol";
+import {TxType} from "./interfaces/ITypes.sol";
 
 /**
  * @title CompliantToken
@@ -13,7 +14,7 @@ import {ICompliance} from "./interfaces/ICompliance.sol";
  * 1. All transfers must pass compliance checks (including entity verification)
  * 2. Token parameters can be managed by governance
  */
-contract CompliantToken is ICompliantToken, ERC20, AccessControl {
+contract CompliantToken is ICompliantToken, TypedToken, AccessControl {
     // Role definitions
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
@@ -42,7 +43,7 @@ contract CompliantToken is ICompliantToken, ERC20, AccessControl {
         string memory name_,
         string memory symbol_,
         address compliance_
-    ) ERC20(name_, symbol_) {
+    ) TypedToken(name_, symbol_) {
         if (compliance_ == address(0)) revert ZeroAddressCompliance();
         compliance = ICompliance(compliance_);
 
@@ -101,5 +102,28 @@ contract CompliantToken is ICompliantToken, ERC20, AccessControl {
     ) external onlyRole(COMPLIANCE_ADMIN_ROLE) {
         if (newCompliance == address(0)) revert ZeroAddressCompliance();
         compliance = ICompliance(newCompliance);
+    }
+
+    /**
+     * @dev Override of _transferWithType to enforce compliance checks for typed transfers
+     * @param from The sender address
+     * @param to The recipient address
+     * @param amount The amount of tokens to transfer
+     * @param txType The type of transaction
+     */
+    function _transferWithType(
+        address from,
+        address to,
+        uint256 amount,
+        TxType txType
+    ) internal virtual override {
+        // Check compliance with failure reason and transaction type
+        (bool isCompliant, string memory failureReason) = compliance
+            .canTransferWithTypeAndFailureReason(from, to, amount, txType);
+        if (!isCompliant) {
+            revert ComplianceCheckFailed(from, to, amount, failureReason);
+        }
+
+        super._transferWithType(from, to, amount, txType);
     }
 }
