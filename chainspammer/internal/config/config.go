@@ -88,17 +88,27 @@ func NewConfigFromEnv() *Config {
 	wallet, _ := hdwallet.NewFromMnemonic(getEnv("WALLET_MEMO", "test test test test test test test test test test test junk"))
 	cnt := 0
 	adminKey, _ := utils.GetNextPrivateKey(wallet, &cnt)
-	entityRegistry, _ := entityRegistry.NewEntityRegistry(common.HexToAddress(getEnv("ENTITY_REGISTRY", "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43")), client)
-	complianceRegistry, _ := complianceRegistry.NewComplianceRegistry(common.HexToAddress(getEnv("COMPLIANCE_REGISTRY", "0x36b58F5C1969B7b6591D752ea6F5486D069010AB")), client)
-	eVNDToken, _ := compliantToken.NewCompliantToken(common.HexToAddress(getEnv("EVND_TOKEN", "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9")), client)
-	mUSDToken, _ := erc20.NewERC20(common.HexToAddress(getEnv("MUSD_TOKEN", "0x9A676e781A523b5d0C0e43731313A708CB607508")), client)
-	exchangePortal, _ := exchangePortal.NewExchangePortal(common.HexToAddress(getEnv("EXCHANGE_PORTAL", "0xC9a43158891282A2B1475592D5719c001986Aaec")), client)
+	entityRegistryAddress := common.HexToAddress(getEnv("ENTITY_REGISTRY", "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43"))
+	complianceRegistryAddress := common.HexToAddress(getEnv("COMPLIANCE_REGISTRY", "0x36b58F5C1969B7b6591D752ea6F5486D069010AB"))
+	eVNDTokenAddress := common.HexToAddress(getEnv("EVND_TOKEN", "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"))
+	mUSDTokenAddress := common.HexToAddress(getEnv("MUSD_TOKEN", "0x9A676e781A523b5d0C0e43731313A708CB607508"))
+	exchangePortalAddress := common.HexToAddress(getEnv("EXCHANGE_PORTAL", "0xC9a43158891282A2B1475592D5719c001986Aaec"))
+	entityRegistry, _ := entityRegistry.NewEntityRegistry(entityRegistryAddress, client)
+	complianceRegistry, _ := complianceRegistry.NewComplianceRegistry(complianceRegistryAddress, client)
+	eVNDToken, _ := compliantToken.NewCompliantToken(eVNDTokenAddress, client)
+	mUSDToken, _ := erc20.NewERC20(mUSDTokenAddress, client)
+	exchangePortal, _ := exchangePortal.NewExchangePortal(exchangePortalAddress, client)
 	systemContracts := types.SystemContracts{
-		EntityRegistry:     entityRegistry,
-		ComplianceRegistry: complianceRegistry,
-		EVNDToken:          eVNDToken,
-		USDToken:           mUSDToken,
-		ExchangePortal:     exchangePortal,
+		EntityRegistry:            entityRegistry,
+		EntityRegistryAddress:     entityRegistryAddress,
+		ComplianceRegistry:        complianceRegistry,
+		ComplianceRegistryAddress: complianceRegistryAddress,
+		EVNDToken:                 eVNDToken,
+		EVNDTokenAddress:          eVNDTokenAddress,
+		USDToken:                  mUSDToken,
+		USDTokenAddress:           mUSDTokenAddress,
+		ExchangePortal:            exchangePortal,
+		ExchangePortalAddress:     exchangePortalAddress,
 	}
 	config := &Config{
 		Client:               client,
@@ -161,7 +171,7 @@ func NewConfigFromContext(c *cli.Context) (*Config, error) {
 	entityRegistryAddress := common.HexToAddress(c.String("entity-registry"))
 	complianceRegistryAddress := common.HexToAddress(c.String("compliance-registry"))
 	eVNDTokenAddress := common.HexToAddress(c.String("evnd-token"))
-	mUSDTokenAddress := common.HexToAddress(c.String("usdt-token"))
+	mUSDTokenAddress := common.HexToAddress(c.String("musd-token"))
 	exchangePortalAddress := common.HexToAddress(c.String("exchange-portal"))
 
 	entityRegistry, err := entityRegistry.NewEntityRegistry(entityRegistryAddress, client)
