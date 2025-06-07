@@ -42,6 +42,7 @@ type Config struct {
 	RegisterEntityWeight int
 	SendEVNDWeight       int
 	ExchangeVNDUSDWeight int
+	EventsConfig        []types.Event
 }
 
 func (c *Config) GetRandomVerifier() *ecdsa.PrivateKey {
@@ -200,6 +201,33 @@ func NewConfigFromContext(c *cli.Context) (*Config, error) {
 		return nil, err
 	}
 
+	blacklistedAddresses := make([]common.Address, 0)
+    for _, addrStr := range c.StringSlice("suspicious-address-interactions.blacklisted-addresses") {
+        addr := common.HexToAddress(addrStr)
+        blacklistedAddresses = append(blacklistedAddresses, addr)
+    }
+
+	eventsConfig := []types.Event{
+		&types.LargeAmountTransfersConfig{
+			TotalAmount:   big.NewInt(c.Int64("large-amount-transfers.total-amount")),
+			Weight:        c.Int("large-amount-transfers.weight"),
+		},
+		&types.MultipleOutgoingTransfersConfig{
+			BlockDuration: c.Int64("multiple-outgoing-transfers.block-duration"),
+			TotalTxs:      c.Int64("multiple-outgoing-transfers.total-txs"),
+			Weight:        c.Int("multiple-outgoing-transfers.weight"),
+		},
+		&types.MultipleIncomingTransfersConfig{
+			BlockDuration: c.Int64("multiple-incoming-transfers.block-duration"),
+			TotalAmount:   big.NewInt(c.Int64("multiple-incoming-transfers.total-amount")),
+			Weight:        c.Int("multiple-incoming-transfers.weight"),
+		},
+		&types.SuspiciousAddressInteractionsConfig{
+			BlacklistAddresses: blacklistedAddresses,
+			Weight: c.Int("suspicious-address-interactions.weight"),
+		},
+	}
+
 	systemContracts := types.SystemContracts{
 		EntityRegistry:            entityRegistry,
 		EntityRegistryAddress:     entityRegistryAddress,
@@ -227,9 +255,10 @@ func NewConfigFromContext(c *cli.Context) (*Config, error) {
 		AdminKey:             adminKey,
 		SystemContracts:      systemContracts,
 		AddressCounter:       cnt,
-		RegisterEntityWeight: c.Int("register-entity-weight"),
-		SendEVNDWeight:       c.Int("send-evnd-weight"),
-		ExchangeVNDUSDWeight: c.Int("exchange-vnd-usd-weight"),
+		RegisterEntityWeight: c.Int("register-entity.weight"),
+		SendEVNDWeight:       c.Int("send-evnd.weight"),
+		ExchangeVNDUSDWeight: c.Int("exchange-vnd-usd.weight"),
+		EventsConfig:         eventsConfig,
 	}
 	return config, nil
 }

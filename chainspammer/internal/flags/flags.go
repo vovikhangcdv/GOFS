@@ -62,19 +62,19 @@ var (
 	}
 
 	RegisterEntityWeight = &cli.IntFlag{
-		Name:  "register-entity-weight",
+		Name:  "register-entity.weight",
 		Value: 1,
 		Usage: "Weight for register entity transactions",
 	}
 
 	SendEVNDWeight = &cli.IntFlag{
-		Name:  "send-evnd-weight",
+		Name:  "send-evnd.weight",
 		Value: 1,
 		Usage: "Weight for send EVND transactions",
 	}
 
 	ExchangeVNDUSDWeight = &cli.IntFlag{
-		Name:  "exchange-vnd-usd-weight",
+		Name:  "exchange-vnd-usd.weight",
 		Value: 1,
 		Usage: "Weight for exchange VND to USD transactions",
 	}
@@ -83,6 +83,69 @@ var (
 		Name:  "max-keys",
 		Value: 100,
 		Usage: "Maximum number of keys to generate",
+	}
+
+	LargeAmountTransfersWeight = &cli.IntFlag{
+		Name:  "large-amount-transfers.weight",
+		Value: 1,
+		Usage: "Weight for Event: Large amount transfers",
+	}
+
+	MultipleOutgoingTransfersWeight = &cli.IntFlag{
+		Name:  "multiple-outgoing-transfers.weight",
+		Value: 1,
+		Usage: "Weight for Event: Multiple outgoing transfers",
+	}
+
+	MultipleIncomingTransfersWeight = &cli.IntFlag{
+		Name:  "multiple-incoming-transfers.weight",
+		Value: 1,
+		Usage: "Weight for Event: Multiple incoming transfers",
+	}
+
+	SuspiciousAddressInteractionsWeight = &cli.IntFlag{
+		Name:  "suspicious-address-interactions.weight",
+		Value: 1,
+		Usage: "Weight for Event: Suspicious address interactions",
+	}
+
+	LargeAmountTransfersTotalAmount = &cli.Int64Flag{
+		Name:  "large-amount-transfers.total-amount",
+		Value: 1_000_000_000_000_000_000,
+		Usage: "Total amount for Event: Large amount transfers",
+	}
+
+	MultipleOutgoingTransfersBlockDuration = &cli.Int64Flag{
+		Name:  "multiple-outgoing-transfers.block-duration",
+		Value: 10,
+		Usage: "Block duration for Event: Multiple outgoing transfers",
+	}
+
+	MultipleOutgoingTransfersTotalTxs = &cli.Int64Flag{
+		Name:  "multiple-outgoing-transfers.total-txs",
+		Value: 5,
+		Usage: "Total transactions for Event: Multiple outgoing transfers",
+	}
+
+	MultipleIncomingTransfersBlockDuration = &cli.Int64Flag{
+		Name:  "multiple-incoming-transfers.block-duration",
+		Value: 10,
+		Usage: "Block duration for Event: Multiple incoming transfers",
+	}
+
+	MultipleIncomingTransfersTotalAmount = &cli.Int64Flag{
+		Name:  "multiple-incoming-transfers.total-amount",
+		Value: 1_000_000_000_000_000_000,
+		Usage: "Total amount for Event: Multiple incoming transfers",
+	}
+
+	SuspiciousAddressInteractionsBlacklistAddresses = &cli.StringSliceFlag{
+		Name:  "suspicious-address-interactions.blacklisted-addresses",
+		Value: cli.NewStringSlice(
+			"0x0000000000000000000000000000000000006969",
+			"0x0000000000000000000000000000000000696969",
+		),
+		Usage: "Blacklist addresses for Event: Suspicious address interactions",
 	}
 
 	Flags = []cli.Flag{
@@ -100,5 +163,15 @@ var (
 		SendEVNDWeight,
 		ExchangeVNDUSDWeight,
 		MaxKeys,
+		LargeAmountTransfersWeight,
+		MultipleOutgoingTransfersWeight,
+		MultipleIncomingTransfersWeight,
+		SuspiciousAddressInteractionsWeight,
+		LargeAmountTransfersTotalAmount,
+		MultipleOutgoingTransfersBlockDuration,
+		MultipleOutgoingTransfersTotalTxs,
+		MultipleIncomingTransfersBlockDuration,
+		MultipleIncomingTransfersTotalAmount,
+		SuspiciousAddressInteractionsBlacklistAddresses,
 	}
 )

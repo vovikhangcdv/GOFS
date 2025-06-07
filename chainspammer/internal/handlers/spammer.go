@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -60,4 +61,53 @@ func Spam(config *config.Config) (common.Hash, error) {
 		log.Println("⚠️ Unknown transaction type")
 	}
 	return txHash, nil
+}
+
+func SpamEvent(config *config.Config) (bool, error) {
+	event := utils.SelectEvent(config.EventsConfig)
+	txHashes := make([]common.Hash, 0)
+
+	if len(config.Keys) < 2 {
+		return false, fmt.Errorf("too few users")
+	}
+	sk := config.GetRandomKey()
+
+	switch e := event.(type) {
+	case *localtypes.LargeAmountTransfersConfig:
+		log.Println("🚨 EVENT: Large amount transfers")
+		txHashesCp, err := HandleLargeAmountTransfers(config, sk, e.TotalAmount)
+		if err != nil {
+			return false, err
+		}
+		txHashes = append(txHashes, txHashesCp...)
+	case *localtypes.MultipleOutgoingTransfersConfig:
+		log.Println("🚨 EVENT: Multiple outgoing transfers")
+		txHashesCp, err := HandleMultipleOutgoingTransfers(config, sk, e.BlockDuration, e.TotalTxs)
+		if err != nil {
+			return false, err
+		}
+		txHashes = append(txHashes, txHashesCp...)
+	case *localtypes.MultipleIncomingTransfersConfig:
+		log.Println("🚨 EVENT: Multiple incoming transfers")
+		txHashesCp, err := HandleMultipleIncomingTransfers(config, crypto.PubkeyToAddress(sk.PublicKey), e.BlockDuration, e.TotalAmount)
+		if err != nil {
+			return false, err
+		}
+		txHashes = append(txHashes, txHashesCp...)
+	case *localtypes.SuspiciousAddressInteractionsConfig:
+		log.Println("🚨 EVENT: Suspicious address interactions")
+		txHashesCp, err := HandleSuspiciousAddressInteractions(config, sk, e.BlacklistAddresses)
+		if err != nil {
+			return false, err
+		}
+		txHashes = append(txHashes, txHashesCp...)
+	}
+
+	errors := GetReceipts(config, txHashes)
+	for _, err := range errors {
+		if err != nil {
+			return false, err
+		}
+	}
+	return true, nil
 }

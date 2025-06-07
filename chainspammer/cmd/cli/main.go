@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math/rand"
 	"log"
 	"os"
 	"time"
@@ -27,11 +28,21 @@ func runSpam(c *cli.Context) error {
 		return err
 	}
 	for {
-		txHash, err := handlers.Spam(config)
-		if txHash == (common.Hash{}) || err != nil {
-			log.Println("❌ Error while spamming: ", err)
+		choice := rand.Intn(2)
+		if choice == 0 {
+			txHash, err := handlers.Spam(config)
+			if txHash == (common.Hash{}) || err != nil {
+				log.Println("❌ Error while spamming: ", err)
+			} else {
+				log.Println("✅ Tx hash: ", txHash.Hex())
+			}
 		} else {
-			log.Println("✅ Tx hash: ", txHash.Hex())
+			success, err := handlers.SpamEvent(config)
+			if !success || err != nil {
+				log.Println("🚨 Error while creating event: ", err)
+			} else {
+				log.Println("🚨 Event created successfully")
+			}
 		}
 		time.Sleep(time.Duration(config.DelayTime) * time.Second)
 	}
