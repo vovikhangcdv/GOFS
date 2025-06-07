@@ -2,6 +2,7 @@ package config
 
 import (
 	"crypto/ecdsa"
+	"errors"
 	"math/big"
 	"os"
 	"strconv"
@@ -29,6 +30,7 @@ type Config struct {
 	Verifiers       []*ecdsa.PrivateKey
 	Blacklisters    []*ecdsa.PrivateKey
 	Keys            []*ecdsa.PrivateKey
+	MaxKeys         int
 	DelayTime       int64
 	Wallet          *hdwallet.Wallet
 	Seed            int64
@@ -50,13 +52,16 @@ func (c *Config) GetRandomKey() *ecdsa.PrivateKey {
 	return c.Keys[utils.RandomIdx(len(c.Keys))]
 }
 
-func (c *Config) GetNewKey() *ecdsa.PrivateKey {
+func (c *Config) GetNewKey() (*ecdsa.PrivateKey, error) {
+	if len(c.Keys) >= c.MaxKeys {
+		return nil, errors.New("max users reached")
+	}
 	key, err := utils.GetNextPrivateKey(c.Wallet, &c.AddressCounter)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	c.Keys = append(c.Keys, key)
-	return key
+	return key, nil
 }
 
 func getEnv(key, defaultValue string) string {
@@ -116,7 +121,8 @@ func NewConfigFromEnv() *Config {
 		ChainID:              utils.GetChainID(backend),
 		Faucet:               faucetSk,
 		Seed:                 int64(getEnvAsInt("SEED", 0)),
-		Keys:                 utils.RandomSks(10),
+		Keys:                 utils.RandomSks(getEnvAsInt("MAX_KEYS", 10)),
+		MaxKeys:              getEnvAsInt("MAX_KEYS", 100),
 		DelayTime:            int64(getEnvAsInt("DELAY_TIME", 3)),
 		Wallet:               wallet,
 		AdminKey:             adminKey,
@@ -166,7 +172,7 @@ func NewConfigFromContext(c *cli.Context) (*Config, error) {
 		blacklisters[i] = blacklister
 	}
 
-	keys := make([]*ecdsa.PrivateKey, 0)
+	keys := make([]*ecdsa.PrivateKey, 0, c.Int("max-keys"))
 
 	entityRegistryAddress := common.HexToAddress(c.String("entity-registry"))
 	complianceRegistryAddress := common.HexToAddress(c.String("compliance-registry"))
@@ -215,6 +221,7 @@ func NewConfigFromContext(c *cli.Context) (*Config, error) {
 		Faucet:               faucetSk,
 		Seed:                 c.Int64("seed"),
 		Keys:                 keys,
+		MaxKeys:              c.Int("max-keys"),
 		Verifiers:            verifiers,
 		Blacklisters:         blacklisters,
 		Wallet:               wallet,

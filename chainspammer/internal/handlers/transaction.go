@@ -79,7 +79,10 @@ func AirdropVNDIfNeeded(config *config.Config, receiver common.Address) (*big.In
 
 func SendRegisterEntityTx(config *config.Config) (common.Hash, error) {
 	skVerifier := config.GetRandomVerifier()
-	skUser := config.GetNewKey()
+	skUser, err := config.GetNewKey()
+	if err != nil {
+		return common.Hash{}, err
+	}
 	isVerified, err := config.SystemContracts.EntityRegistry.IsVerifiedEntity(&bind.CallOpts{}, crypto.PubkeyToAddress(skUser.PublicKey))
 	if err != nil {
 		return common.Hash{}, err

@@ -79,6 +79,12 @@ var (
 		Usage: "Weight for exchange VND to USD transactions",
 	}
 
+	MaxKeys = &cli.IntFlag{
+		Name:  "max-keys",
+		Value: 100,
+		Usage: "Maximum number of keys to generate",
+	}
+
 	Flags = []cli.Flag{
 		RpcURL,
 		Seed,
@@ -93,5 +99,6 @@ var (
 		RegisterEntityWeight,
 		SendEVNDWeight,
 		ExchangeVNDUSDWeight,
+		MaxKeys,
 	}
 )
