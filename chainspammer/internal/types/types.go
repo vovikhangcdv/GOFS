@@ -29,6 +29,48 @@ type TxType struct {
 	Weight int
 }
 
+type Event interface {
+	GetWeight() int
+}
+
+type LargeAmountTransfersConfig struct {
+	TotalAmount *big.Int
+	Weight int
+}
+
+func (e *LargeAmountTransfersConfig) GetWeight() int {
+	return e.Weight
+}
+
+type MultipleOutgoingTransfersConfig struct {
+	BlockDuration int64
+	TotalTxs int64
+	Weight int
+}
+
+func (e *MultipleOutgoingTransfersConfig) GetWeight() int {
+	return e.Weight
+}
+
+type MultipleIncomingTransfersConfig struct {
+	BlockDuration int64
+	TotalAmount *big.Int
+	Weight int
+}
+
+func (e *MultipleIncomingTransfersConfig) GetWeight() int {
+	return e.Weight
+}
+
+type SuspiciousAddressInteractionsConfig struct {
+	BlacklistAddresses []common.Address
+	Weight int
+}
+
+func (e *SuspiciousAddressInteractionsConfig) GetWeight() int {
+	return e.Weight
+}
+
 type SystemContracts struct {
 	EntityRegistry *entityRegistry.EntityRegistry
 	EntityRegistryAddress common.Address

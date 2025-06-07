@@ -7,7 +7,6 @@ import (
 	"log"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -37,6 +36,17 @@ func AirdropGas(config *config.Config, addr common.Address) (common.Hash, error)
 	ethValue := new(big.Float).Quo(new(big.Float).SetInt(airdropValue), new(big.Float).SetInt(big.NewInt(params.Ether)))
 	log.Println("Airdropped ", ethValue.Text('f', 6), " ETH to ", addr.Hex(), " tx_hash: ", txHash.Hex())
 	return txHash, nil
+}
+
+func AirdropGasIfNeeded(config *config.Config, addr common.Address) (common.Hash, error) {
+	balance, err := config.Client.BalanceAt(context.Background(), addr, nil)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	if balance.Cmp(big.NewInt(int64(float64(params.Ether) * 0.1))) == 0 {
+		return AirdropGas(config, addr)
+	}
+	return common.Hash{}, nil
 }
 
 func AirdropVND(config *config.Config, receiver common.Address, airdropValue *big.Int) (common.Hash, error) {
@@ -79,9 +89,8 @@ func AirdropVNDIfNeeded(config *config.Config, receiver common.Address) (*big.In
 	return balance, nil
 }
 
-func SendRegisterEntityTx(config *config.Config) (common.Hash, error) {
+func SendRegisterEntityTx(config *config.Config, skUser *ecdsa.PrivateKey, isUseRPC bool) (common.Hash, error) {
 	skVerifier := config.GetRandomVerifier()
-	skUser := config.GetNewKey()
 	isVerified, err := config.SystemContracts.EntityRegistry.IsVerifiedEntity(&bind.CallOpts{}, crypto.PubkeyToAddress(skUser.PublicKey))
 	if err != nil {
 		return common.Hash{}, err
@@ -95,7 +104,7 @@ func SendRegisterEntityTx(config *config.Config) (common.Hash, error) {
 		return common.Hash{}, err
 	}
 	opts := &bind.TransactOpts{
-		GasLimit:  30_000_000,
+		GasLimit:  500_000,
 		NoSend:    true,
 		Signer: func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
 			return tx, nil
@@ -106,16 +115,7 @@ func SendRegisterEntityTx(config *config.Config) (common.Hash, error) {
 		return common.Hash{}, err
 	}
 
-	msg := ethereum.CallMsg{
-		From: crypto.PubkeyToAddress(skUser.PublicKey),
-		To:   tx.To(),
-		Data: tx.Data(),
-	}
-	gas, err := config.Client.EstimateGas(context.Background(), msg)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, skUser, *tx.To(), tx.Value(), gas, tx.Data(), false)
+	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, skUser, *tx.To(), tx.Value(), tx.Gas(), tx.Data(), isUseRPC)
 	if err != nil {
 		return common.Hash{}, err
 	}
@@ -127,7 +127,7 @@ func SendRegisterEntityTx(config *config.Config) (common.Hash, error) {
 	return txHash, nil
 }
 
-func SendExchangeVNDToUSDTx(config *config.Config, skFrom *ecdsa.PrivateKey) (common.Hash, error) {
+func SendExchangeVNDToUSDTx(config *config.Config, skFrom *ecdsa.PrivateKey, isUseRPC bool) (common.Hash, error) {
 	addr := crypto.PubkeyToAddress(skFrom.PublicKey)
 	if _, err := AirdropGas(config, addr); err != nil {
 		return common.Hash{}, err
@@ -138,6 +138,9 @@ func SendExchangeVNDToUSDTx(config *config.Config, skFrom *ecdsa.PrivateKey) (co
 	}
 	if !verifiered {
 		return common.Hash{}, fmt.Errorf("address is not verified, skipping")
+	}
+	if _, err := AirdropGasIfNeeded(config, addr); err != nil {
+		return common.Hash{}, err
 	}
 	fromBalance, err := AirdropVNDIfNeeded(config, addr)
 	if err != nil {
@@ -164,7 +167,7 @@ func SendExchangeVNDToUSDTx(config *config.Config, skFrom *ecdsa.PrivateKey) (co
 	}
 
 	opts := &bind.TransactOpts{
-		GasLimit: 30_000_000,
+		GasLimit: 500_000,
 		NoSend:   true,
 		Signer: func(_ common.Address, tx *types.Transaction) (*types.Transaction, error) {
 			return tx, nil
@@ -181,7 +184,7 @@ func SendExchangeVNDToUSDTx(config *config.Config, skFrom *ecdsa.PrivateKey) (co
 	if err != nil {
 		return common.Hash{}, err
 	}
-	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, skFrom, *tx.To(), tx.Value(), tx.Gas(), tx.Data(), false)
+	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, skFrom, *tx.To(), tx.Value(), tx.Gas(), tx.Data(), isUseRPC)
 	if err != nil {
 		return common.Hash{}, err
 	}
@@ -189,7 +192,7 @@ func SendExchangeVNDToUSDTx(config *config.Config, skFrom *ecdsa.PrivateKey) (co
 	return txHash, nil
 }
 
-func SendTransferEVNDRandomAmountTx(config *config.Config, skFrom *ecdsa.PrivateKey, to common.Address) (common.Hash, error) {
+func SendTransferEVNDRandomAmountTx(config *config.Config, skFrom *ecdsa.PrivateKey, to common.Address, isUseRPC bool) (common.Hash, error) {
 	from := crypto.PubkeyToAddress(skFrom.PublicKey)
 	// Check if `from` and `to` are verified
 	fromVerified, err := config.SystemContracts.EntityRegistry.IsVerifiedEntity(&bind.CallOpts{}, from)
@@ -209,13 +212,16 @@ func SendTransferEVNDRandomAmountTx(config *config.Config, skFrom *ecdsa.Private
 	if _, err := AirdropGas(config, from); err != nil {
 		return common.Hash{}, err
 	}
+	if _, err := AirdropGasIfNeeded(config, from); err != nil {
+		return common.Hash{}, err
+	}
 	fromBalance, err := AirdropVNDIfNeeded(config, from)
 	if err != nil {
 		log.Println("❌ Error while funding eVND: ", err)
 		return common.Hash{}, err
 	}
 	randomValue := utils.RandomBigInt(fromBalance)
-	txHash, err := sendTransferEVNDTx(config, skFrom, to, randomValue)
+	txHash, err := sendTransferEVNDTx(config, skFrom, to, randomValue, isUseRPC)
 	if err != nil {
 		return common.Hash{}, err
 	}
@@ -223,9 +229,9 @@ func SendTransferEVNDRandomAmountTx(config *config.Config, skFrom *ecdsa.Private
 	return txHash, nil
 }
 
-func sendTransferEVNDTx(config *config.Config, sk *ecdsa.PrivateKey, to common.Address, value *big.Int) (common.Hash, error) {
+func sendTransferEVNDTx(config *config.Config, sk *ecdsa.PrivateKey, to common.Address, value *big.Int, isUseRPC bool) (common.Hash, error) {
 	opts := &bind.TransactOpts{
-		GasLimit:  10_000_000,
+		GasLimit:  500_000,
 		NoSend:    true,
 		Signer: func(_ common.Address, tx *types.Transaction) (*types.Transaction, error) {
 			return tx, nil
@@ -244,7 +250,7 @@ func sendTransferEVNDTx(config *config.Config, sk *ecdsa.PrivateKey, to common.A
 	// if err != nil {
 	// 	return common.Hash{}, err
 	// }
-	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, sk, *tx.To(), tx.Value(), tx.Gas(), tx.Data(), false)
+	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, sk, *tx.To(), tx.Value(), tx.Gas(), tx.Data(), isUseRPC)
 	if err != nil {
 		return common.Hash{}, err
 	}

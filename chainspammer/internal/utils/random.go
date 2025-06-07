@@ -92,6 +92,25 @@ func SelectTxType(types []localtypes.TxType) string {
 	return types[0].Type
 }
 
+func SelectEvent(events []localtypes.Event) localtypes.Event {
+	totalWeight := 0
+	for _, e := range events {
+		totalWeight += e.GetWeight()
+	}
+
+	r := mathRand.Intn(totalWeight)
+	currentWeight := 0
+
+	for _, e := range events {
+		currentWeight += e.GetWeight()
+		if r < currentWeight {
+			return e
+		}
+	}
+
+	return events[0]
+}
+
 func GetRandomEntityType() uint8 {
 	return uint8(mathRand.Intn(3))
 }

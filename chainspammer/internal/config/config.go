@@ -2,6 +2,7 @@ package config
 
 import (
 	"crypto/ecdsa"
+	"errors"
 	"math/big"
 	"os"
 	"strconv"
@@ -29,6 +30,7 @@ type Config struct {
 	Verifiers       []*ecdsa.PrivateKey
 	Blacklisters    []*ecdsa.PrivateKey
 	Keys            []*ecdsa.PrivateKey
+	MaxKeys         int
 	DelayTime       int64
 	Wallet          *hdwallet.Wallet
 	Seed            int64
@@ -40,6 +42,7 @@ type Config struct {
 	RegisterEntityWeight int
 	SendEVNDWeight       int
 	ExchangeVNDUSDWeight int
+	EventsConfig        []types.Event
 }
 
 func (c *Config) GetRandomVerifier() *ecdsa.PrivateKey {
@@ -50,13 +53,15 @@ func (c *Config) GetRandomKey() *ecdsa.PrivateKey {
 	return c.Keys[utils.RandomIdx(len(c.Keys))]
 }
 
-func (c *Config) GetNewKey() *ecdsa.PrivateKey {
+func (c *Config) GetNewKey() (*ecdsa.PrivateKey, error) {
+	if len(c.Keys) >= c.MaxKeys {
+		return nil, errors.New("max users reached")
+	}
 	key, err := utils.GetNextPrivateKey(c.Wallet, &c.AddressCounter)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	c.Keys = append(c.Keys, key)
-	return key
+	return key, nil
 }
 
 func getEnv(key, defaultValue string) string {
@@ -88,17 +93,27 @@ func NewConfigFromEnv() *Config {
 	wallet, _ := hdwallet.NewFromMnemonic(getEnv("WALLET_MEMO", "test test test test test test test test test test test junk"))
 	cnt := 0
 	adminKey, _ := utils.GetNextPrivateKey(wallet, &cnt)
-	entityRegistry, _ := entityRegistry.NewEntityRegistry(common.HexToAddress(getEnv("ENTITY_REGISTRY", "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43")), client)
-	complianceRegistry, _ := complianceRegistry.NewComplianceRegistry(common.HexToAddress(getEnv("COMPLIANCE_REGISTRY", "0x36b58F5C1969B7b6591D752ea6F5486D069010AB")), client)
-	eVNDToken, _ := compliantToken.NewCompliantToken(common.HexToAddress(getEnv("EVND_TOKEN", "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9")), client)
-	mUSDToken, _ := erc20.NewERC20(common.HexToAddress(getEnv("MUSD_TOKEN", "0x9A676e781A523b5d0C0e43731313A708CB607508")), client)
-	exchangePortal, _ := exchangePortal.NewExchangePortal(common.HexToAddress(getEnv("EXCHANGE_PORTAL", "0xC9a43158891282A2B1475592D5719c001986Aaec")), client)
+	entityRegistryAddress := common.HexToAddress(getEnv("ENTITY_REGISTRY", "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43"))
+	complianceRegistryAddress := common.HexToAddress(getEnv("COMPLIANCE_REGISTRY", "0x36b58F5C1969B7b6591D752ea6F5486D069010AB"))
+	eVNDTokenAddress := common.HexToAddress(getEnv("EVND_TOKEN", "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"))
+	mUSDTokenAddress := common.HexToAddress(getEnv("MUSD_TOKEN", "0x9A676e781A523b5d0C0e43731313A708CB607508"))
+	exchangePortalAddress := common.HexToAddress(getEnv("EXCHANGE_PORTAL", "0xC9a43158891282A2B1475592D5719c001986Aaec"))
+	entityRegistry, _ := entityRegistry.NewEntityRegistry(entityRegistryAddress, client)
+	complianceRegistry, _ := complianceRegistry.NewComplianceRegistry(complianceRegistryAddress, client)
+	eVNDToken, _ := compliantToken.NewCompliantToken(eVNDTokenAddress, client)
+	mUSDToken, _ := erc20.NewERC20(mUSDTokenAddress, client)
+	exchangePortal, _ := exchangePortal.NewExchangePortal(exchangePortalAddress, client)
 	systemContracts := types.SystemContracts{
-		EntityRegistry:     entityRegistry,
-		ComplianceRegistry: complianceRegistry,
-		EVNDToken:          eVNDToken,
-		USDToken:           mUSDToken,
-		ExchangePortal:     exchangePortal,
+		EntityRegistry:            entityRegistry,
+		EntityRegistryAddress:     entityRegistryAddress,
+		ComplianceRegistry:        complianceRegistry,
+		ComplianceRegistryAddress: complianceRegistryAddress,
+		EVNDToken:                 eVNDToken,
+		EVNDTokenAddress:          eVNDTokenAddress,
+		USDToken:                  mUSDToken,
+		USDTokenAddress:           mUSDTokenAddress,
+		ExchangePortal:            exchangePortal,
+		ExchangePortalAddress:     exchangePortalAddress,
 	}
 	config := &Config{
 		Client:               client,
@@ -106,7 +121,8 @@ func NewConfigFromEnv() *Config {
 		ChainID:              utils.GetChainID(backend),
 		Faucet:               faucetSk,
 		Seed:                 int64(getEnvAsInt("SEED", 0)),
-		Keys:                 utils.RandomSks(10),
+		Keys:                 utils.RandomSks(getEnvAsInt("MAX_KEYS", 10)),
+		MaxKeys:              getEnvAsInt("MAX_KEYS", 100),
 		DelayTime:            int64(getEnvAsInt("DELAY_TIME", 3)),
 		Wallet:               wallet,
 		AdminKey:             adminKey,
@@ -156,12 +172,12 @@ func NewConfigFromContext(c *cli.Context) (*Config, error) {
 		blacklisters[i] = blacklister
 	}
 
-	keys := make([]*ecdsa.PrivateKey, 0)
+	keys := make([]*ecdsa.PrivateKey, 0, c.Int("max-keys"))
 
 	entityRegistryAddress := common.HexToAddress(c.String("entity-registry"))
 	complianceRegistryAddress := common.HexToAddress(c.String("compliance-registry"))
 	eVNDTokenAddress := common.HexToAddress(c.String("evnd-token"))
-	mUSDTokenAddress := common.HexToAddress(c.String("usdt-token"))
+	mUSDTokenAddress := common.HexToAddress(c.String("musd-token"))
 	exchangePortalAddress := common.HexToAddress(c.String("exchange-portal"))
 
 	entityRegistry, err := entityRegistry.NewEntityRegistry(entityRegistryAddress, client)
@@ -185,6 +201,33 @@ func NewConfigFromContext(c *cli.Context) (*Config, error) {
 		return nil, err
 	}
 
+	blacklistedAddresses := make([]common.Address, 0)
+    for _, addrStr := range c.StringSlice("suspicious-address-interactions.blacklisted-addresses") {
+        addr := common.HexToAddress(addrStr)
+        blacklistedAddresses = append(blacklistedAddresses, addr)
+    }
+
+	eventsConfig := []types.Event{
+		&types.LargeAmountTransfersConfig{
+			TotalAmount:   big.NewInt(c.Int64("large-amount-transfers.total-amount")),
+			Weight:        c.Int("large-amount-transfers.weight"),
+		},
+		&types.MultipleOutgoingTransfersConfig{
+			BlockDuration: c.Int64("multiple-outgoing-transfers.block-duration"),
+			TotalTxs:      c.Int64("multiple-outgoing-transfers.total-txs"),
+			Weight:        c.Int("multiple-outgoing-transfers.weight"),
+		},
+		&types.MultipleIncomingTransfersConfig{
+			BlockDuration: c.Int64("multiple-incoming-transfers.block-duration"),
+			TotalAmount:   big.NewInt(c.Int64("multiple-incoming-transfers.total-amount")),
+			Weight:        c.Int("multiple-incoming-transfers.weight"),
+		},
+		&types.SuspiciousAddressInteractionsConfig{
+			BlacklistAddresses: blacklistedAddresses,
+			Weight: c.Int("suspicious-address-interactions.weight"),
+		},
+	}
+
 	systemContracts := types.SystemContracts{
 		EntityRegistry:            entityRegistry,
 		EntityRegistryAddress:     entityRegistryAddress,
@@ -205,15 +248,17 @@ func NewConfigFromContext(c *cli.Context) (*Config, error) {
 		Faucet:               faucetSk,
 		Seed:                 c.Int64("seed"),
 		Keys:                 keys,
+		MaxKeys:              c.Int("max-keys"),
 		Verifiers:            verifiers,
 		Blacklisters:         blacklisters,
 		Wallet:               wallet,
 		AdminKey:             adminKey,
 		SystemContracts:      systemContracts,
 		AddressCounter:       cnt,
-		RegisterEntityWeight: c.Int("register-entity-weight"),
-		SendEVNDWeight:       c.Int("send-evnd-weight"),
-		ExchangeVNDUSDWeight: c.Int("exchange-vnd-usd-weight"),
+		RegisterEntityWeight: c.Int("register-entity.weight"),
+		SendEVNDWeight:       c.Int("send-evnd.weight"),
+		ExchangeVNDUSDWeight: c.Int("exchange-vnd-usd.weight"),
+		EventsConfig:         eventsConfig,
 	}
 	return config, nil
 }
