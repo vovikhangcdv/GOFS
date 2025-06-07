@@ -94,7 +94,7 @@ func HandleMultipleIncomingTransfers(config *config.Config, addr common.Address,
 	log.Printf("MultipleIncomingTransfers: Sending %s VND over %d blocks (delay: %d seconds between txs)",
 		totalAmount.String(), blockDuration, delayBetweenTxs)
 	totalReceived := big.NewInt(0)
-	for i := 0; i < 100; i++ { // Avoid infinite loop
+	for i := 0; i < 10; i++ { // Avoid infinite loop
 		senderPrivateKey := config.GetRandomKey()
 		sender := crypto.PubkeyToAddress(senderPrivateKey.PublicKey)
 		balance, err := config.SystemContracts.EVNDToken.BalanceOf(&bind.CallOpts{}, sender)
@@ -143,12 +143,26 @@ func GetReceipts(config *config.Config, txHashes []common.Hash) []error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	for _, txHash := range txHashes {
-		receipt, err := config.Client.TransactionReceipt(ctx, txHash)
-		if err == nil && receipt.Status != 1 {
+		tx, isPending, err := config.Client.TransactionByHash(ctx, txHash)
+		if err != nil {
 			errors = append(errors, fmt.Errorf("transaction %s failed", txHash.Hex()))
 			continue
 		}
-		errors = append(errors, err)
+		// if the transaction is pending, wait for it to be mined
+		if isPending {
+			receipt, err := bind.WaitMined(ctx, config.Client, tx)
+			if err != nil {
+				errors = append(errors, fmt.Errorf("transaction %s failed", txHash.Hex()))
+				continue
+			}
+			if receipt.Status != 1 {
+				errors = append(errors, fmt.Errorf("transaction %s failed", txHash.Hex()))
+				continue
+			}
+			errors = append(errors, nil)
+			continue
+		}
+		errors = append(errors, nil)
 	}
 	return errors
 }

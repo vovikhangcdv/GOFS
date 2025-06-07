@@ -103,7 +103,9 @@ func SendSignedTx(backend *rpc.Client, tx *types.Transaction, isUseRPC bool) err
 		return err
 	}
 	// Wait for the transaction to be mined
-	receipt, err := bind.WaitMined(context.Background(), client, tx)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	receipt, err := bind.WaitMined(ctx, client, tx)
 	if err != nil {
 		return fmt.Errorf("Failed to wait for transaction confirmation: %v", err)
 	}
