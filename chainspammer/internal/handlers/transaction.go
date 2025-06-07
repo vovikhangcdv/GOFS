@@ -1,13 +1,11 @@
 package handlers
 
 import (
-	"context"
 	"crypto/ecdsa"
 	"fmt"
 	"log"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -95,7 +93,7 @@ func SendRegisterEntityTx(config *config.Config) (common.Hash, error) {
 		return common.Hash{}, err
 	}
 	opts := &bind.TransactOpts{
-		GasLimit:  30_000_000,
+		GasLimit:  5_000_000,
 		NoSend:    true,
 		Signer: func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
 			return tx, nil
@@ -106,16 +104,7 @@ func SendRegisterEntityTx(config *config.Config) (common.Hash, error) {
 		return common.Hash{}, err
 	}
 
-	msg := ethereum.CallMsg{
-		From: crypto.PubkeyToAddress(skUser.PublicKey),
-		To:   tx.To(),
-		Data: tx.Data(),
-	}
-	gas, err := config.Client.EstimateGas(context.Background(), msg)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, skUser, *tx.To(), tx.Value(), gas, tx.Data(), false)
+	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, skUser, *tx.To(), tx.Value(), tx.Gas(), tx.Data(), false)
 	if err != nil {
 		return common.Hash{}, err
 	}
