@@ -27,7 +27,7 @@ func Spam(config *config.Config) (common.Hash, error) {
 		if err != nil {
 			return common.Hash{}, err
 		}
-		txHash, err = SendRegisterEntityTx(config, skUser)
+		txHash, err = SendRegisterEntityTx(config, skUser, false)
 		if err != nil {
 			return common.Hash{}, err
 		}
@@ -41,7 +41,7 @@ func Spam(config *config.Config) (common.Hash, error) {
 		}
 		skFrom := config.GetRandomKey()
 		to := crypto.PubkeyToAddress(config.GetRandomKey().PublicKey)
-		txHash, err = SendTransferEVNDRandomAmountTx(config, skFrom, to)
+		txHash, err = SendTransferEVNDRandomAmountTx(config, skFrom, to, false)
 		if err != nil {
 			return common.Hash{}, err
 		}
@@ -52,7 +52,7 @@ func Spam(config *config.Config) (common.Hash, error) {
 			return common.Hash{}, nil
 		}
 		skFrom := config.GetRandomKey()
-		txHash, err = SendExchangeVNDToUSDTx(config, skFrom)
+		txHash, err = SendExchangeVNDToUSDTx(config, skFrom, false)
 		if err != nil {
 			return common.Hash{}, err
 		}
