@@ -3,7 +3,8 @@ package handlers
 import (
 	"fmt"
 	"log"
-
+	"math/big"
+	"crypto/rand"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/vovikhangcdv/GOFS/chainspammer/internal/config"
@@ -16,6 +17,7 @@ func Spam(config *config.Config) (common.Hash, error) {
 		{Type: "register_entity", Weight: config.RegisterEntityWeight},
 		{Type: "send_evnd", Weight: config.SendEVNDWeight},
 		{Type: "exchange_vnd_usd", Weight: config.ExchangeVNDUSDWeight},
+		{Type: "set_exchange_rate", Weight: 1},
 	}
 	txType := utils.SelectTxType(txTypes)
 
@@ -54,6 +56,20 @@ func Spam(config *config.Config) (common.Hash, error) {
 		}
 		skFrom := config.GetRandomKey()
 		txHash, err = SendExchangeVNDToUSDTx(config, skFrom, false)
+		if err != nil {
+			return common.Hash{}, err
+		}
+	case "set_exchange_rate":
+		log.Println("✏️ Setting exchange rate")
+		minExchangeRate, _ := new(big.Int).SetString("23_000_000_000_000_000_000", 0)
+		maxExchangeRate, _ := new(big.Int).SetString("27_000_000_000_000_000_000", 0)
+		rangeExchangeRate := new(big.Int).Sub(maxExchangeRate, minExchangeRate)
+		newExchangeRate, err := rand.Int(rand.Reader, rangeExchangeRate)
+		newExchangeRate = newExchangeRate.Add(newExchangeRate, minExchangeRate)
+		if err != nil {
+			return common.Hash{}, err
+		}
+		txHash, err = SendSetExchangeRateTx(config, newExchangeRate, false)
 		if err != nil {
 			return common.Hash{}, err
 		}
