@@ -342,3 +342,23 @@ func SendApproveTxIfNeeded(config *config.Config, sk *ecdsa.PrivateKey, exchange
 	log.Println("Approved ", value.String(), " from ", addr.Hex(), " tx hash: ", txHash.Hex())
 	return nil
 }
+
+func SendSetExchangeRateTx(config *config.Config, newExchangeRate *big.Int, isUseRPC bool) (common.Hash, error) {
+	opts := &bind.TransactOpts{
+		GasLimit: 100_000,
+		NoSend:   true,
+		Signer: func(_ common.Address, tx *types.Transaction) (*types.Transaction, error) {
+			return tx, nil
+		},
+	}
+	tx, err := config.SystemContracts.ExchangePortal.SetExchangeRate(opts, newExchangeRate)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, config.AdminKey, *tx.To(), tx.Value(), tx.Gas(), tx.Data(), isUseRPC)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	log.Println("Set exchange rate to ", newExchangeRate.String(), " tx hash: ", txHash.Hex())
+	return txHash, nil
+}
