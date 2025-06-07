@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"fmt"
 	"log"
@@ -35,6 +36,17 @@ func AirdropGas(config *config.Config, addr common.Address) (common.Hash, error)
 	ethValue := new(big.Float).Quo(new(big.Float).SetInt(airdropValue), new(big.Float).SetInt(big.NewInt(params.Ether)))
 	log.Println("Airdropped ", ethValue.Text('f', 6), " ETH to ", addr.Hex(), " tx_hash: ", txHash.Hex())
 	return txHash, nil
+}
+
+func AirdropGasIfNeeded(config *config.Config, addr common.Address) (common.Hash, error) {
+	balance, err := config.Client.BalanceAt(context.Background(), addr, nil)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	if balance.Cmp(big.NewInt(int64(float64(params.Ether) * 0.1))) == 0 {
+		return AirdropGas(config, addr)
+	}
+	return common.Hash{}, nil
 }
 
 func AirdropVND(config *config.Config, receiver common.Address, airdropValue *big.Int) (common.Hash, error) {
@@ -127,6 +139,9 @@ func SendExchangeVNDToUSDTx(config *config.Config, skFrom *ecdsa.PrivateKey) (co
 	if !verifiered {
 		return common.Hash{}, fmt.Errorf("address is not verified, skipping")
 	}
+	if _, err := AirdropGasIfNeeded(config, addr); err != nil {
+		return common.Hash{}, err
+	}
 	fromBalance, err := AirdropVNDIfNeeded(config, addr)
 	if err != nil {
 		log.Println("❌ Error while funding eVND: ", err)
@@ -197,6 +212,9 @@ func SendTransferEVNDRandomAmountTx(config *config.Config, skFrom *ecdsa.Private
 	if _, err := AirdropGas(config, from); err != nil {
 		return common.Hash{}, err
 	}
+	if _, err := AirdropGasIfNeeded(config, from); err != nil {
+		return common.Hash{}, err
+	}
 	fromBalance, err := AirdropVNDIfNeeded(config, from)
 	if err != nil {
 		log.Println("❌ Error while funding eVND: ", err)
@@ -213,7 +231,7 @@ func SendTransferEVNDRandomAmountTx(config *config.Config, skFrom *ecdsa.Private
 
 func sendTransferEVNDTx(config *config.Config, sk *ecdsa.PrivateKey, to common.Address, value *big.Int) (common.Hash, error) {
 	opts := &bind.TransactOpts{
-		GasLimit:  10_000_000,
+		GasLimit:  500_000,
 		NoSend:    true,
 		Signer: func(_ common.Address, tx *types.Transaction) (*types.Transaction, error) {
 			return tx, nil
