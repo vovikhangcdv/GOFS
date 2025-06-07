@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
-	// "log"
+	"log"
 	"math/big"
 	"time"
 
@@ -89,7 +89,7 @@ func SendNormalTx(backend *rpc.Client, chainId *big.Int, sk *ecdsa.PrivateKey, t
 
 func SendSignedTx(backend *rpc.Client, tx *types.Transaction, isUseRPC bool) error {
 	rlpData, _ := tx.MarshalBinary()
-	// log.Println("rlpData: ", hexutil.Encode(rlpData))
+	log.Println("rlpData: ", hexutil.Encode(rlpData))
 
 	if isUseRPC {
 		if err := backend.CallContext(context.Background(), nil, "eth_sendRawTransaction", hexutil.Encode(rlpData)); err != nil {

@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"encoding/csv"
+	"fmt"
+	"os"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -122,4 +125,58 @@ func RandomBigInt(max *big.Int) *big.Int {
 		panic(err)
 	}
 	return n
+}
+
+// readEntityData reads the CSV file and returns a slice of EntityData
+func readEntityData(filePath string, idx int) (localtypes.EntityData, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return localtypes.EntityData{}, fmt.Errorf("error opening file: %w", err)
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	// Skip header
+	if _, err := reader.Read(); err != nil {
+		return localtypes.EntityData{}, fmt.Errorf("error reading header: %w", err)
+	}
+
+	records, err := reader.ReadAll()
+	if err != nil {
+		return localtypes.EntityData{}, fmt.Errorf("error reading records: %w", err)
+	}
+
+	var entity localtypes.EntityData
+	for i, record := range records {
+		if i != idx {
+			continue
+		}
+		if len(record) < 18 { // Ensure we have all required fields
+			continue
+		}
+		entity = localtypes.EntityData{
+			Name:        record[0],
+			IDNumber:    record[1],
+			Birthday:    record[2],
+			Gender:      record[3],
+			Email:       record[4],
+			Phone:       record[5],
+			Address:     record[6],
+			Nationality: record[7],
+			Others:      record[8],
+			Root:        record[9],
+		}
+	}
+
+	return entity, nil
+}
+
+// getRandomEntityData returns a random entity data from the CSV file
+func GetRandomEntityData(filePath string) (localtypes.EntityData, error) {
+	idx := mathRand.Intn(1000)
+	entity, err := readEntityData(filePath, idx)
+	if err != nil {
+		return localtypes.EntityData{}, fmt.Errorf("error reading entity data: %w", err)
+	}
+	return entity, nil
 }

@@ -65,7 +65,8 @@ OPTIONS:
    --multiple-incoming-transfers.block-duration value                                                                               Block duration for Event: Multiple incoming transfers (default: 10)
    --multiple-incoming-transfers.total-amount value                                                                                 Total amount for Event: Multiple incoming transfers (default: 1000000000000000000)
    --suspicious-address-interactions.blacklisted-addresses value [ --suspicious-address-interactions.blacklisted-addresses value ]  Blacklist addresses for Event: Suspicious address interactions (default: "0x0000000000000000000000000000000000006969", "0x0000000000000000000000000000000000696969")
-   --help, -h                                                                                                                       show help
+   --entity-data-path value                                                                                                         Path to entity data CSV file (default: "../contracts/test/entity_data.csv")
+   --help, -h    
 ```
 
 ### Example
