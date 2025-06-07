@@ -148,6 +148,12 @@ var (
 		Usage: "Blacklist addresses for Event: Suspicious address interactions",
 	}
 
+	EntityDataPath = &cli.StringFlag{
+		Name:  "entity-data-path",
+		Value: "../contracts/test/entity_data.csv",
+		Usage: "Path to entity data CSV file",
+	}
+
 	Flags = []cli.Flag{
 		RpcURL,
 		Seed,
@@ -173,5 +179,6 @@ var (
 		MultipleIncomingTransfersBlockDuration,
 		MultipleIncomingTransfersTotalAmount,
 		SuspiciousAddressInteractionsBlacklistAddresses,
+		EntityDataPath,
 	}
 )
