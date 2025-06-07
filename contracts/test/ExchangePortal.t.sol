@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ExchangePortal} from "../src/ExchangePortal.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {Entity, EntityType} from "../src/interfaces/ITypes.sol";
 contract MockToken is ERC20 {
     constructor(string memory name, string memory symbol) ERC20(name, symbol) {
         _mint(msg.sender, 1000000 * 10 ** decimals());
@@ -12,6 +13,15 @@ contract MockToken is ERC20 {
 
     function mint(address to, uint256 amount) external {
         _mint(to, amount);
+    }
+}
+
+contract MockRegistry {
+    function register(
+        Entity calldata entity,
+        bytes memory verifierSignature
+    ) external {
+        // Mock implementation - just return without doing anything
     }
 }
 
@@ -353,5 +363,51 @@ contract ExchangePortalTest is Test {
         address invalidToken = makeAddr("invalidToken");
         vm.expectRevert(ExchangePortal.InvalidTokenPair.selector);
         portal.getExchangeAmount(invalidToken, address(token1), 100 * 1e18);
+    }
+
+    function test_RegisterWithRegistry() public {
+        address mockRegistry = makeAddr("mockRegistry");
+        Entity memory entity = Entity({
+            entityAddress: address(portal),
+            entityType: EntityType.wrap(1),
+            entityData: abi.encode("Exchange Portal", "Exchange entity"),
+            verifier: makeAddr("verifier")
+        });
+        bytes memory signature = "mock signature";
+
+        // Deploy a mock registry contract that implements the register function
+        MockRegistry mockRegistryContract = new MockRegistry();
+
+        // Admin can authorize registration
+        vm.startPrank(admin);
+        portal.registerWithRegistry(
+            address(mockRegistryContract),
+            entity,
+            signature
+        );
+        vm.stopPrank();
+    }
+
+    function test_RegisterWithRegistry_Unauthorized() public {
+        address mockRegistry = makeAddr("mockRegistry");
+        Entity memory entity = Entity({
+            entityAddress: address(portal),
+            entityType: EntityType.wrap(1),
+            entityData: abi.encode("Exchange Portal", "Exchange entity"),
+            verifier: makeAddr("verifier")
+        });
+        bytes memory signature = "mock signature";
+
+        // Non-admin cannot authorize registration
+        vm.startPrank(user);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                user,
+                portal.REGISTER_ADMIN_ROLE()
+            )
+        );
+        portal.registerWithRegistry(mockRegistry, entity, signature);
+        vm.stopPrank();
     }
 }

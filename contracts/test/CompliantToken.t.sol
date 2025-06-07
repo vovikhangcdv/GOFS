@@ -6,6 +6,7 @@ import {CompliantToken} from "../src/CompliantToken.sol";
 import {ICompliance} from "../src/interfaces/ICompliance.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {TxType} from "../src/interfaces/ITypes.sol";
 
 // Mock compliance contract for testing
 contract MockCompliance is ICompliance {
@@ -60,6 +61,36 @@ contract MockCompliance is ICompliance {
         address from,
         address to,
         uint256 amount
+    ) external view returns (bool, string memory) {
+        if (from == address(0)) {
+            return (allowMinting, allowMinting ? "" : "Minting not allowed");
+        }
+        if (to == address(0)) {
+            return (allowBurning, allowBurning ? "" : "Burning not allowed");
+        }
+        return (allowTransfer, failureMessage);
+    }
+
+    function canTransferWithType(
+        address from,
+        address to,
+        uint256 amount,
+        TxType txType
+    ) external view returns (bool) {
+        if (from == address(0)) {
+            return allowMinting;
+        }
+        if (to == address(0)) {
+            return allowBurning;
+        }
+        return allowTransfer;
+    }
+
+    function canTransferWithTypeAndFailureReason(
+        address from,
+        address to,
+        uint256 amount,
+        TxType txType
     ) external view returns (bool, string memory) {
         if (from == address(0)) {
             return (allowMinting, allowMinting ? "" : "Minting not allowed");

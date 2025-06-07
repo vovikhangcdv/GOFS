@@ -6,6 +6,7 @@ import {ComplianceRegistry} from "../src/ComplianceRegistry.sol";
 import {ICompliance} from "../src/interfaces/ICompliance.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {TxType} from "../src/interfaces/ITypes.sol";
 
 // Mock compliance module for testing
 contract MockCompliance is ICompliance {
@@ -37,6 +38,24 @@ contract MockCompliance is ICompliance {
         address,
         address,
         uint256
+    ) external view override returns (bool, string memory) {
+        return (_shouldAllow, _failureReason);
+    }
+
+    function canTransferWithType(
+        address,
+        address,
+        uint256,
+        TxType
+    ) external view override returns (bool) {
+        return _shouldAllow;
+    }
+
+    function canTransferWithTypeAndFailureReason(
+        address,
+        address,
+        uint256,
+        TxType
     ) external view override returns (bool, string memory) {
         return (_shouldAllow, _failureReason);
     }
@@ -190,5 +209,122 @@ contract ComplianceRegistryTest is Test {
         vm.expectEmit(true, false, false, false);
         emit ComplianceModuleRemoved(address(allowingModule));
         registry.removeModule(address(allowingModule));
+    }
+
+    function test_SupportsInterface() public {
+        // Test ICompliance interface
+        assertTrue(registry.supportsInterface(type(ICompliance).interfaceId));
+
+        // Test AccessControl interface
+        assertTrue(
+            registry.supportsInterface(type(IAccessControl).interfaceId)
+        );
+
+        // Test IERC165 interface
+        assertTrue(registry.supportsInterface(type(IERC165).interfaceId));
+
+        // Test invalid interface
+        assertFalse(registry.supportsInterface(0x12345678));
+    }
+
+    function test_IsModule() public {
+        // Test module not added
+        assertFalse(registry.isModule(address(allowingModule)));
+
+        // Add module and test
+        registry.addModule(address(allowingModule));
+        assertTrue(registry.isModule(address(allowingModule)));
+
+        // Remove module and test
+        registry.removeModule(address(allowingModule));
+        assertFalse(registry.isModule(address(allowingModule)));
+    }
+
+    function test_CanTransferWithType_SingleAllowingModule() public {
+        registry.addModule(address(allowingModule));
+        assertTrue(
+            registry.canTransferWithType(
+                address(1),
+                address(2),
+                100,
+                TxType.wrap(1)
+            )
+        );
+    }
+
+    function test_CanTransferWithType_SingleDenyingModule() public {
+        registry.addModule(address(denyingModule));
+        assertFalse(
+            registry.canTransferWithType(
+                address(1),
+                address(2),
+                100,
+                TxType.wrap(1)
+            )
+        );
+    }
+
+    function test_CanTransferWithType_MultipleModules() public {
+        registry.addModule(address(allowingModule));
+        registry.addModule(address(denyingModule));
+        assertFalse(
+            registry.canTransferWithType(
+                address(1),
+                address(2),
+                100,
+                TxType.wrap(1)
+            )
+        );
+    }
+
+    function test_CanTransferWithTypeAndFailureReason_SingleAllowingModule()
+        public
+    {
+        registry.addModule(address(allowingModule));
+        (bool success, string memory reason) = registry
+            .canTransferWithTypeAndFailureReason(
+                address(1),
+                address(2),
+                100,
+                TxType.wrap(1)
+            );
+        assertTrue(success);
+        assertEq(reason, "");
+    }
+
+    function test_CanTransferWithTypeAndFailureReason_SingleDenyingModule()
+        public
+    {
+        registry.addModule(address(denyingModule));
+        (bool success, string memory reason) = registry
+            .canTransferWithTypeAndFailureReason(
+                address(1),
+                address(2),
+                100,
+                TxType.wrap(1)
+            );
+        assertFalse(success);
+        assertEq(reason, "Transfer not allowed");
+    }
+
+    function test_CanTransferWithTypeAndFailureReason_MultipleModules() public {
+        registry.addModule(address(allowingModule));
+        registry.addModule(address(denyingModule));
+        (bool success, string memory reason) = registry
+            .canTransferWithTypeAndFailureReason(
+                address(1),
+                address(2),
+                100,
+                TxType.wrap(1)
+            );
+        assertFalse(success);
+        assertEq(reason, "Transfer not allowed");
+    }
+
+    function test_AddModule_RevertInvalidInterface_NonContract() public {
+        // Test with EOA address - should revert because EOA cannot implement interface
+        address eoa = makeAddr("eoa");
+        vm.expectRevert(); // EOA will cause a generic revert when trying to call supportsInterface
+        registry.addModule(eoa);
     }
 }

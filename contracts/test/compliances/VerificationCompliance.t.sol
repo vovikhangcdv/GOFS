@@ -4,7 +4,8 @@ pragma solidity ^0.8.20;
 import {Test} from "forge-std/Test.sol";
 import {VerificationCompliance} from "../../src/compliances/VerificationCompliance.sol";
 import {EntityRegistry} from "../../src/EntityRegistry.sol";
-import {Entity, EntityType} from "../../src/interfaces/ITypes.sol";
+import {Entity, EntityType, TxType} from "../../src/interfaces/ITypes.sol";
+import {ICompliance} from "../../src/interfaces/ICompliance.sol";
 
 contract VerificationComplianceTest is Test {
     VerificationCompliance public complianceModule;
@@ -197,5 +198,136 @@ contract VerificationComplianceTest is Test {
             .canTransferWithFailureReason(unverifiedEntity, address(0), 100);
         assertFalse(success);
         assertEq(reason, "Sender for burning is not a verified entity");
+    }
+
+    function test_SupportsInterface() public {
+        // Test ICompliance interface
+        assertTrue(
+            complianceModule.supportsInterface(type(ICompliance).interfaceId)
+        );
+
+        // Test invalid interface
+        assertFalse(complianceModule.supportsInterface(0x12345678));
+    }
+
+    function test_CanTransferWithType_BothVerified() public {
+        assertTrue(
+            complianceModule.canTransferWithType(
+                verifiedEntity1,
+                verifiedEntity2,
+                100,
+                TxType.wrap(1)
+            )
+        );
+    }
+
+    function test_CanTransferWithType_UnverifiedSender() public {
+        assertFalse(
+            complianceModule.canTransferWithType(
+                unverifiedEntity,
+                verifiedEntity1,
+                100,
+                TxType.wrap(1)
+            )
+        );
+    }
+
+    function test_CanTransferWithType_UnverifiedRecipient() public {
+        assertFalse(
+            complianceModule.canTransferWithType(
+                verifiedEntity1,
+                unverifiedEntity,
+                100,
+                TxType.wrap(1)
+            )
+        );
+    }
+
+    function test_CanTransferWithType_MintingAndBurning() public {
+        // Test typed minting (from zero address)
+        assertTrue(
+            complianceModule.canTransferWithType(
+                address(0),
+                verifiedEntity1,
+                100,
+                TxType.wrap(1)
+            )
+        );
+
+        // Test typed burning (to zero address)
+        assertTrue(
+            complianceModule.canTransferWithType(
+                verifiedEntity1,
+                address(0),
+                100,
+                TxType.wrap(1)
+            )
+        );
+    }
+
+    function test_CanTransferWithTypeAndFailureReason_BothVerified() public {
+        (bool success, string memory reason) = complianceModule
+            .canTransferWithTypeAndFailureReason(
+                verifiedEntity1,
+                verifiedEntity2,
+                100,
+                TxType.wrap(1)
+            );
+        assertTrue(success);
+        assertEq(reason, "");
+    }
+
+    function test_CanTransferWithTypeAndFailureReason_UnverifiedSender()
+        public
+    {
+        (bool success, string memory reason) = complianceModule
+            .canTransferWithTypeAndFailureReason(
+                unverifiedEntity,
+                verifiedEntity1,
+                100,
+                TxType.wrap(1)
+            );
+        assertFalse(success);
+        assertEq(reason, "Sender is not a verified entity");
+    }
+
+    function test_CanTransferWithTypeAndFailureReason_UnverifiedRecipient()
+        public
+    {
+        (bool success, string memory reason) = complianceModule
+            .canTransferWithTypeAndFailureReason(
+                verifiedEntity1,
+                unverifiedEntity,
+                100,
+                TxType.wrap(1)
+            );
+        assertFalse(success);
+        assertEq(reason, "Recipient is not a verified entity");
+    }
+
+    function test_CanTransferWithTypeAndFailureReason_MintingAndBurning()
+        public
+    {
+        // Test typed minting
+        (bool canMint, string memory mintReason) = complianceModule
+            .canTransferWithTypeAndFailureReason(
+                address(0),
+                verifiedEntity1,
+                100,
+                TxType.wrap(1)
+            );
+        assertTrue(canMint);
+        assertEq(mintReason, "");
+
+        // Test typed burning
+        (bool canBurn, string memory burnReason) = complianceModule
+            .canTransferWithTypeAndFailureReason(
+                verifiedEntity1,
+                address(0),
+                100,
+                TxType.wrap(1)
+            );
+        assertTrue(canBurn);
+        assertEq(burnReason, "");
     }
 }

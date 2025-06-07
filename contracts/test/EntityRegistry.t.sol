@@ -6,6 +6,7 @@ import {EntityRegistry} from "../src/EntityRegistry.sol";
 import {Entity, EntityType} from "../src/interfaces/ITypes.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MerkleLibrary} from "../src/libraries/MerkleLibrary.sol";
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 
 contract EntityRegistryTest is Test {
     EntityRegistry public registry;
@@ -18,7 +19,6 @@ contract EntityRegistryTest is Test {
     // Test Entity data
     string constant TEST_ENTITY_NAME = "Test Entity";
     string constant TEST_ENTITY_INFO = "Test Entity Info";
-
 
     string constant TEST_ENTITY_INFO_ID_NUMBER = "083200000000";
     string constant TEST_ENTITY_INFO_BIRTHDAY = "1990-01-01";
@@ -430,14 +430,26 @@ contract EntityRegistryTest is Test {
         Entity memory entity = Entity({
             entityAddress: entityAddress,
             entityType: TEST_ENTITY_TYPE,
-            entityData: _encodeEntityDataWithMerkleRoot(TEST_ENTITY_NAME, _getTestEntityInfo()),
+            entityData: _encodeEntityDataWithMerkleRoot(
+                TEST_ENTITY_NAME,
+                _getTestEntityInfo()
+            ),
             verifier: verifier
         });
 
         bytes memory signature = _signEntity(verifierPrivateKey, entity);
 
         vm.prank(entityAddress);
-        registry.register(entity, signature);
+        // registry.register(entity, signature);
+        // call raw
+        (bool success, bytes memory data) = address(registry).call(
+            abi.encodeWithSelector(
+                registry.register.selector,
+                entity,
+                signature
+            )
+        );
+        assertTrue(success);
 
         assertTrue(registry.isVerifiedEntity(entityAddress));
     }
@@ -531,5 +543,106 @@ contract EntityRegistryTest is Test {
         string[] memory infos
     ) internal pure returns (bytes memory) {
         return abi.encode(name, MerkleLibrary.calculateInfoRoot(infos));
+    }
+
+    function test_DomainSeparator() public {
+        bytes32 domainSeparator = registry.domainSeparator();
+        assertNotEq(domainSeparator, bytes32(0));
+
+        // Domain separator should be consistent
+        assertEq(domainSeparator, registry.domainSeparator());
+    }
+
+    function test_ForwardRegister() public {
+        Entity memory entity = Entity({
+            entityAddress: entityAddress,
+            entityType: TEST_ENTITY_TYPE,
+            entityData: _encodeEntityData(TEST_ENTITY_NAME, TEST_ENTITY_INFO),
+            verifier: verifier
+        });
+
+        bytes memory signature = _signEntity(verifierPrivateKey, entity);
+
+        // Admin can forward register for any entity
+        vm.prank(admin);
+        registry.forwardRegister(entity, signature);
+
+        assertTrue(registry.isVerifiedEntity(entityAddress));
+
+        // Verify the entity was stored correctly
+        Entity memory storedEntity = registry.getEntity(entityAddress);
+        assertEq(storedEntity.entityAddress, entity.entityAddress);
+        assertEq(
+            EntityType.unwrap(storedEntity.entityType),
+            EntityType.unwrap(entity.entityType)
+        );
+        assertEq(storedEntity.verifier, entity.verifier);
+    }
+
+    function test_ForwardRegister_Unauthorized() public {
+        Entity memory entity = Entity({
+            entityAddress: entityAddress,
+            entityType: TEST_ENTITY_TYPE,
+            entityData: _encodeEntityData(TEST_ENTITY_NAME, TEST_ENTITY_INFO),
+            verifier: verifier
+        });
+
+        bytes memory signature = _signEntity(verifierPrivateKey, entity);
+
+        // Create a test account for unauthorized access
+        address unauthorizedCaller = makeAddr("unauthorizedCaller");
+
+        // Use unauthorizedCaller as the unauthorized caller
+        vm.prank(unauthorizedCaller);
+        vm.expectPartialRevert(
+            IAccessControl.AccessControlUnauthorizedAccount.selector
+        );
+        registry.forwardRegister(entity, signature);
+    }
+
+    function test_ForwardRegister_AlreadyRegistered() public {
+        Entity memory entity = Entity({
+            entityAddress: entityAddress,
+            entityType: TEST_ENTITY_TYPE,
+            entityData: _encodeEntityData(TEST_ENTITY_NAME, TEST_ENTITY_INFO),
+            verifier: verifier
+        });
+
+        bytes memory signature = _signEntity(verifierPrivateKey, entity);
+
+        // First registration via normal register
+        vm.prank(entityAddress);
+        registry.register(entity, signature);
+
+        // Try to forward register the same entity
+        vm.prank(admin);
+        vm.expectRevert(EntityRegistry.EntityAlreadyRegistered.selector);
+        registry.forwardRegister(entity, signature);
+    }
+
+    function test_VerifyInfo_InvalidProof() public {
+        // Register entity with merkle root
+        string[] memory infos = _getTestEntityInfo();
+        bytes32[] memory tree = MerkleLibrary.buildTree(infos);
+        bytes32 root = tree[0];
+
+        Entity memory entity = Entity({
+            entityAddress: entityAddress,
+            entityType: TEST_ENTITY_TYPE,
+            entityData: abi.encode(TEST_ENTITY_NAME, root),
+            verifier: verifier
+        });
+
+        bytes memory signature = _signEntity(verifierPrivateKey, entity);
+
+        vm.prank(entityAddress);
+        registry.register(entity, signature);
+
+        // Try to verify with wrong info hash
+        bytes32 wrongHashedInfo = keccak256(abi.encodePacked("wrong info"));
+        bytes32[] memory proof = MerkleLibrary.getProof(tree, 0);
+
+        // Should return false for wrong info
+        assertFalse(registry.verifyInfo(entity, wrongHashedInfo, proof));
     }
 }
