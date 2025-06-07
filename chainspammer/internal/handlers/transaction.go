@@ -15,6 +15,7 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/vovikhangcdv/GOFS/chainspammer/internal/config"
 	entityRegistry "github.com/vovikhangcdv/GOFS/chainspammer/internal/generated_contracts/entity_registry"
+	localtypes "github.com/vovikhangcdv/GOFS/chainspammer/internal/types"
 	"github.com/vovikhangcdv/GOFS/chainspammer/internal/utils"
 )
 
@@ -24,6 +25,7 @@ var (
 	typeUint8, _    = abi.NewType("uint8", "", nil)
 	typeAddress, _  = abi.NewType("address", "", nil)
 	typeBytes, _    = abi.NewType("bytes", "", nil)
+	typeString, _   = abi.NewType("string", "", nil)
 )
 
 func AirdropGas(config *config.Config, addr common.Address) (common.Hash, error) {
@@ -43,7 +45,7 @@ func AirdropGasIfNeeded(config *config.Config, addr common.Address) (common.Hash
 	if err != nil {
 		return common.Hash{}, err
 	}
-	if balance.Cmp(big.NewInt(int64(float64(params.Ether) * 0.1))) == 0 {
+	if balance.Cmp(big.NewInt(int64(float64(params.Ether)*0.1))) == 0 {
 		return AirdropGas(config, addr)
 	}
 	return common.Hash{}, nil
@@ -104,13 +106,13 @@ func SendRegisterEntityTx(config *config.Config, skUser *ecdsa.PrivateKey, isUse
 		return common.Hash{}, err
 	}
 	opts := &bind.TransactOpts{
-		GasLimit:  500_000,
-		NoSend:    true,
+		GasLimit: 500_000,
+		NoSend:   true,
 		Signer: func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
 			return tx, nil
 		},
 	}
-	tx, entityType, err := createRegisterTx(config, opts, skVerifier, skUser)
+	tx, entityData, entityType, err := createRegisterTx(config, opts, skVerifier, skUser)
 	if err != nil {
 		return common.Hash{}, err
 	}
@@ -120,6 +122,8 @@ func SendRegisterEntityTx(config *config.Config, skUser *ecdsa.PrivateKey, isUse
 		return common.Hash{}, err
 	}
 	log.Println("Registered Address: ", crypto.PubkeyToAddress(skUser.PublicKey).Hex(), " entity_type: ", entityType, " tx_hash: ", txHash.Hex())
+
+	log.Println("Entity Info: Name=", entityData.Name, " IDNumber=", entityData.IDNumber, " Birthday=", entityData.Birthday, " Gender=", entityData.Gender, " Email=", entityData.Email, " Phone=", entityData.Phone, " Address=", entityData.Address, " Nationality=", entityData.Nationality, " Others=", entityData.Others)
 
 	if _, err := AirdropVND(config, crypto.PubkeyToAddress(skUser.PublicKey), big.NewInt(10_000_000)); err != nil {
 		return common.Hash{}, err
@@ -231,8 +235,8 @@ func SendTransferEVNDRandomAmountTx(config *config.Config, skFrom *ecdsa.Private
 
 func sendTransferEVNDTx(config *config.Config, sk *ecdsa.PrivateKey, to common.Address, value *big.Int, isUseRPC bool) (common.Hash, error) {
 	opts := &bind.TransactOpts{
-		GasLimit:  500_000,
-		NoSend:    true,
+		GasLimit: 500_000,
+		NoSend:   true,
 		Signer: func(_ common.Address, tx *types.Transaction) (*types.Transaction, error) {
 			return tx, nil
 		},
@@ -278,33 +282,55 @@ func hashEntity(domainSeparator string, entity entityRegistry.Entity) common.Has
 	return crypto.Keccak256Hash(buf)
 }
 
-func createRegisterTx(config *config.Config, opts *bind.TransactOpts, skVerifier *ecdsa.PrivateKey, skUser *ecdsa.PrivateKey) (*types.Transaction, uint8, error) {
+func createRegisterTx(config *config.Config, opts *bind.TransactOpts, skVerifier *ecdsa.PrivateKey, skUser *ecdsa.PrivateKey) (*types.Transaction, localtypes.EntityData, uint8, error) {
+	entityData, err := utils.GetRandomEntityData(config.EntityDataPath)
+	if err != nil {
+		return nil, localtypes.EntityData{}, 0, err
+	}
+	structType, _ := abi.NewType("tuple(string name, bytes32 root)", "", []abi.ArgumentMarshaling{
+		{Name: "name", Type: "string"},
+		{Name: "root", Type: "bytes32"},
+	})
+	arguments := abi.Arguments{
+		{Type: structType},
+	}
+	structValue := struct {
+		Name string
+		Root [32]byte
+	}{
+		Name: entityData.Name,
+		Root: common.HexToHash(entityData.Root),
+	}
+	structAbiEncoded, err := arguments.Pack(structValue)
+	if err != nil {
+		return nil, localtypes.EntityData{}, 0, err
+	}
 	entity := entityRegistry.Entity{
 		EntityAddress: crypto.PubkeyToAddress(skUser.PublicKey),
 		EntityType:    utils.GetRandomEntityType(),
-		EntityData:    utils.RandomCallData(32),
+		EntityData:    structAbiEncoded,
 		Verifier:      crypto.PubkeyToAddress(skVerifier.PublicKey),
 	}
 
 	domainSeparator, err := config.SystemContracts.EntityRegistry.DomainSeparator(&bind.CallOpts{})
 	if err != nil {
-		return nil, 0, err
+		return nil, localtypes.EntityData{}, 0, err
 	}
 
 	hash := hashEntity(common.Bytes2Hex(domainSeparator[:]), entity)
 
 	signature, err := crypto.Sign(hash.Bytes(), skVerifier)
 	if err != nil {
-		return nil, 0, err
+		return nil, localtypes.EntityData{}, 0, err
 	}
 	signature[64] += 27
 
 	tx, err := config.SystemContracts.EntityRegistry.Register(opts, entity, signature)
 
 	if err != nil {
-		return nil, 0, err
+		return nil, localtypes.EntityData{}, 0, err
 	}
-	return tx, entity.EntityType, nil
+	return tx, entityData, entity.EntityType, nil
 }
 
 func isValidAmount(config *config.Config, token0, token1 common.Address, amount *big.Int) bool {

@@ -31,6 +31,7 @@ type Config struct {
 	Blacklisters    []*ecdsa.PrivateKey
 	Keys            []*ecdsa.PrivateKey
 	MaxKeys         int
+	EntityDataPath  string
 	DelayTime       int64
 	Wallet          *hdwallet.Wallet
 	Seed            int64
@@ -227,6 +228,7 @@ func NewConfigFromContext(c *cli.Context) (*Config, error) {
 			Weight: c.Int("suspicious-address-interactions.weight"),
 		},
 	}
+	entityDataPath := c.String("entity-data-path")
 
 	systemContracts := types.SystemContracts{
 		EntityRegistry:            entityRegistry,
@@ -259,6 +261,7 @@ func NewConfigFromContext(c *cli.Context) (*Config, error) {
 		SendEVNDWeight:       c.Int("send-evnd.weight"),
 		ExchangeVNDUSDWeight: c.Int("exchange-vnd-usd.weight"),
 		EventsConfig:         eventsConfig,
+		EntityDataPath:       entityDataPath,
 	}
 	return config, nil
 }

@@ -83,3 +83,16 @@ type SystemContracts struct {
 	ExchangePortal *exchangePortal.ExchangePortal
 	ExchangePortalAddress common.Address
 }
+
+type EntityData struct {
+	Name        string
+	IDNumber    string
+	Birthday    string
+	Gender      string
+	Email       string
+	Phone       string
+	Address     string
+	Nationality string
+	Others      string
+	Root        string
+}
