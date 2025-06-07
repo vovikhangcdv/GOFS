@@ -97,8 +97,6 @@ graph TB
     DeFiLayer <-->|Global Liquidity| External
 ```
 
-osystems through compliance-enforce## 🔗 Technical Architecture
-
 ### 🛠 Core Components
 
 | Component             | Function              | Key Features                                     |
