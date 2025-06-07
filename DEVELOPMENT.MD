@@ -16,17 +16,8 @@ gofs/
 ## 🔧 Basic Setup
 
 ```bash
-# Clone and setup
-git clone <repository-url>
-cd gofs
-
-# Deploy contracts locally
-cd contracts
-anvil  # In separate terminal
-
 # starting blockchain
 anvil
-
 # starting contracts
 cd contracts/ && forge script script/SimpleDeployAll.s.sol:SimpleDeployAll --rpc-url 127.0.0.1:8545 --broadcast
 
