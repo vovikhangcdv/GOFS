@@ -77,12 +77,8 @@ func AirdropVNDIfNeeded(config *config.Config, receiver common.Address) (*big.In
 	return balance, nil
 }
 
-func SendRegisterEntityTx(config *config.Config) (common.Hash, error) {
+func SendRegisterEntityTx(config *config.Config, skUser *ecdsa.PrivateKey) (common.Hash, error) {
 	skVerifier := config.GetRandomVerifier()
-	skUser, err := config.GetNewKey()
-	if err != nil {
-		return common.Hash{}, err
-	}
 	isVerified, err := config.SystemContracts.EntityRegistry.IsVerifiedEntity(&bind.CallOpts{}, crypto.PubkeyToAddress(skUser.PublicKey))
 	if err != nil {
 		return common.Hash{}, err
@@ -96,7 +92,7 @@ func SendRegisterEntityTx(config *config.Config) (common.Hash, error) {
 		return common.Hash{}, err
 	}
 	opts := &bind.TransactOpts{
-		GasLimit:  5_000_000,
+		GasLimit:  500_000,
 		NoSend:    true,
 		Signer: func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
 			return tx, nil
@@ -156,7 +152,7 @@ func SendExchangeVNDToUSDTx(config *config.Config, skFrom *ecdsa.PrivateKey) (co
 	}
 
 	opts := &bind.TransactOpts{
-		GasLimit: 30_000_000,
+		GasLimit: 500_000,
 		NoSend:   true,
 		Signer: func(_ common.Address, tx *types.Transaction) (*types.Transaction, error) {
 			return tx, nil

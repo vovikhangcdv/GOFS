@@ -60,7 +60,6 @@ func (c *Config) GetNewKey() (*ecdsa.PrivateKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.Keys = append(c.Keys, key)
 	return key, nil
 }
 

@@ -23,10 +23,16 @@ func Spam(config *config.Config) (common.Hash, error) {
 	switch txType {
 	case "register_entity":
 		log.Println("🆕👤 Registering entity")
-		txHash, err = SendRegisterEntityTx(config)
+		skUser, err := config.GetNewKey()
 		if err != nil {
 			return common.Hash{}, err
 		}
+		txHash, err = SendRegisterEntityTx(config, skUser)
+		if err != nil {
+			return common.Hash{}, err
+		}
+		config.Keys = append(config.Keys, skUser)
+		log.Println("Total users: ", len(config.Keys))
 	case "send_evnd":
 		log.Println("💸 Sending EVND")
 		if len(config.Keys) < 2 {
