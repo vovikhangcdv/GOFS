@@ -454,6 +454,17 @@ contract EntityRegistryTest is Test {
         assertTrue(registry.isVerifiedEntity(entityAddress));
     }
 
+    function test_getName_after_register() public {
+        test_RegisterEntity_WithMerkleRoot();
+
+        (string memory entityName, ) = abi.decode(
+            registry.getEntity(entityAddress).entityData,
+            (string, bytes32)
+        );
+        console.log("entityName", entityName);
+        assertEq(entityName, TEST_ENTITY_NAME);
+    }
+
     function test_VerifyInfo_ValidProof(uint256 index) public {
         vm.assume(index < _getTestEntityInfo().length);
 
