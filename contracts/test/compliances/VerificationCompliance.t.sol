@@ -42,7 +42,8 @@ contract VerificationComplianceTest is Test {
         entityRegistry.addVerifier(verifier, allowedTypes);
 
         // Deploy compliance module
-        complianceModule = new VerificationCompliance(address(entityRegistry));
+        complianceModule = new VerificationCompliance();
+        complianceModule.initialize(address(entityRegistry));
         vm.stopPrank();
 
         // Register two verified entities
@@ -95,18 +96,22 @@ contract VerificationComplianceTest is Test {
         entityRegistry.register(entity, signature);
     }
 
-    function test_Constructor() public {
-        // Test constructor with zero address
+    function testConstructor() public {
+        // Test valid initialization
+        VerificationCompliance newCompliance = new VerificationCompliance();
+        newCompliance.initialize(address(entityRegistry));
+        assertEq(
+            address(newCompliance.entityRegistry()),
+            address(entityRegistry)
+        );
+    }
+
+    function testConstructorWithZeroAddress() public {
+        VerificationCompliance newCompliance = new VerificationCompliance();
         vm.expectRevert(
             VerificationCompliance.InvalidEntityRegistryAddress.selector
         );
-        new VerificationCompliance(address(0));
-
-        // Test constructor success
-        assertEq(
-            address(complianceModule.entityRegistry()),
-            address(entityRegistry)
-        );
+        newCompliance.initialize(address(0));
     }
 
     function test_CanTransfer_MintingAndBurning() public {

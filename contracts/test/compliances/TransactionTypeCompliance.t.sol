@@ -116,7 +116,8 @@ contract TransactionTypeComplianceTest is Test {
         entityRegistry = new EntityRegistry();
 
         // Deploy compliance contract
-        compliance = new TransactionTypeCompliance(address(entityRegistry));
+        compliance = new TransactionTypeCompliance();
+        compliance.initialize(address(entityRegistry));
 
         // Grant TX_TYPE_ADMIN_ROLE to txTypeAdmin
         compliance.grantRole(compliance.TX_TYPE_ADMIN_ROLE(), txTypeAdmin);
@@ -133,10 +134,9 @@ contract TransactionTypeComplianceTest is Test {
     }
 
     function testConstructor() public {
-        // Test valid constructor
-        TransactionTypeCompliance newCompliance = new TransactionTypeCompliance(
-            address(entityRegistry)
-        );
+        // Test valid initialization
+        TransactionTypeCompliance newCompliance = new TransactionTypeCompliance();
+        newCompliance.initialize(address(entityRegistry));
         assertEq(
             address(newCompliance.entityRegistry()),
             address(entityRegistry)
@@ -158,10 +158,11 @@ contract TransactionTypeComplianceTest is Test {
     }
 
     function testConstructorWithZeroAddress() public {
+        TransactionTypeCompliance newCompliance = new TransactionTypeCompliance();
         vm.expectRevert(
             TransactionTypeCompliance.InvalidEntityRegistryAddress.selector
         );
-        new TransactionTypeCompliance(address(0));
+        newCompliance.initialize(address(0));
     }
 
     function testSupportsInterface() public view {

@@ -28,20 +28,24 @@ contract EntityTypeComplianceTest is Test {
     );
 
     function setUp() public {
-        // Setup verifier from private key
-        _verifier = vm.addr(VERIFIER_PRIVATE_KEY);
+        // Set up accounts
+        admin = makeAddr("admin");
+        alice = makeAddr("alice");
+        bob = makeAddr("bob");
 
-        // Deploy and set up EntityRegistry
         vm.startPrank(admin);
 
+        // Deploy registry
         entityRegistry = new EntityRegistry();
 
-        // Deploy EntityTypeCompliance with EntityRegistry
-        compliance = new EntityTypeCompliance(address(entityRegistry));
+        // Deploy compliance module
+        compliance = new EntityTypeCompliance();
+        compliance.initialize(address(entityRegistry));
 
         // Setup roles
         compliance.grantRole(compliance.DEFAULT_ADMIN_ROLE(), admin);
         compliance.grantRole(compliance.COMPLIANCE_ADMIN_ROLE(), admin);
+
         vm.stopPrank();
     }
 
@@ -313,11 +317,12 @@ contract EntityTypeComplianceTest is Test {
     }
 
     // Test invalid entity registry address
-    function test_ConstructorZeroAddress() public {
+    function testConstructorWithZeroAddress() public {
+        EntityTypeCompliance newCompliance = new EntityTypeCompliance();
         vm.expectRevert(
             EntityTypeCompliance.InvalidEntityRegistryAddress.selector
         );
-        new EntityTypeCompliance(address(0));
+        newCompliance.initialize(address(0));
     }
 
     // Test disallowed transfer between types

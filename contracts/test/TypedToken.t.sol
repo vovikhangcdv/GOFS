@@ -71,7 +71,8 @@ contract TypedTokenTest is Test {
 
         vm.startPrank(owner);
         compliance = new SimpleCompliance();
-        token = new CompliantToken("Typed Token", "TYPED", address(compliance));
+        token = new CompliantToken();
+        token.initialize("Typed Token", "TYPED", address(compliance));
         vm.stopPrank();
     }
 

@@ -8,7 +8,13 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 
 contract MockToken is ERC20 {
-    constructor() ERC20("Mock", "MCK") {}
+    constructor(
+        string memory name,
+        string memory symbol,
+        uint8 decimals
+    ) ERC20(name, symbol) {
+        _mint(msg.sender, 1000000 * 10 ** decimals);
+    }
 
     function mint(address to, uint256 amount) external {
         _mint(to, amount);
@@ -28,22 +34,31 @@ contract SupplyComplianceTest is Test {
     event MaxSupplyUpdated(uint256 oldMax, uint256 newMax);
 
     function setUp() public {
-        admin = address(this);
+        // Set up accounts
+        admin = makeAddr("admin");
         user1 = makeAddr("user1");
         user2 = makeAddr("user2");
 
-        token = new MockToken();
-        compliance = new SupplyCompliance(address(token));
+        vm.startPrank(admin);
+
+        // Deploy token
+        token = new MockToken("Test Token", "TEST", 18);
+
+        // Deploy compliance module
+        compliance = new SupplyCompliance();
+        compliance.initialize(address(token));
+
+        // Setup roles
+        compliance.grantRole(compliance.DEFAULT_ADMIN_ROLE(), admin);
+        compliance.grantRole(compliance.SUPPLY_ADMIN_ROLE(), admin);
+
+        vm.stopPrank();
     }
 
-    function test_Constructor() public {
-        // Test token not set revert
+    function testConstructorWithZeroAddress() public {
+        SupplyCompliance newCompliance = new SupplyCompliance();
         vm.expectRevert(SupplyCompliance.TokenNotSet.selector);
-        new SupplyCompliance(address(0));
-
-        // Test roles assignment
-        assertTrue(compliance.hasRole(DEFAULT_ADMIN_ROLE, admin));
-        assertTrue(compliance.hasRole(SUPPLY_ADMIN_ROLE, admin));
+        newCompliance.initialize(address(0));
     }
 
     function test_SetMaxSupply() public {

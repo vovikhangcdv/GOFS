@@ -122,20 +122,24 @@ contract CompliantTokenTest is Test {
 
         vm.startPrank(owner);
         compliance = new MockCompliance();
-        token = new CompliantToken("Test Token", "TEST", address(compliance));
+        token = new CompliantToken();
+        token.initialize("Test Token", "TEST", address(compliance));
         vm.stopPrank();
     }
 
     function test_Constructor() public {
-        assertEq(token.name(), "Test Token");
-        assertEq(token.symbol(), "TEST");
-        assertEq(address(token.compliance()), address(compliance));
+        CompliantToken newToken = new CompliantToken();
+        newToken.initialize("Test Token", "TEST", address(compliance));
+        assertEq(newToken.name(), "Test Token");
+        assertEq(newToken.symbol(), "TEST");
+        assertEq(address(newToken.compliance()), address(compliance));
     }
 
     function test_ConstructorRevertsOnZeroComplianceAddress() public {
         vm.startPrank(owner);
+        CompliantToken newToken = new CompliantToken();
         vm.expectRevert(CompliantToken.ZeroAddressCompliance.selector);
-        new CompliantToken("Test Token", "TEST", address(0));
+        newToken.initialize("Test Token", "TEST", address(0));
         vm.stopPrank();
     }
 

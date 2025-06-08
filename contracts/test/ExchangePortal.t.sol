@@ -64,7 +64,8 @@ contract ExchangePortalTest is Test {
         token1 = new MockToken("Token1", "TK1");
 
         // Deploy portal
-        portal = new ExchangePortal(
+        portal = new ExchangePortal();
+        portal.initialize(
             address(token0),
             address(token1),
             INITIAL_RATE,
@@ -284,8 +285,9 @@ contract ExchangePortalTest is Test {
     }
 
     function test_RevertOnConstructorZeroAddress() public {
+        ExchangePortal testPortal = new ExchangePortal();
         vm.expectRevert(ExchangePortal.ZeroAddress.selector);
-        new ExchangePortal(
+        testPortal.initialize(
             address(0),
             address(token1),
             INITIAL_RATE,
@@ -293,8 +295,9 @@ contract ExchangePortalTest is Test {
             INITIAL_FEE
         );
 
+        testPortal = new ExchangePortal();
         vm.expectRevert(ExchangePortal.ZeroAddress.selector);
-        new ExchangePortal(
+        testPortal.initialize(
             address(token0),
             address(0),
             INITIAL_RATE,
@@ -302,8 +305,9 @@ contract ExchangePortalTest is Test {
             INITIAL_FEE
         );
 
+        testPortal = new ExchangePortal();
         vm.expectRevert(ExchangePortal.ZeroAddress.selector);
-        new ExchangePortal(
+        testPortal.initialize(
             address(token0),
             address(token1),
             INITIAL_RATE,
@@ -313,8 +317,9 @@ contract ExchangePortalTest is Test {
     }
 
     function test_RevertOnConstructorSameTokens() public {
+        ExchangePortal testPortal = new ExchangePortal();
         vm.expectRevert(ExchangePortal.TokensMustBeDifferent.selector);
-        new ExchangePortal(
+        testPortal.initialize(
             address(token0),
             address(token0),
             INITIAL_RATE,
@@ -324,8 +329,9 @@ contract ExchangePortalTest is Test {
     }
 
     function test_RevertOnConstructorZeroRate() public {
+        ExchangePortal testPortal = new ExchangePortal();
         vm.expectRevert(ExchangePortal.InvalidInitialRate.selector);
-        new ExchangePortal(
+        testPortal.initialize(
             address(token0),
             address(token1),
             0,
@@ -335,8 +341,9 @@ contract ExchangePortalTest is Test {
     }
 
     function test_RevertOnConstructorFeeTooHigh() public {
+        ExchangePortal testPortal = new ExchangePortal();
         vm.expectRevert(ExchangePortal.FeeTooHigh.selector);
-        new ExchangePortal(
+        testPortal.initialize(
             address(token0),
             address(token1),
             INITIAL_RATE,
