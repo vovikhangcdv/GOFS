@@ -7,24 +7,62 @@ import {TxType} from "../interfaces/ITypes.sol";
 
 /**
  * @title AddressRestrictionCompliance
- * @dev Compliance module that implements address blacklisting functionality
+ * @dev Compliance module that implements address blacklisting functionality with reason tracking
  */
 contract AddressRestrictionCompliance is ICompliance, AccessControl {
     // Role for managing blacklist
     bytes32 public constant BLACKLIST_ADMIN_ROLE =
         keccak256("BLACKLIST_ADMIN_ROLE");
 
-    // Mappings to track blacklisted addresses
-    mapping(address => bool) private _blacklistedFrom; // blacklisted from sending
-    mapping(address => bool) private _blacklistedTo; // blacklisted from receiving
+    // Struct to store restriction information
+    struct RestrictionInfo {
+        bool isRestricted;
+        string reason;
+        uint256 timestamp;
+        address restrictedBy;
+    }
 
-    // Events
-    event AddressBlacklistedFrom(address indexed account);
-    event AddressUnblacklistedFrom(address indexed account);
-    event AddressBlacklistedTo(address indexed account);
-    event AddressUnblacklistedTo(address indexed account);
-    event AddressBlacklisted(address indexed account);
-    event AddressUnblacklisted(address indexed account);
+    // Mappings to track blacklisted addresses with detailed information
+    mapping(address => RestrictionInfo) private _restrictedFrom; // restricted from sending
+    mapping(address => RestrictionInfo) private _restrictedTo; // restricted from receiving
+
+    // Events with reason tracking
+    event AddressBlacklistedFrom(
+        address indexed account,
+        string reason,
+        address indexed restrictedBy,
+        uint256 timestamp
+    );
+    event AddressUnblacklistedFrom(
+        address indexed account,
+        string reason,
+        address indexed unrestrictedBy,
+        uint256 timestamp
+    );
+    event AddressBlacklistedTo(
+        address indexed account,
+        string reason,
+        address indexed restrictedBy,
+        uint256 timestamp
+    );
+    event AddressUnblacklistedTo(
+        address indexed account,
+        string reason,
+        address indexed unrestrictedBy,
+        uint256 timestamp
+    );
+    event AddressBlacklisted(
+        address indexed account,
+        string reason,
+        address indexed restrictedBy,
+        uint256 timestamp
+    );
+    event AddressUnblacklisted(
+        address indexed account,
+        string reason,
+        address indexed unrestrictedBy,
+        uint256 timestamp
+    );
 
     // Custom errors
     error AddressAlreadyBlacklistedFrom(address account);
@@ -33,6 +71,8 @@ contract AddressRestrictionCompliance is ICompliance, AccessControl {
     error AddressNotBlacklistedTo(address account);
     error ZeroAddress();
     error EmptyAddressList();
+    error EmptyReason();
+    error ArrayLengthMismatch();
 
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -52,132 +92,354 @@ contract AddressRestrictionCompliance is ICompliance, AccessControl {
     }
 
     /**
-     * @dev Add addresses to the blacklist for sending tokens
+     * @dev Add addresses to the blacklist for sending tokens with reasons
      * @param accounts The addresses to blacklist
+     * @param reasons The reasons for blacklisting (must match accounts length)
      */
-    function blacklistFrom(
-        address[] memory accounts
+    function blacklistFromWithReasons(
+        address[] memory accounts,
+        string[] memory reasons
     ) external onlyRole(BLACKLIST_ADMIN_ROLE) {
         if (accounts.length == 0) revert EmptyAddressList();
+        if (accounts.length != reasons.length) revert ArrayLengthMismatch();
 
         for (uint256 i = 0; i < accounts.length; i++) {
             address account = accounts[i];
+            string memory reason = reasons[i];
+
             if (account == address(0)) revert ZeroAddress();
-            if (_blacklistedFrom[account])
+            if (bytes(reason).length == 0) revert EmptyReason();
+            if (_restrictedFrom[account].isRestricted)
                 revert AddressAlreadyBlacklistedFrom(account);
 
-            _blacklistedFrom[account] = true;
-            emit AddressBlacklistedFrom(account);
+            _restrictedFrom[account] = RestrictionInfo({
+                isRestricted: true,
+                reason: reason,
+                timestamp: block.timestamp,
+                restrictedBy: msg.sender
+            });
+
+            emit AddressBlacklistedFrom(
+                account,
+                reason,
+                msg.sender,
+                block.timestamp
+            );
         }
     }
 
     /**
-     * @dev Add addresses to the blacklist for receiving tokens
+     * @dev Add addresses to the blacklist for sending tokens with a single reason
      * @param accounts The addresses to blacklist
+     * @param reason The reason for blacklisting all addresses
      */
-    function blacklistTo(
-        address[] memory accounts
+    function blacklistFrom(
+        address[] memory accounts,
+        string memory reason
     ) external onlyRole(BLACKLIST_ADMIN_ROLE) {
         if (accounts.length == 0) revert EmptyAddressList();
+        if (bytes(reason).length == 0) revert EmptyReason();
 
         for (uint256 i = 0; i < accounts.length; i++) {
             address account = accounts[i];
             if (account == address(0)) revert ZeroAddress();
-            if (_blacklistedTo[account])
+            if (_restrictedFrom[account].isRestricted)
+                revert AddressAlreadyBlacklistedFrom(account);
+
+            _restrictedFrom[account] = RestrictionInfo({
+                isRestricted: true,
+                reason: reason,
+                timestamp: block.timestamp,
+                restrictedBy: msg.sender
+            });
+
+            emit AddressBlacklistedFrom(
+                account,
+                reason,
+                msg.sender,
+                block.timestamp
+            );
+        }
+    }
+
+    /**
+     * @dev Add addresses to the blacklist for receiving tokens with reasons
+     * @param accounts The addresses to blacklist
+     * @param reasons The reasons for blacklisting (must match accounts length)
+     */
+    function blacklistToWithReasons(
+        address[] memory accounts,
+        string[] memory reasons
+    ) external onlyRole(BLACKLIST_ADMIN_ROLE) {
+        if (accounts.length == 0) revert EmptyAddressList();
+        if (accounts.length != reasons.length) revert ArrayLengthMismatch();
+
+        for (uint256 i = 0; i < accounts.length; i++) {
+            address account = accounts[i];
+            string memory reason = reasons[i];
+
+            if (account == address(0)) revert ZeroAddress();
+            if (bytes(reason).length == 0) revert EmptyReason();
+            if (_restrictedTo[account].isRestricted)
                 revert AddressAlreadyBlacklistedTo(account);
 
-            _blacklistedTo[account] = true;
-            emit AddressBlacklistedTo(account);
+            _restrictedTo[account] = RestrictionInfo({
+                isRestricted: true,
+                reason: reason,
+                timestamp: block.timestamp,
+                restrictedBy: msg.sender
+            });
+
+            emit AddressBlacklistedTo(
+                account,
+                reason,
+                msg.sender,
+                block.timestamp
+            );
         }
     }
 
     /**
-     * @dev Add addresses to both sending and receiving blacklists
+     * @dev Add addresses to the blacklist for receiving tokens with a single reason
      * @param accounts The addresses to blacklist
+     * @param reason The reason for blacklisting all addresses
+     */
+    function blacklistTo(
+        address[] memory accounts,
+        string memory reason
+    ) external onlyRole(BLACKLIST_ADMIN_ROLE) {
+        if (accounts.length == 0) revert EmptyAddressList();
+        if (bytes(reason).length == 0) revert EmptyReason();
+
+        for (uint256 i = 0; i < accounts.length; i++) {
+            address account = accounts[i];
+            if (account == address(0)) revert ZeroAddress();
+            if (_restrictedTo[account].isRestricted)
+                revert AddressAlreadyBlacklistedTo(account);
+
+            _restrictedTo[account] = RestrictionInfo({
+                isRestricted: true,
+                reason: reason,
+                timestamp: block.timestamp,
+                restrictedBy: msg.sender
+            });
+
+            emit AddressBlacklistedTo(
+                account,
+                reason,
+                msg.sender,
+                block.timestamp
+            );
+        }
+    }
+
+    /**
+     * @dev Add addresses to both sending and receiving blacklists with reasons
+     * @param accounts The addresses to blacklist
+     * @param reasons The reasons for blacklisting (must match accounts length)
+     */
+    function blacklistWithReasons(
+        address[] memory accounts,
+        string[] memory reasons
+    ) external onlyRole(BLACKLIST_ADMIN_ROLE) {
+        if (accounts.length == 0) revert EmptyAddressList();
+        if (accounts.length != reasons.length) revert ArrayLengthMismatch();
+
+        for (uint256 i = 0; i < accounts.length; i++) {
+            address account = accounts[i];
+            string memory reason = reasons[i];
+
+            if (account == address(0)) revert ZeroAddress();
+            if (bytes(reason).length == 0) revert EmptyReason();
+
+            RestrictionInfo memory restrictionInfo = RestrictionInfo({
+                isRestricted: true,
+                reason: reason,
+                timestamp: block.timestamp,
+                restrictedBy: msg.sender
+            });
+
+            if (!_restrictedFrom[account].isRestricted) {
+                _restrictedFrom[account] = restrictionInfo;
+                emit AddressBlacklistedFrom(
+                    account,
+                    reason,
+                    msg.sender,
+                    block.timestamp
+                );
+            }
+            if (!_restrictedTo[account].isRestricted) {
+                _restrictedTo[account] = restrictionInfo;
+                emit AddressBlacklistedTo(
+                    account,
+                    reason,
+                    msg.sender,
+                    block.timestamp
+                );
+            }
+
+            emit AddressBlacklisted(
+                account,
+                reason,
+                msg.sender,
+                block.timestamp
+            );
+        }
+    }
+
+    /**
+     * @dev Add addresses to both sending and receiving blacklists with a single reason
+     * @param accounts The addresses to blacklist
+     * @param reason The reason for blacklisting all addresses
      */
     function blacklist(
-        address[] memory accounts
+        address[] memory accounts,
+        string memory reason
     ) external onlyRole(BLACKLIST_ADMIN_ROLE) {
         if (accounts.length == 0) revert EmptyAddressList();
+        if (bytes(reason).length == 0) revert EmptyReason();
 
         for (uint256 i = 0; i < accounts.length; i++) {
             address account = accounts[i];
             if (account == address(0)) revert ZeroAddress();
 
-            if (!_blacklistedFrom[account]) {
-                _blacklistedFrom[account] = true;
-                emit AddressBlacklistedFrom(account);
+            RestrictionInfo memory restrictionInfo = RestrictionInfo({
+                isRestricted: true,
+                reason: reason,
+                timestamp: block.timestamp,
+                restrictedBy: msg.sender
+            });
+
+            if (!_restrictedFrom[account].isRestricted) {
+                _restrictedFrom[account] = restrictionInfo;
+                emit AddressBlacklistedFrom(
+                    account,
+                    reason,
+                    msg.sender,
+                    block.timestamp
+                );
             }
-            if (!_blacklistedTo[account]) {
-                _blacklistedTo[account] = true;
-                emit AddressBlacklistedTo(account);
+            if (!_restrictedTo[account].isRestricted) {
+                _restrictedTo[account] = restrictionInfo;
+                emit AddressBlacklistedTo(
+                    account,
+                    reason,
+                    msg.sender,
+                    block.timestamp
+                );
             }
-            emit AddressBlacklisted(account);
+
+            emit AddressBlacklisted(
+                account,
+                reason,
+                msg.sender,
+                block.timestamp
+            );
         }
     }
 
     /**
-     * @dev Remove addresses from the sending blacklist
+     * @dev Remove addresses from the sending blacklist with reason
      * @param accounts The addresses to remove from blacklist
+     * @param reason The reason for unrestricting
      */
     function unblacklistFrom(
-        address[] memory accounts
+        address[] memory accounts,
+        string memory reason
     ) external onlyRole(BLACKLIST_ADMIN_ROLE) {
         if (accounts.length == 0) revert EmptyAddressList();
+        if (bytes(reason).length == 0) revert EmptyReason();
 
         for (uint256 i = 0; i < accounts.length; i++) {
             address account = accounts[i];
             if (account == address(0)) revert ZeroAddress();
 
-            if (_blacklistedFrom[account]) {
-                _blacklistedFrom[account] = false;
-                emit AddressUnblacklistedFrom(account);
+            if (_restrictedFrom[account].isRestricted) {
+                delete _restrictedFrom[account];
+                emit AddressUnblacklistedFrom(
+                    account,
+                    reason,
+                    msg.sender,
+                    block.timestamp
+                );
             }
         }
     }
 
     /**
-     * @dev Remove addresses from the receiving blacklist
+     * @dev Remove addresses from the receiving blacklist with reason
      * @param accounts The addresses to remove from blacklist
+     * @param reason The reason for unrestricting
      */
     function unblacklistTo(
-        address[] memory accounts
+        address[] memory accounts,
+        string memory reason
     ) external onlyRole(BLACKLIST_ADMIN_ROLE) {
         if (accounts.length == 0) revert EmptyAddressList();
+        if (bytes(reason).length == 0) revert EmptyReason();
 
         for (uint256 i = 0; i < accounts.length; i++) {
             address account = accounts[i];
             if (account == address(0)) revert ZeroAddress();
 
-            if (_blacklistedTo[account]) {
-                _blacklistedTo[account] = false;
-                emit AddressUnblacklistedTo(account);
+            if (_restrictedTo[account].isRestricted) {
+                delete _restrictedTo[account];
+                emit AddressUnblacklistedTo(
+                    account,
+                    reason,
+                    msg.sender,
+                    block.timestamp
+                );
             }
         }
     }
 
     /**
-     * @dev Remove addresses from both blacklists
+     * @dev Remove addresses from both blacklists with reason
      * @param accounts The addresses to remove from blacklist
+     * @param reason The reason for unrestricting
      */
     function unblacklist(
-        address[] memory accounts
+        address[] memory accounts,
+        string memory reason
     ) external onlyRole(BLACKLIST_ADMIN_ROLE) {
         if (accounts.length == 0) revert EmptyAddressList();
+        if (bytes(reason).length == 0) revert EmptyReason();
 
         for (uint256 i = 0; i < accounts.length; i++) {
             address account = accounts[i];
             if (account == address(0)) revert ZeroAddress();
 
-            if (_blacklistedFrom[account]) {
-                _blacklistedFrom[account] = false;
-                emit AddressUnblacklistedFrom(account);
+            bool wasRestrictedFrom = _restrictedFrom[account].isRestricted;
+            bool wasRestrictedTo = _restrictedTo[account].isRestricted;
+
+            if (wasRestrictedFrom) {
+                delete _restrictedFrom[account];
+                emit AddressUnblacklistedFrom(
+                    account,
+                    reason,
+                    msg.sender,
+                    block.timestamp
+                );
             }
-            if (_blacklistedTo[account]) {
-                _blacklistedTo[account] = false;
-                emit AddressUnblacklistedTo(account);
+            if (wasRestrictedTo) {
+                delete _restrictedTo[account];
+                emit AddressUnblacklistedTo(
+                    account,
+                    reason,
+                    msg.sender,
+                    block.timestamp
+                );
             }
-            emit AddressUnblacklisted(account);
+
+            if (wasRestrictedFrom || wasRestrictedTo) {
+                emit AddressUnblacklisted(
+                    account,
+                    reason,
+                    msg.sender,
+                    block.timestamp
+                );
+            }
         }
     }
 
@@ -187,7 +449,7 @@ contract AddressRestrictionCompliance is ICompliance, AccessControl {
      * @return bool True if the address is blacklisted from sending
      */
     function isBlacklistedFrom(address account) public view returns (bool) {
-        return _blacklistedFrom[account];
+        return _restrictedFrom[account].isRestricted;
     }
 
     /**
@@ -196,7 +458,7 @@ contract AddressRestrictionCompliance is ICompliance, AccessControl {
      * @return bool True if the address is blacklisted from receiving
      */
     function isBlacklistedTo(address account) public view returns (bool) {
-        return _blacklistedTo[account];
+        return _restrictedTo[account].isRestricted;
     }
 
     /**
@@ -205,7 +467,53 @@ contract AddressRestrictionCompliance is ICompliance, AccessControl {
      * @return bool True if the address is blacklisted from both sending and receiving
      */
     function isBlacklisted(address account) public view returns (bool) {
-        return _blacklistedFrom[account] && _blacklistedTo[account];
+        return
+            _restrictedFrom[account].isRestricted &&
+            _restrictedTo[account].isRestricted;
+    }
+
+    /**
+     * @dev Get restriction information for sending
+     * @param account The address to check
+     * @return RestrictionInfo Complete restriction information
+     */
+    function getRestrictionInfoFrom(
+        address account
+    ) external view returns (RestrictionInfo memory) {
+        return _restrictedFrom[account];
+    }
+
+    /**
+     * @dev Get restriction information for receiving
+     * @param account The address to check
+     * @return RestrictionInfo Complete restriction information
+     */
+    function getRestrictionInfoTo(
+        address account
+    ) external view returns (RestrictionInfo memory) {
+        return _restrictedTo[account];
+    }
+
+    /**
+     * @dev Get restriction reason for sending
+     * @param account The address to check
+     * @return string The reason for restriction (empty if not restricted)
+     */
+    function getRestrictionReasonFrom(
+        address account
+    ) external view returns (string memory) {
+        return _restrictedFrom[account].reason;
+    }
+
+    /**
+     * @dev Get restriction reason for receiving
+     * @param account The address to check
+     * @return string The reason for restriction (empty if not restricted)
+     */
+    function getRestrictionReasonTo(
+        address account
+    ) external view returns (string memory) {
+        return _restrictedTo[account].reason;
     }
 
     /**
@@ -219,11 +527,27 @@ contract AddressRestrictionCompliance is ICompliance, AccessControl {
         address to,
         uint256
     ) external view override returns (bool, string memory) {
-        if (_blacklistedFrom[from]) {
-            return (false, "Sender address is blacklisted from sending");
+        if (_restrictedFrom[from].isRestricted) {
+            return (
+                false,
+                string(
+                    abi.encodePacked(
+                        "Sender address is blacklisted from sending. Reason: ",
+                        _restrictedFrom[from].reason
+                    )
+                )
+            );
         }
-        if (_blacklistedTo[to]) {
-            return (false, "Recipient address is blacklisted from receiving");
+        if (_restrictedTo[to].isRestricted) {
+            return (
+                false,
+                string(
+                    abi.encodePacked(
+                        "Recipient address is blacklisted from receiving. Reason: ",
+                        _restrictedTo[to].reason
+                    )
+                )
+            );
         }
         return (true, "");
     }
