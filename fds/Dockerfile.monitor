@@ -1,0 +1,34 @@
+# Build stage
+FROM ghcr.io/foundry-rs/foundry:latest
+
+# Install build dependencies
+USER root
+# Install dependencies
+# Install dependencies
+RUN apt-get update && apt-get install -y wget tar
+
+# Install Go
+ENV GO_VERSION=1.21.5
+RUN wget https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
+    rm go${GO_VERSION}.linux-amd64.tar.gz
+
+WORKDIR /app
+ENV PATH="/usr/local/go/bin:${PATH}"
+# Copy go mod and sum files
+COPY go.mod go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy the source code
+COPY . .
+RUN go mod tidy
+# Build the monitor service
+RUN CGO_ENABLED=0 GOOS=linux go build -o monitor ./cmd/monitor
+
+# Final stage
+COPY contracts/TokenX.json ./contracts/TokenX.json
+
+# Run the monitor service
+CMD ["./monitor"] 
