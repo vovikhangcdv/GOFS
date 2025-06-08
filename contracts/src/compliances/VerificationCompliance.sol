@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {ICompliance} from "../interfaces/ICompliance.sol";
 import {EntityRegistry} from "../EntityRegistry.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {TxType} from "../interfaces/ITypes.sol";
 
@@ -11,17 +12,22 @@ import {TxType} from "../interfaces/ITypes.sol";
  * @dev Compliance module that checks if both sender and receiver are verified entities
  * in the EntityRegistry before allowing transfers.
  */
-contract VerificationCompliance is ICompliance {
-    // The immutable reference to the Entity Registry
-    EntityRegistry public immutable entityRegistry;
+contract VerificationCompliance is ICompliance, Initializable {
+    // The reference to the Entity Registry (changed from immutable)
+    EntityRegistry public entityRegistry;
 
     error InvalidEntityRegistryAddress();
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /**
-     * @dev Constructor to set the EntityRegistry address
+     * @dev Initialize the contract with EntityRegistry address
      * @param _entityRegistry The address of the EntityRegistry contract
      */
-    constructor(address _entityRegistry) {
+    function initialize(address _entityRegistry) public initializer {
         if (_entityRegistry == address(0))
             revert InvalidEntityRegistryAddress();
         entityRegistry = EntityRegistry(_entityRegistry);
@@ -137,4 +143,11 @@ contract VerificationCompliance is ICompliance {
         // So we just delegate to the standard compliance check
         return this.canTransferWithFailureReason(_from, _to, _amount);
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] private __gap;
 }

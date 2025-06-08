@@ -3,9 +3,10 @@ pragma solidity ^0.8.20;
 
 import {IEntityRegistry} from "./interfaces/IEntityRegistry.sol";
 import {IEntityVerifierRegistry} from "./interfaces/IEntityVerifierRegistry.sol";
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 import {Entity, EntityType} from "./interfaces/ITypes.sol";
 import {EntityLibrary} from "./libraries/EntityLibrary.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
@@ -13,8 +14,8 @@ import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProo
 contract EntityRegistry is
     IEntityRegistry,
     IEntityVerifierRegistry,
-    AccessControl,
-    EIP712
+    AccessControlUpgradeable,
+    EIP712Upgradeable
 {
     using EntityLibrary for Entity;
 
@@ -34,7 +35,7 @@ contract EntityRegistry is
 
     bytes32 public constant ENTITY_REGISTRY_ADMIN_ROLE =
         keccak256("ENTITY_REGISTRY_ADMIN_ROLE");
-    bytes32 public ENTITY_TYPE_HASH = EntityLibrary.ENTITY_TYPEHASH;
+    bytes32 public ENTITY_TYPE_HASH; // Changed from constant to allow initialization
     bytes32 public constant PROACTIVE_REGISTRY_FOWARDER_ADMIN_ROLE =
         keccak256("PROACTIVE_REGISTRY_FORWARDER_ADMIN_ROLE");
 
@@ -46,7 +47,17 @@ contract EntityRegistry is
     event VerifierRemoved(address indexed verifier);
     event EntityRegistered(address indexed entityAddress, Entity entity);
 
-    constructor() EIP712("EntityRegistry", "1.0.0") {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize() public initializer {
+        __AccessControl_init();
+        __EIP712_init("EntityRegistry", "1.0.0");
+
+        ENTITY_TYPE_HASH = EntityLibrary.ENTITY_TYPEHASH;
+
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(ENTITY_REGISTRY_ADMIN_ROLE, msg.sender);
         _grantRole(PROACTIVE_REGISTRY_FOWARDER_ADMIN_ROLE, msg.sender);
@@ -195,4 +206,11 @@ contract EntityRegistry is
         }
         return false;
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[48] private __gap;
 }

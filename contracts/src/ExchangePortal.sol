@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IExchange.sol";
 import {EntityRegisterable} from "./others/EntityRegisterable.sol";
 
-contract ExchangePortal is IExchangePortal, AccessControl, EntityRegisterable {
+contract ExchangePortal is
+    IExchangePortal,
+    AccessControlUpgradeable,
+    EntityRegisterable
+{
     using SafeERC20 for IERC20;
 
     error ZeroAddress();
@@ -29,8 +34,8 @@ contract ExchangePortal is IExchangePortal, AccessControl, EntityRegisterable {
     uint256 public constant MAX_FEE = 100_00; // 10% max fee (scaled by 1e4)
     uint256 public constant FEE_DENOMINATOR = 10000;
 
-    address public immutable override token0;
-    address public immutable override token1;
+    address public override token0; // Changed from immutable
+    address public override token1; // Changed from immutable
     uint256 private _exchangeRate;
 
     uint256 public exchangeFee; // Fee in basis points (1/100 of 1%)
@@ -47,19 +52,26 @@ contract ExchangePortal is IExchangePortal, AccessControl, EntityRegisterable {
         uint256 feeAmount
     );
 
-    constructor(
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(
         address _token0,
         address _token1,
         uint256 initialRate,
         address _treasury,
         uint256 _exchangeFee
-    ) {
+    ) public initializer {
         if (_token0 == address(0)) revert ZeroAddress();
         if (_token1 == address(0)) revert ZeroAddress();
         if (_treasury == address(0)) revert ZeroAddress();
         if (_token0 == _token1) revert TokensMustBeDifferent();
         if (initialRate == 0) revert InvalidInitialRate();
         if (_exchangeFee > MAX_FEE) revert FeeTooHigh();
+
+        __AccessControl_init();
 
         token0 = _token0;
         token1 = _token1;
@@ -178,4 +190,11 @@ contract ExchangePortal is IExchangePortal, AccessControl, EntityRegisterable {
 
         return baseAmount;
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[47] private __gap;
 }

@@ -4,7 +4,8 @@ pragma solidity ^0.8.20;
 import {ICompliance} from "../interfaces/ICompliance.sol";
 import {EntityRegistry} from "../EntityRegistry.sol";
 import {Entity, EntityType, TxType} from "../interfaces/ITypes.sol";
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
@@ -12,13 +13,13 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
  * @title EntityTypeCompliance
  * @dev Compliance module that manages which entity types are allowed to transfer to which other entity types
  */
-contract EntityTypeCompliance is ICompliance, AccessControl {
+contract EntityTypeCompliance is ICompliance, AccessControlUpgradeable {
     // Role for managing compliance constraints
     bytes32 public constant COMPLIANCE_ADMIN_ROLE =
         keccak256("COMPLIANCE_ADMIN_ROLE");
 
-    // The immutable reference to the Entity Registry
-    EntityRegistry public immutable entityRegistry;
+    // The reference to the Entity Registry (changed from immutable)
+    EntityRegistry public entityRegistry;
 
     // Use BitMaps for storing transfer policies
     // Each EntityType has its own bitmap where each bit represents whether it can transfer to that EntityType
@@ -38,14 +39,23 @@ contract EntityTypeCompliance is ICompliance, AccessControl {
         EntityType fromType,
         EntityType toType
     );
+    error ZeroAddress();
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
 
     /**
-     * @dev Constructor to set the EntityRegistry address and grant admin roles
+     * @dev Initialize the contract with EntityRegistry address and grant admin roles
      * @param _entityRegistry The address of the EntityRegistry contract
      */
-    constructor(address _entityRegistry) {
+    function initialize(address _entityRegistry) public initializer {
         if (_entityRegistry == address(0))
             revert InvalidEntityRegistryAddress();
+
+        __AccessControl_init();
+
         entityRegistry = EntityRegistry(_entityRegistry);
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(COMPLIANCE_ADMIN_ROLE, msg.sender);
@@ -56,10 +66,16 @@ contract EntityTypeCompliance is ICompliance, AccessControl {
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(AccessControl, IERC165) returns (bool) {
+    )
+        public
+        view
+        virtual
+        override(AccessControlUpgradeable, IERC165)
+        returns (bool)
+    {
         return
             interfaceId == type(ICompliance).interfaceId ||
-            interfaceId == type(AccessControl).interfaceId ||
+            interfaceId == type(AccessControlUpgradeable).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
@@ -218,4 +234,11 @@ contract EntityTypeCompliance is ICompliance, AccessControl {
         // So we just delegate to the standard compliance check
         return canTransferWithFailureReason(_from, _to, _amount);
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[47] private __gap;
 }

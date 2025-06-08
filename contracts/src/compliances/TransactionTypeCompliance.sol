@@ -4,7 +4,8 @@ pragma solidity ^0.8.20;
 import {ICompliance} from "../interfaces/ICompliance.sol";
 import {EntityRegistry} from "../EntityRegistry.sol";
 import {Entity, EntityType, TxType} from "../interfaces/ITypes.sol";
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
@@ -12,15 +13,15 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
  * @title TransactionTypeCompliance
  * @dev Compliance module that manages which entity types are allowed to send/receive for specific transaction types
  */
-contract TransactionTypeCompliance is ICompliance, AccessControl {
+contract TransactionTypeCompliance is ICompliance, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.UintSet;
 
     // Role for managing transaction type policies
     bytes32 public constant TX_TYPE_ADMIN_ROLE =
         keccak256("TX_TYPE_ADMIN_ROLE");
 
-    // The immutable reference to the Entity Registry
-    EntityRegistry public immutable entityRegistry;
+    // The reference to the Entity Registry (changed from immutable)
+    EntityRegistry public entityRegistry;
 
     // Mappings to store allowed entity types for each transaction type
     mapping(uint8 => EnumerableSet.UintSet) private _allowedFromEntityTypes;
@@ -52,10 +53,19 @@ contract TransactionTypeCompliance is ICompliance, AccessControl {
     error EmptyEntityTypesList();
     error InvalidArrayLengths();
     error TransactionTypeNotUsable(TxType txType);
+    error ZeroAddress();
 
-    constructor(address _entityRegistry) {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address _entityRegistry) public initializer {
         if (_entityRegistry == address(0))
             revert InvalidEntityRegistryAddress();
+
+        __AccessControl_init();
+
         entityRegistry = EntityRegistry(_entityRegistry);
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(TX_TYPE_ADMIN_ROLE, msg.sender);
@@ -66,10 +76,16 @@ contract TransactionTypeCompliance is ICompliance, AccessControl {
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(AccessControl, IERC165) returns (bool) {
+    )
+        public
+        view
+        virtual
+        override(AccessControlUpgradeable, IERC165)
+        returns (bool)
+    {
         return
             interfaceId == type(ICompliance).interfaceId ||
-            interfaceId == type(AccessControl).interfaceId ||
+            interfaceId == type(AccessControlUpgradeable).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
@@ -442,4 +458,11 @@ contract TransactionTypeCompliance is ICompliance, AccessControl {
 
         return (true, "");
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[47] private __gap;
 }

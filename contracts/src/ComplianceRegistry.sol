@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {ICompliance} from "./interfaces/ICompliance.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {TxType} from "./interfaces/ITypes.sol";
 
-contract ComplianceRegistry is ICompliance, AccessControl {
+contract ComplianceRegistry is ICompliance, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     bytes32 public constant COMPLIANCE_ADMIN_ROLE =
@@ -24,7 +25,13 @@ contract ComplianceRegistry is ICompliance, AccessControl {
     event ComplianceModuleAdded(address indexed module);
     event ComplianceModuleRemoved(address indexed module);
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
+        _disableInitializers();
+    }
+
+    function initialize() public initializer {
+        __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(COMPLIANCE_ADMIN_ROLE, msg.sender);
     }
@@ -34,10 +41,16 @@ contract ComplianceRegistry is ICompliance, AccessControl {
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(AccessControl, IERC165) returns (bool) {
+    )
+        public
+        view
+        virtual
+        override(AccessControlUpgradeable, IERC165)
+        returns (bool)
+    {
         return
             interfaceId == type(ICompliance).interfaceId ||
-            interfaceId == type(AccessControl).interfaceId ||
+            interfaceId == type(AccessControlUpgradeable).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
@@ -164,4 +177,11 @@ contract ComplianceRegistry is ICompliance, AccessControl {
         }
         return (true, "");
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] private __gap;
 }

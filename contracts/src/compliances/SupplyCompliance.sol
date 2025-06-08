@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "../interfaces/ICompliance.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
@@ -12,23 +13,31 @@ import {TxType} from "../interfaces/ITypes.sol";
  * @title SupplyRestrictionModuleCompliance
  * @dev A compliance module that enforces maximum supply restrictions for minting operations
  */
-contract SupplyCompliance is ICompliance, AccessControl {
+contract SupplyCompliance is ICompliance, AccessControlUpgradeable {
     /// @notice Role for managing supply limits
     bytes32 public constant SUPPLY_ADMIN_ROLE = keccak256("SUPPLY_ADMIN_ROLE");
 
     /// @notice Maximum allowed supply
     uint256 private _maxSupply;
 
-    /// @notice Target token address
-    address private immutable _token;
+    /// @notice Target token address (changed from immutable)
+    address private _token;
 
     /// @notice Emitted when max supply is updated
     event MaxSupplyUpdated(uint256 oldMax, uint256 newMax);
 
     error TokenNotSet();
 
-    constructor(address token) {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address token) public initializer {
         if (token == address(0)) revert TokenNotSet();
+
+        __AccessControl_init();
+
         _token = token;
 
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
@@ -40,10 +49,16 @@ contract SupplyCompliance is ICompliance, AccessControl {
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(AccessControl, IERC165) returns (bool) {
+    )
+        public
+        view
+        virtual
+        override(AccessControlUpgradeable, IERC165)
+        returns (bool)
+    {
         return
             interfaceId == type(ICompliance).interfaceId ||
-            interfaceId == type(AccessControl).interfaceId ||
+            interfaceId == type(AccessControlUpgradeable).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
@@ -148,4 +163,11 @@ contract SupplyCompliance is ICompliance, AccessControl {
         // So we just delegate to the standard compliance check
         return this.canTransferWithFailureReason(from, to, amount);
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[48] private __gap;
 }

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {ICompliantToken} from "./interfaces/ICompliantToken.sol";
 import {ICompliance} from "./interfaces/ICompliance.sol";
 import {TypedToken} from "./TypedToken.sol";
@@ -14,14 +15,18 @@ import {TxType} from "./interfaces/ITypes.sol";
  * 1. All transfers must pass compliance checks (including entity verification)
  * 2. Token parameters can be managed by governance
  */
-contract CompliantToken is ICompliantToken, TypedToken, AccessControl {
+contract CompliantToken is
+    ICompliantToken,
+    TypedToken,
+    AccessControlUpgradeable
+{
     // Role definitions
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
     bytes32 public constant COMPLIANCE_ADMIN_ROLE =
         keccak256("COMPLIANCE_ADMIN_ROLE");
 
-    // Immutable compliance reference
+    // Compliance reference (changed from immutable to allow upgrades)
     ICompliance public override compliance;
 
     // Custom errors
@@ -33,18 +38,27 @@ contract CompliantToken is ICompliantToken, TypedToken, AccessControl {
     );
     error ZeroAddressCompliance();
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /**
-     * @dev Constructor to initialize the token with basic parameters and required contract reference
+     * @dev Initialize the token with basic parameters and required contract reference
      * @param name_ The name of the token
      * @param symbol_ The symbol of the token
      * @param compliance_ The address of the compliance contract
      */
-    constructor(
+    function initialize(
         string memory name_,
         string memory symbol_,
         address compliance_
-    ) TypedToken(name_, symbol_) {
+    ) public initializer {
         if (compliance_ == address(0)) revert ZeroAddressCompliance();
+
+        __TypedToken_init(name_, symbol_);
+        __AccessControl_init();
+
         compliance = ICompliance(compliance_);
 
         // Setup roles
@@ -126,4 +140,11 @@ contract CompliantToken is ICompliantToken, TypedToken, AccessControl {
 
         super._transferWithType(from, to, amount, txType);
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] private __gap;
 }

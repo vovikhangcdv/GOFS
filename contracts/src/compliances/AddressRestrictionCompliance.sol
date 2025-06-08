@@ -2,14 +2,15 @@
 pragma solidity ^0.8.20;
 
 import "../interfaces/ICompliance.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {TxType} from "../interfaces/ITypes.sol";
 
 /**
  * @title AddressRestrictionCompliance
  * @dev Compliance module that implements address blacklisting functionality with reason tracking
  */
-contract AddressRestrictionCompliance is ICompliance, AccessControl {
+contract AddressRestrictionCompliance is ICompliance, AccessControlUpgradeable {
     // Role for managing blacklist
     bytes32 public constant BLACKLIST_ADMIN_ROLE =
         keccak256("BLACKLIST_ADMIN_ROLE");
@@ -74,7 +75,13 @@ contract AddressRestrictionCompliance is ICompliance, AccessControl {
     error EmptyReason();
     error ArrayLengthMismatch();
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
+        _disableInitializers();
+    }
+
+    function initialize() public initializer {
+        __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(BLACKLIST_ADMIN_ROLE, msg.sender);
     }
@@ -84,10 +91,16 @@ contract AddressRestrictionCompliance is ICompliance, AccessControl {
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(AccessControl, IERC165) returns (bool) {
+    )
+        public
+        view
+        virtual
+        override(AccessControlUpgradeable, IERC165)
+        returns (bool)
+    {
         return
             interfaceId == type(ICompliance).interfaceId ||
-            interfaceId == type(AccessControl).interfaceId ||
+            interfaceId == type(AccessControlUpgradeable).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
@@ -608,4 +621,11 @@ contract AddressRestrictionCompliance is ICompliance, AccessControl {
         // So we just delegate to the standard compliance check
         return this.canTransferWithFailureReason(from, to, amount);
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[48] private __gap;
 }

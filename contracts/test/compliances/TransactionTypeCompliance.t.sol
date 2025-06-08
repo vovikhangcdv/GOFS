@@ -6,6 +6,9 @@ import "../../src/compliances/TransactionTypeCompliance.sol";
 import "../../src/EntityRegistry.sol";
 import {Entity, EntityType, TxType} from "../../src/interfaces/ITypes.sol";
 import {EntityLibrary} from "../../src/libraries/EntityLibrary.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {ICompliance} from "../../src/interfaces/ICompliance.sol";
 
 contract TransactionTypeComplianceTest is Test {
     using EntityLibrary for Entity;
@@ -167,7 +170,7 @@ contract TransactionTypeComplianceTest is Test {
 
         // Test AccessControl interface
         assertTrue(
-            compliance.supportsInterface(type(AccessControl).interfaceId)
+            compliance.supportsInterface(type(IAccessControl).interfaceId)
         );
 
         // Test IERC165 interface
