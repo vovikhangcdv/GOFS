@@ -2,7 +2,7 @@
 
 Draft page layouts for customizing Ethernal to showcase the GOFS/e-VND CBDC system.
 
----
+## PLEASE REFER TO THE [contract-call-example](./dapps/contract-call-example/README.md) for the example of how to call the contracts.
 
 _Note: This is draft minimal information_
 
