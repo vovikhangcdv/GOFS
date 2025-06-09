@@ -71,6 +71,12 @@ contract TransactionTypeCompliance is ICompliance, AccessControlUpgradeable {
         _grantRole(TX_TYPE_ADMIN_ROLE, msg.sender);
     }
 
+    function setEntityRegistry(
+        address _entityRegistry
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        entityRegistry = EntityRegistry(_entityRegistry);
+    }
+
     /**
      * @dev Implements IERC165 interface detection
      */

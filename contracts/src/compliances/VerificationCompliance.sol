@@ -6,13 +6,14 @@ import {EntityRegistry} from "../EntityRegistry.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {TxType} from "../interfaces/ITypes.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 /**
  * @title VerificationCompliance
  * @dev Compliance module that checks if both sender and receiver are verified entities
  * in the EntityRegistry before allowing transfers.
  */
-contract VerificationCompliance is ICompliance, Initializable {
+contract VerificationCompliance is ICompliance, AccessControlUpgradeable {
     // The reference to the Entity Registry (changed from immutable)
     EntityRegistry public entityRegistry;
 
@@ -31,6 +32,13 @@ contract VerificationCompliance is ICompliance, Initializable {
         if (_entityRegistry == address(0))
             revert InvalidEntityRegistryAddress();
         entityRegistry = EntityRegistry(_entityRegistry);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+    function setEntityRegistry(
+        address _entityRegistry
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        entityRegistry = EntityRegistry(_entityRegistry);
     }
 
     /**
@@ -38,7 +46,13 @@ contract VerificationCompliance is ICompliance, Initializable {
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(IERC165) returns (bool) {
+    )
+        public
+        view
+        virtual
+        override(IERC165, AccessControlUpgradeable)
+        returns (bool)
+    {
         return interfaceId == type(ICompliance).interfaceId;
     }
 

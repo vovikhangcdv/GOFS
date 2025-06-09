@@ -44,6 +44,10 @@ contract SupplyCompliance is ICompliance, AccessControlUpgradeable {
         _grantRole(SUPPLY_ADMIN_ROLE, _msgSender());
     }
 
+    function setToken(address token) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _token = token;
+    }
+
     /**
      * @dev Implements IERC165 interface detection
      */
