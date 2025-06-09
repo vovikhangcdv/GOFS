@@ -1,0 +1,56 @@
+---
+description: 
+globs: **.sol
+alwaysApply: false
+---
+# Solidity Coding Standards
+
+## Imports
+- Import only necessary parts from libraries, not entire libraries
+- Use specific imports to reduce contract size and improve readability
+- Example: `import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";` instead of `import "@openzeppelin/contracts/token/ERC20/ERC20.sol";`
+
+## Error Handling
+- Use custom errors instead of require strings
+- Define errors at the contract level
+- Example: `error ZeroAddress();` instead of `require(address != address(0), "Zero address");`
+
+## Access Control
+- Use OpenZeppelin's AccessControl for role-based access control
+- Define roles as constants
+- Use role-based modifiers for access control
+
+## Testing
+- Write comprehensive tests to achieve 100% coverage for src/ code
+- Use Forge's testing framework
+- Run `forge coverage` to verify coverage
+- For detailed coverage report, use `forge coverage --report lcov`
+- Focus coverage on src/ directory, test code coverage is optional
+
+## OpenZeppelin Usage
+- Prefer OpenZeppelin libraries for common tasks
+- Use latest stable versions
+- Follow OpenZeppelin's best practices and patterns
+
+## Code Organization
+- Keep contracts modular and focused
+- Use libraries for reusable code
+- Follow Solidity style guide
+- Use NatSpec comments for documentation
+
+## Documentation
+- Use NatSpec comments for all public/external functions
+- Document complex logic
+- Include parameter descriptions
+- Document state variables
+- Explain any non-obvious code
+
+## Testing Best Practices
+- Test both positive and negative cases
+- Test edge cases
+- Test access control
+- Test state changes
+- Use descriptive test names
+- Group related tests
+- Use setup functions effectively
+- Mock external dependencies
