@@ -46,6 +46,10 @@ contract EntityTypeCompliance is ICompliance, AccessControlUpgradeable {
         _disableInitializers();
     }
 
+    function name() external pure override returns (string memory) {
+        return "EntityTypeCompliance";
+    }
+
     /**
      * @dev Initialize the contract with EntityRegistry address and grant admin roles
      * @param _entityRegistry The address of the EntityRegistry contract

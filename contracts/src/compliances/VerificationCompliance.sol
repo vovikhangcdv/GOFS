@@ -24,6 +24,10 @@ contract VerificationCompliance is ICompliance, AccessControlUpgradeable {
         _disableInitializers();
     }
 
+    function name() external pure override returns (string memory) {
+        return "VerificationCompliance";
+    }
+
     /**
      * @dev Initialize the contract with EntityRegistry address
      * @param _entityRegistry The address of the EntityRegistry contract

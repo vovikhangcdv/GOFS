@@ -27,6 +27,9 @@ contract TransactionTypeCompliance is ICompliance, AccessControlUpgradeable {
     mapping(uint8 => EnumerableSet.UintSet) private _allowedFromEntityTypes;
     mapping(uint8 => EnumerableSet.UintSet) private _allowedToEntityTypes;
 
+    // Mapping to store transaction type metadata
+    mapping(uint8 => string) private _transactionTypeMetadata;
+
     // Events
     event AllowedFromEntityTypeAdded(
         TxType indexed txType,
@@ -45,6 +48,7 @@ contract TransactionTypeCompliance is ICompliance, AccessControlUpgradeable {
         EntityType indexed entityType
     );
     event TransactionTypeCleared(TxType indexed txType);
+    event TransactionTypeMetadataSet(TxType indexed txType, string metadata);
 
     // Custom errors
     error InvalidEntityRegistryAddress();
@@ -54,10 +58,15 @@ contract TransactionTypeCompliance is ICompliance, AccessControlUpgradeable {
     error InvalidArrayLengths();
     error TransactionTypeNotUsable(TxType txType);
     error ZeroAddress();
+    error EmptyMetadata();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
+    }
+
+    function name() external pure override returns (string memory) {
+        return "TransactionTypeCompliance";
     }
 
     function initialize(address _entityRegistry) public initializer {
@@ -358,6 +367,34 @@ contract TransactionTypeCompliance is ICompliance, AccessControlUpgradeable {
         TxType txType
     ) external view returns (uint256) {
         return _allowedToEntityTypes[TxType.unwrap(txType)].length();
+    }
+
+    /**
+     * @dev Set metadata for a transaction type
+     * @param txType The transaction type
+     * @param metadata The metadata string to associate with the transaction type
+     */
+    function setTransactionTypeMetadata(
+        TxType txType,
+        string memory metadata
+    ) external onlyRole(TX_TYPE_ADMIN_ROLE) {
+        if (bytes(metadata).length == 0) revert EmptyMetadata();
+
+        uint8 txTypeId = TxType.unwrap(txType);
+        _transactionTypeMetadata[txTypeId] = metadata;
+
+        emit TransactionTypeMetadataSet(txType, metadata);
+    }
+
+    /**
+     * @dev Get metadata for a transaction type
+     * @param txType The transaction type
+     * @return string The metadata string associated with the transaction type
+     */
+    function getTransactionTypeMetadata(
+        TxType txType
+    ) external view returns (string memory) {
+        return _transactionTypeMetadata[TxType.unwrap(txType)];
     }
 
     /**

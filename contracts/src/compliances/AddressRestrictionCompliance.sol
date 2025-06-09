@@ -80,6 +80,10 @@ contract AddressRestrictionCompliance is ICompliance, AccessControlUpgradeable {
         _disableInitializers();
     }
 
+    function name() external pure override returns (string memory) {
+        return "AddressRestrictionCompliance";
+    }
+
     function initialize() public initializer {
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);

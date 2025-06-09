@@ -33,6 +33,10 @@ contract SupplyCompliance is ICompliance, AccessControlUpgradeable {
         _disableInitializers();
     }
 
+    function name() external pure override returns (string memory) {
+        return "SupplyCompliance";
+    }
+
     function initialize(address token) public initializer {
         if (token == address(0)) revert TokenNotSet();
 
