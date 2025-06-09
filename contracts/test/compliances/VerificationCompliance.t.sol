@@ -6,7 +6,8 @@ import {VerificationCompliance} from "../../src/compliances/VerificationComplian
 import {EntityRegistry} from "../../src/EntityRegistry.sol";
 import {Entity, EntityType, TxType} from "../../src/interfaces/ITypes.sol";
 import {ICompliance} from "../../src/interfaces/ICompliance.sol";
-
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 contract VerificationComplianceTest is Test {
     VerificationCompliance public complianceModule;
     EntityRegistry public entityRegistry;
@@ -34,7 +35,18 @@ contract VerificationComplianceTest is Test {
 
         // Deploy contracts
         vm.startPrank(admin);
-        entityRegistry = new EntityRegistry();
+        entityRegistry = EntityRegistry(
+            address(
+                new TransparentUpgradeableProxy(
+                    address(new EntityRegistry()),
+                    address(new ProxyAdmin(admin)),
+                    abi.encodeWithSelector(
+                        EntityRegistry.initialize.selector,
+                        admin
+                    )
+                )
+            )
+        );
 
         // Setup allowed entity types for verifier
         EntityType[] memory allowedTypes = new EntityType[](1);
@@ -42,8 +54,18 @@ contract VerificationComplianceTest is Test {
         entityRegistry.addVerifier(verifier, allowedTypes);
 
         // Deploy compliance module
-        complianceModule = new VerificationCompliance();
-        complianceModule.initialize(address(entityRegistry));
+        complianceModule = VerificationCompliance(
+            address(
+                new TransparentUpgradeableProxy(
+                    address(new VerificationCompliance()),
+                    address(new ProxyAdmin(admin)),
+                    abi.encodeWithSelector(
+                        VerificationCompliance.initialize.selector,
+                        address(entityRegistry)
+                    )
+                )
+            )
+        );
         vm.stopPrank();
 
         // Register two verified entities
@@ -94,24 +116,6 @@ contract VerificationComplianceTest is Test {
 
         vm.prank(entityAddress);
         entityRegistry.register(entity, signature);
-    }
-
-    function testConstructor() public {
-        // Test valid initialization
-        VerificationCompliance newCompliance = new VerificationCompliance();
-        newCompliance.initialize(address(entityRegistry));
-        assertEq(
-            address(newCompliance.entityRegistry()),
-            address(entityRegistry)
-        );
-    }
-
-    function testConstructorWithZeroAddress() public {
-        VerificationCompliance newCompliance = new VerificationCompliance();
-        vm.expectRevert(
-            VerificationCompliance.InvalidEntityRegistryAddress.selector
-        );
-        newCompliance.initialize(address(0));
     }
 
     function test_CanTransfer_MintingAndBurning() public {

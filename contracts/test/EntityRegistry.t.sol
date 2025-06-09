@@ -7,6 +7,8 @@ import {Entity, EntityType} from "../src/interfaces/ITypes.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MerkleLibrary} from "../src/libraries/MerkleLibrary.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 contract EntityRegistryTest is Test {
     EntityRegistry public registry;
@@ -42,7 +44,19 @@ contract EntityRegistryTest is Test {
 
         // Deploy contract
         vm.startPrank(admin);
-        registry = new EntityRegistry();
+        // registry = new EntityRegistry();
+        registry = EntityRegistry(
+            address(
+                new TransparentUpgradeableProxy(
+                    address(new EntityRegistry()),
+                    address(new ProxyAdmin(admin)),
+                    abi.encodeWithSelector(
+                        EntityRegistry.initialize.selector,
+                        admin
+                    )
+                )
+            )
+        );
         vm.stopPrank();
 
         // Set up allowed entity types for verifier

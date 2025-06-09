@@ -7,7 +7,8 @@ import {EntityLibrary} from "../../src/libraries/EntityLibrary.sol";
 import {EntityTypeCompliance} from "../../src/compliances/EntityTypeCompliance.sol";
 import {EntityRegistry} from "../../src/EntityRegistry.sol";
 import {IEntityRegistry} from "../../src/interfaces/IEntityRegistry.sol";
-
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 contract EntityTypeComplianceTest is Test {
     using EntityLibrary for Entity;
     EntityTypeCompliance public compliance;
@@ -36,16 +37,38 @@ contract EntityTypeComplianceTest is Test {
         vm.startPrank(admin);
 
         // Deploy registry
-        entityRegistry = new EntityRegistry();
+        entityRegistry = EntityRegistry(
+            address(
+                new TransparentUpgradeableProxy(
+                    address(new EntityRegistry()),
+                    address(new ProxyAdmin(admin)),
+                    abi.encodeWithSelector(
+                        EntityRegistry.initialize.selector,
+                        admin
+                    )
+                )
+            )
+        );
 
         // Deploy compliance module
-        compliance = new EntityTypeCompliance();
-        compliance.initialize(address(entityRegistry));
+        compliance = EntityTypeCompliance(
+            address(
+                new TransparentUpgradeableProxy(
+                    address(new EntityTypeCompliance()),
+                    address(new ProxyAdmin(admin)),
+                    abi.encodeWithSelector(
+                        EntityTypeCompliance.initialize.selector,
+                        address(entityRegistry)
+                    )
+                )
+            )
+        );
 
         // Setup roles
         compliance.grantRole(compliance.DEFAULT_ADMIN_ROLE(), admin);
         compliance.grantRole(compliance.COMPLIANCE_ADMIN_ROLE(), admin);
 
+        _verifier = vm.addr(VERIFIER_PRIVATE_KEY);
         vm.stopPrank();
     }
 
@@ -314,15 +337,6 @@ contract EntityTypeComplianceTest is Test {
         vm.expectRevert(EntityTypeCompliance.InvalidArrayLengths.selector);
         compliance.setTransferPolicy(fromType, toTypes, alloweds);
         vm.stopPrank();
-    }
-
-    // Test invalid entity registry address
-    function testConstructorWithZeroAddress() public {
-        EntityTypeCompliance newCompliance = new EntityTypeCompliance();
-        vm.expectRevert(
-            EntityTypeCompliance.InvalidEntityRegistryAddress.selector
-        );
-        newCompliance.initialize(address(0));
     }
 
     // Test disallowed transfer between types

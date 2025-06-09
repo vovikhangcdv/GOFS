@@ -7,7 +7,8 @@ import {ICompliance} from "../src/interfaces/ICompliance.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {TxType} from "../src/interfaces/ITypes.sol";
-
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 // Mock compliance module for testing
 contract MockCompliance is ICompliance {
     bool private _shouldAllow;
@@ -83,7 +84,15 @@ contract ComplianceRegistryTest is Test {
 
     function setUp() public {
         admin = address(this);
-        registry = new ComplianceRegistry();
+        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
+            address(new ComplianceRegistry()),
+            address(new ProxyAdmin(admin)),
+            abi.encodeWithSelector(
+                ComplianceRegistry.initialize.selector,
+                admin
+            )
+        );
+        registry = ComplianceRegistry(address(proxy));
         allowingModule = new MockCompliance(true, "");
         denyingModule = new MockCompliance(false, "Transfer not allowed");
         invalidModule = new InvalidMockCompliance();

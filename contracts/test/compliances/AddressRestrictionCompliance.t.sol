@@ -4,7 +4,8 @@ pragma solidity ^0.8.20;
 import {Vm, Test} from "forge-std/Test.sol";
 import {AddressRestrictionCompliance} from "../../src/compliances/AddressRestrictionCompliance.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 contract AddressRestrictionComplianceTest is Test {
     bytes32 public constant BLACKLIST_ADMIN_ROLE =
         keccak256("BLACKLIST_ADMIN_ROLE");
@@ -62,7 +63,17 @@ contract AddressRestrictionComplianceTest is Test {
         user3 = makeAddr("user3");
         nonAdmin = makeAddr("nonAdmin");
 
-        complianceModule = new AddressRestrictionCompliance();
+        complianceModule = AddressRestrictionCompliance(
+            address(
+                new TransparentUpgradeableProxy(
+                    address(new AddressRestrictionCompliance()),
+                    address(new ProxyAdmin(admin)),
+                    abi.encodeWithSelector(
+                        AddressRestrictionCompliance.initialize.selector
+                    )
+                )
+            )
+        );
     }
 
     function test_InitialState() public {
