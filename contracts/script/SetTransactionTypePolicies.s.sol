@@ -2,8 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Script, console2} from "forge-std/Script.sol";
-import {TransactionTypeCompliance} from "../src/compliances/TransactionTypeCompliance.sol";
-import {EntityRegistry} from "../src/EntityRegistry.sol";
+import {BaseScript} from "./BaseScript.s.sol";
 import {EntityType, TxType} from "../src/interfaces/ITypes.sol";
 import {EntityLibrary} from "../src/libraries/EntityLibrary.sol";
 
@@ -11,13 +10,7 @@ import {EntityLibrary} from "../src/libraries/EntityLibrary.sol";
  * @title SetTransactionTypePolicies
  * @dev Script to set up transaction type transfer policies using the admin role
  */
-contract SetTransactionTypePolicies is Script {
-    // Contract instances
-    TransactionTypeCompliance public transactionTypeCompliance =
-        TransactionTypeCompliance(0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB);
-    EntityRegistry public entityRegistry =
-        EntityRegistry(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
-
+contract SetTransactionTypePolicies is BaseScript {
     // Transaction Types
     TxType constant UNKNOWN_TYPE = TxType.wrap(0);
     TxType constant PAYMENT_TYPE = TxType.wrap(1);
@@ -26,31 +19,19 @@ contract SetTransactionTypePolicies is Script {
     TxType constant INVESTMENT_TYPE = TxType.wrap(4);
     TxType constant EXCHANGE_TYPE = TxType.wrap(5);
 
-    string mnemonic;
-
-    function run() public {
-        // Start broadcasting transactions from the admin account
-        mnemonic = vm.envString("WALLET_MEMO");
-        uint256 adminPrivateKey = vm.deriveKey(mnemonic, 0);
-        address admin = vm.addr(adminPrivateKey);
+    function run() public virtual {
+        // Initialize base script
+        __BaseScript_init();
+        __BaseScript_initializeContracts();
 
         // Get current nonce to avoid nonce mismatch
-        uint256 currentNonce = vm.getNonce(admin);
+        uint256 currentNonce = vm.getNonce(deployer);
         console2.log("Current nonce for admin:", currentNonce);
 
         // Start recording transactions for deployment
-        vm.startBroadcast(adminPrivateKey);
-
-        // Setup metadata for each transaction type
-        setupTransactionTypeMetadata();
-
-        // Setup policies for each transaction type
-        setupUnknownPolicies();
-        setupPaymentPolicies();
-        setupGivePolicies();
-        setupLoanPolicies();
-        setupInvestmentPolicies();
-        setupExchangePolicies();
+        vm.startBroadcast(vm.deriveKey(mnemonic, 0));
+        // Setup all policies
+        setupTransactionTypePolicies();
 
         vm.stopBroadcast();
 
@@ -58,8 +39,20 @@ contract SetTransactionTypePolicies is Script {
         console2.log(
             "Transaction type transfer policies have been set up successfully"
         );
-        logPolicies();
-        logMetadata();
+        logTransactionTypePolicies();
+        logTransactionTypeMetadata();
+    }
+
+    function setupTransactionTypePolicies() public {
+        // Setup metadata for each transaction type
+        setupTransactionTypeMetadata();
+        // Setup policies for each transaction type
+        setupUnknownPolicies();
+        setupPaymentPolicies();
+        setupGivePolicies();
+        setupLoanPolicies();
+        setupInvestmentPolicies();
+        setupExchangePolicies();
     }
 
     function setupTransactionTypeMetadata() internal {
@@ -88,8 +81,6 @@ contract SetTransactionTypePolicies is Script {
             EXCHANGE_TYPE,
             "EXCHANGE: Currency exchange and trading transactions through authorized portals"
         );
-
-        console2.log("\nSet up transaction type metadata");
     }
 
     function setupUnknownPolicies() internal {
@@ -105,8 +96,6 @@ contract SetTransactionTypePolicies is Script {
             fromTypes,
             fromTypes
         );
-
-        console2.log("\nSet up Unknown transaction type policies");
     }
 
     function setupPaymentPolicies() internal {
@@ -132,8 +121,6 @@ contract SetTransactionTypePolicies is Script {
             fromTypes,
             fromTypes // Same types can receive payments
         );
-
-        console2.log("\nSet up Payment transaction type policies");
     }
 
     function setupGivePolicies() internal {
@@ -165,8 +152,6 @@ contract SetTransactionTypePolicies is Script {
             fromTypes,
             toTypes
         );
-
-        console2.log("\nSet up Give transaction type policies");
     }
 
     function setupLoanPolicies() internal {
@@ -192,8 +177,6 @@ contract SetTransactionTypePolicies is Script {
             fromTypes,
             toTypes
         );
-
-        console2.log("\nSet up Loan transaction type policies");
     }
 
     function setupInvestmentPolicies() internal {
@@ -224,8 +207,6 @@ contract SetTransactionTypePolicies is Script {
             fromTypes,
             toTypes
         );
-
-        console2.log("\nSet up Investment transaction type policies");
     }
 
     function setupExchangePolicies() internal {
@@ -250,11 +231,9 @@ contract SetTransactionTypePolicies is Script {
             fromTypes,
             fromTypes
         );
-
-        console2.log("\nSet up Exchange transaction type policies");
     }
 
-    function logPolicies() internal view {
+    function logTransactionTypePolicies() internal view {
         TxType[] memory txTypes = new TxType[](6);
         txTypes[0] = UNKNOWN_TYPE;
         txTypes[1] = PAYMENT_TYPE;
@@ -271,7 +250,9 @@ contract SetTransactionTypePolicies is Script {
         txTypeNames[4] = "INVESTMENT";
         txTypeNames[5] = "EXCHANGE";
 
-        console2.log("\nTransaction Type Policies:");
+        console2.log(
+            "\n========== Transaction Type Transfer Policies =========="
+        );
         console2.log("------------------------");
 
         for (uint i = 0; i < txTypes.length; i++) {
@@ -307,7 +288,7 @@ contract SetTransactionTypePolicies is Script {
         }
     }
 
-    function logMetadata() internal view {
+    function logTransactionTypeMetadata() internal view {
         TxType[] memory txTypes = new TxType[](6);
         txTypes[0] = UNKNOWN_TYPE;
         txTypes[1] = PAYMENT_TYPE;

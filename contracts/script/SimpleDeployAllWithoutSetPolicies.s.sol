@@ -20,7 +20,7 @@ import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.s
 import {SetEntityTypePolicies} from "./SetEntityTypePolicies.s.sol";
 import {SetTransactionTypePolicies} from "./SetTransactionTypePolicies.s.sol";
 
-contract SimpleDeployAll is
+contract SimpleDeployAllWithoutSetPolicies is
     BaseScript,
     SetEntityTypePolicies,
     SetTransactionTypePolicies
@@ -51,16 +51,16 @@ contract SimpleDeployAll is
         _deployComplianceModules();
         _deployExchangePortal();
 
-        // Deploy and setup policies using the dedicated scripts
-        setupEntityTypePolicies();
-        setupTransactionTypePolicies();
+        // // Deploy and setup policies using the dedicated scripts
+        // setupEntityTypePolicies();
+        // setupTransactionTypePolicies();
 
         vm.stopBroadcast();
 
         // Log deployment addresses
         logDeploymentAddresses();
-        logEntityTypePolicies();
-        logTransactionTypePolicies();
+        // logEntityTypePolicies();
+        // logTransactionTypePolicies();
     }
 
     function _deployEntityRegistry() internal {

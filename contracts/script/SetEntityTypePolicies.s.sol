@@ -2,8 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Script, console2} from "forge-std/Script.sol";
-import {EntityTypeCompliance} from "../src/compliances/EntityTypeCompliance.sol";
-import {EntityRegistry} from "../src/EntityRegistry.sol";
+import {BaseScript} from "./BaseScript.s.sol";
 import {EntityType} from "../src/interfaces/ITypes.sol";
 import {EntityLibrary} from "../src/libraries/EntityLibrary.sol";
 
@@ -11,31 +10,36 @@ import {EntityLibrary} from "../src/libraries/EntityLibrary.sol";
  * @title SetEntityTypePolicies
  * @dev Script to set up entity type transfer policies using the admin role
  */
-contract SetEntityTypePolicies is Script {
+contract SetEntityTypePolicies is BaseScript {
     // Use constants from EntityLibrary
     using EntityLibrary for EntityType;
 
-    // Contract instances
-    EntityTypeCompliance public entityTypeCompliance =
-        EntityTypeCompliance(0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf);
-    EntityRegistry public entityRegistry =
-        EntityRegistry(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
-
-    string mnemonic;
-
-    function run() public {
-        // Start broadcasting transactions from the admin account
-        mnemonic = vm.envString("WALLET_MEMO");
-        uint256 adminPrivateKey = vm.deriveKey(mnemonic, 0);
-        address admin = vm.addr(adminPrivateKey);
+    function run() public virtual {
+        // Initialize base script
+        __BaseScript_init();
+        __BaseScript_initializeContracts();
 
         // Get current nonce to avoid nonce mismatch
-        uint256 currentNonce = vm.getNonce(admin);
+        uint256 currentNonce = vm.getNonce(deployer);
         console2.log("Current nonce for admin:", currentNonce);
 
         // Start recording transactions for deployment
-        vm.startBroadcast(adminPrivateKey);
+        vm.startBroadcast(vm.deriveKey(mnemonic, 0));
 
+        // Setup all policies
+        setupEntityTypePolicies();
+
+        vm.stopBroadcast();
+
+        // Log the completion
+        console2.log(
+            "Entity type transfer policies have been set up successfully"
+        );
+        logEntityTypePolicies();
+        logEntityTypeMetadata();
+    }
+
+    function setupEntityTypePolicies() public {
         // Setup metadata for each entity type
         setupEntityTypeMetadata();
 
@@ -49,14 +53,6 @@ contract SetEntityTypePolicies is Script {
         setupHouseholdBusinessPolicies();
         setupForeignInvestorPolicies();
         setupExchangePortalPolicies();
-        vm.stopBroadcast();
-
-        // Log the completion
-        console2.log(
-            "Entity type transfer policies have been set up successfully"
-        );
-        logPolicies();
-        logMetadata();
     }
 
     function setupEntityTypeMetadata() internal {
@@ -117,8 +113,6 @@ contract SetEntityTypePolicies is Script {
             EntityLibrary.FOREIGN_INVESTED_ECONOMIC_ORGANIZATION,
             "FOREIGN_INVESTED_ECONOMIC_ORGANIZATION: Foreign invested economic organization (To chuc kinh te co von dau tu nuoc ngoai)"
         );
-
-        console2.log("\nSet up entity type metadata");
     }
 
     function setupIndividualPolicies() internal {
@@ -143,8 +137,6 @@ contract SetEntityTypePolicies is Script {
             allowedTypes,
             alloweds
         );
-
-        console2.log("\nSet up Individual transfer policies");
     }
 
     function setupPrivateEnterprisePolicies() internal {
@@ -159,8 +151,6 @@ contract SetEntityTypePolicies is Script {
             allTypes,
             alloweds
         );
-
-        console2.log("\nSet up Private Enterprise transfer policies");
     }
 
     function setupLLCPolicies() internal {
@@ -182,8 +172,6 @@ contract SetEntityTypePolicies is Script {
             allTypes,
             alloweds
         );
-
-        console2.log("\nSet up LLC transfer policies");
     }
 
     function setupJointStockCompanyPolicies() internal {
@@ -198,8 +186,6 @@ contract SetEntityTypePolicies is Script {
             allTypes,
             alloweds
         );
-
-        console2.log("\nSet up Joint Stock Company transfer policies");
     }
 
     function setupPartnershipPolicies() internal {
@@ -223,8 +209,6 @@ contract SetEntityTypePolicies is Script {
             allowedTypes,
             alloweds
         );
-
-        console2.log("\nSet up Partnership transfer policies");
     }
 
     function setupCooperativePolicies() internal {
@@ -253,8 +237,6 @@ contract SetEntityTypePolicies is Script {
                 alloweds
             );
         }
-
-        console2.log("\nSet up Cooperative transfer policies");
     }
 
     function setupHouseholdBusinessPolicies() internal {
@@ -274,8 +256,6 @@ contract SetEntityTypePolicies is Script {
             allowedTypes,
             alloweds
         );
-
-        console2.log("\nSet up Household Business transfer policies");
     }
 
     function setupForeignInvestorPolicies() internal {
@@ -299,8 +279,6 @@ contract SetEntityTypePolicies is Script {
                 alloweds
             );
         }
-
-        console2.log("\nSet up Foreign Investor transfer policies");
     }
 
     function setupExchangePortalPolicies() internal {
@@ -315,8 +293,6 @@ contract SetEntityTypePolicies is Script {
             allTypes,
             alloweds
         );
-
-        console2.log("\nSet up Exchange Portal transfer policies");
     }
 
     function getAllEntityTypes() internal pure returns (EntityType[] memory) {
@@ -338,11 +314,11 @@ contract SetEntityTypePolicies is Script {
         return types;
     }
 
-    function logPolicies() internal view {
+    function logEntityTypePolicies() internal view {
         EntityType[] memory allTypes = getAllEntityTypes();
         string[] memory typeNames = getTypeNames();
 
-        console2.log("\nComplete Transfer Policy Matrix:");
+        console2.log("\n========== Entity Type Transfer Policies ==========");
 
         // Print header
         string memory header = "From \\ To |";
@@ -377,7 +353,7 @@ contract SetEntityTypePolicies is Script {
         }
     }
 
-    function logMetadata() internal view {
+    function logEntityTypeMetadata() internal view {
         EntityType[] memory allTypes = getAllEntityTypes();
         string[] memory typeNames = getTypeNames();
 
