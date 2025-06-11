@@ -121,7 +121,7 @@ contract SetEntityTypePolicies is BaseScript {
 
     function setupIndividualPolicies() internal {
         // Individuals can transfer to most domestic entities
-        EntityType[] memory allowedTypes = new EntityType[](8);
+        EntityType[] memory allowedTypes = new EntityType[](9);
         allowedTypes[0] = EntityLibrary.INDIVIDUAL;
         allowedTypes[1] = EntityLibrary.PRIVATE_ENTERPRISE;
         allowedTypes[2] = EntityLibrary.LLC_ONE_MEMBER;
@@ -130,6 +130,7 @@ contract SetEntityTypePolicies is BaseScript {
         allowedTypes[5] = EntityLibrary.PARTNERSHIP;
         allowedTypes[6] = EntityLibrary.COOPERATIVE;
         allowedTypes[7] = EntityLibrary.HOUSEHOLD_BUSINESS;
+        allowedTypes[8] = EntityLibrary.EXCHANGE_PORTAL;
 
         bool[] memory alloweds = new bool[](allowedTypes.length);
         for (uint i = 0; i < allowedTypes.length; i++) {
