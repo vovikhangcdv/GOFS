@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./fds-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "9000:3000"
+    environment:
+      - VITE_API_URL=http://api:8888
+    depends_on:
+      - api
+    networks:
+      - fds_network
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./fds-api
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=fds
+      - RESTRICT_CONTRACT_ADDRESS=${RESTRICT_CONTRACT_ADDRESS}
+      - BLACKLIST_PRIVATE_KEY=${BLACKLIST_PRIVATE_KEY}
+      - EVND_TOKEN_ADDRESS=${EVND_TOKEN_ADDRESS}
+      - MAINNET_RPC_URL=${MAINNET_RPC_URL}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - fds_network
+    restart: unless-stopped
+
+  monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile.monitor
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=fds
+      - DB_SSLMODE=disable
+      - MAINNET_WS_URL=${MAINNET_WS_URL}
+      - MAINNET_RPC_URL=${MAINNET_RPC_URL}
+      - EVND_TOKEN_ADDRESS=${EVND_TOKEN_ADDRESS}
+      - CONTRACT_ABI=./contracts/TokenX.json
+      - LARGE_AMOUNT_THRESHOLD=${LARGE_AMOUNT_THRESHOLD:-1000.0}
+      - BLACKLIST_PRIVATE_KEY=${BLACKLIST_PRIVATE_KEY}
+      - RESTRICT_CONTRACT_ADDRESS=${RESTRICT_CONTRACT_ADDRESS}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - fds_network
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=fds
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - fds_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+networks:
+  fds_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
