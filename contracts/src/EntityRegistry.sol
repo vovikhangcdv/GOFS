@@ -28,6 +28,7 @@ contract EntityRegistry is
     error EmptyEntityTypes();
     error VerifierDoesNotExist();
     error VerifierAlreadyExists();
+    error EmptyMetadata();
 
     function domainSeparator() external view returns (bytes32) {
         return _domainSeparatorV4();
@@ -42,10 +43,14 @@ contract EntityRegistry is
     mapping(address => Entity) private _entities;
     mapping(address => EntityType[]) private _verifierAllowedTypes;
 
+    // Mapping to store entity type metadata
+    mapping(uint8 => string) private _entityTypeMetadata;
+
     event VerifierAdded(address indexed verifier, EntityType[] entityTypes);
     event VerifierUpdated(address indexed verifier, EntityType[] entityTypes);
     event VerifierRemoved(address indexed verifier);
     event EntityRegistered(address indexed entityAddress, Entity entity);
+    event EntityTypeMetadataSet(EntityType indexed entityType, string metadata);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -179,6 +184,34 @@ contract EntityRegistry is
         delete _verifierAllowedTypes[verifier];
 
         emit VerifierRemoved(verifier);
+    }
+
+    /**
+     * @dev Set metadata for an entity type
+     * @param entityType The entity type
+     * @param metadata The metadata string to associate with the entity type
+     */
+    function setEntityTypeMetadata(
+        EntityType entityType,
+        string memory metadata
+    ) external onlyRole(ENTITY_REGISTRY_ADMIN_ROLE) {
+        if (bytes(metadata).length == 0) revert EmptyMetadata();
+
+        uint8 entityTypeId = EntityType.unwrap(entityType);
+        _entityTypeMetadata[entityTypeId] = metadata;
+
+        emit EntityTypeMetadataSet(entityType, metadata);
+    }
+
+    /**
+     * @dev Get metadata for an entity type
+     * @param entityType The entity type
+     * @return string The metadata string associated with the entity type
+     */
+    function getEntityTypeMetadata(
+        EntityType entityType
+    ) external view returns (string memory) {
+        return _entityTypeMetadata[EntityType.unwrap(entityType)];
     }
 
     /// @notice Verifies if a given info (hashed) is part of the Entity's info root

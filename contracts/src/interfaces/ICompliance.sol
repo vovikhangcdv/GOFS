@@ -11,6 +11,8 @@ import {TxType} from "./ITypes.sol";
  * based on compliance rules.
  */
 interface ICompliance is IERC165 {
+    function name() external view returns (string memory);
+
     function canTransfer(
         address _from,
         address _to,

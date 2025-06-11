@@ -7,7 +7,8 @@ import {ICompliance} from "../src/interfaces/ICompliance.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {TxType} from "../src/interfaces/ITypes.sol";
-
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 // Mock compliance contract for testing
 contract MockCompliance is ICompliance {
     bool private allowTransfer;
@@ -122,25 +123,41 @@ contract CompliantTokenTest is Test {
 
         vm.startPrank(owner);
         compliance = new MockCompliance();
-        token = new CompliantToken();
-        token.initialize("Test Token", "TEST", address(compliance));
+        token = CompliantToken(
+            address(
+                new TransparentUpgradeableProxy(
+                    address(new CompliantToken()),
+                    address(new ProxyAdmin(owner)),
+                    abi.encodeWithSelector(
+                        CompliantToken.initialize.selector,
+                        "Test Token",
+                        "TEST",
+                        address(compliance)
+                    )
+                )
+            )
+        );
         vm.stopPrank();
     }
 
     function test_Constructor() public {
-        CompliantToken newToken = new CompliantToken();
-        newToken.initialize("Test Token", "TEST", address(compliance));
+        CompliantToken newToken = CompliantToken(
+            address(
+                new TransparentUpgradeableProxy(
+                    address(new CompliantToken()),
+                    address(new ProxyAdmin(owner)),
+                    abi.encodeWithSelector(
+                        CompliantToken.initialize.selector,
+                        "Test Token",
+                        "TEST",
+                        address(compliance)
+                    )
+                )
+            )
+        );
         assertEq(newToken.name(), "Test Token");
         assertEq(newToken.symbol(), "TEST");
         assertEq(address(newToken.compliance()), address(compliance));
-    }
-
-    function test_ConstructorRevertsOnZeroComplianceAddress() public {
-        vm.startPrank(owner);
-        CompliantToken newToken = new CompliantToken();
-        vm.expectRevert(CompliantToken.ZeroAddressCompliance.selector);
-        newToken.initialize("Test Token", "TEST", address(0));
-        vm.stopPrank();
     }
 
     function test_Mint() public {

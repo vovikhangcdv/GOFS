@@ -307,7 +307,7 @@ func createRegisterTx(config *config.Config, opts *bind.TransactOpts, skVerifier
 	}
 	entity := entityRegistry.Entity{
 		EntityAddress: crypto.PubkeyToAddress(skUser.PublicKey),
-		EntityType:    utils.GetRandomEntityType(),
+		EntityType:    3, // utils.GetRandomEntityType(),
 		EntityData:    structAbiEncoded,
 		Verifier:      crypto.PubkeyToAddress(skVerifier.PublicKey),
 	}

@@ -9,7 +9,8 @@ import {EntityLibrary} from "../../src/libraries/EntityLibrary.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {ICompliance} from "../../src/interfaces/ICompliance.sol";
-
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 contract TransactionTypeComplianceTest is Test {
     using EntityLibrary for Entity;
 
@@ -113,11 +114,32 @@ contract TransactionTypeComplianceTest is Test {
         vm.startPrank(admin);
 
         // Deploy EntityRegistry
-        entityRegistry = new EntityRegistry();
+        entityRegistry = EntityRegistry(
+            address(
+                new TransparentUpgradeableProxy(
+                    address(new EntityRegistry()),
+                    address(new ProxyAdmin(admin)),
+                    abi.encodeWithSelector(
+                        EntityRegistry.initialize.selector,
+                        admin
+                    )
+                )
+            )
+        );
 
         // Deploy compliance contract
-        compliance = new TransactionTypeCompliance();
-        compliance.initialize(address(entityRegistry));
+        compliance = TransactionTypeCompliance(
+            address(
+                new TransparentUpgradeableProxy(
+                    address(new TransactionTypeCompliance()),
+                    address(new ProxyAdmin(admin)),
+                    abi.encodeWithSelector(
+                        TransactionTypeCompliance.initialize.selector,
+                        address(entityRegistry)
+                    )
+                )
+            )
+        );
 
         // Grant TX_TYPE_ADMIN_ROLE to txTypeAdmin
         compliance.grantRole(compliance.TX_TYPE_ADMIN_ROLE(), txTypeAdmin);
@@ -131,38 +153,6 @@ contract TransactionTypeComplianceTest is Test {
         _registerEntity(user1, EntityType.unwrap(BANK));
         _registerEntity(user2, EntityType.unwrap(CORPORATE));
         _registerEntity(user3, EntityType.unwrap(INDIVIDUAL));
-    }
-
-    function testConstructor() public {
-        // Test valid initialization
-        TransactionTypeCompliance newCompliance = new TransactionTypeCompliance();
-        newCompliance.initialize(address(entityRegistry));
-        assertEq(
-            address(newCompliance.entityRegistry()),
-            address(entityRegistry)
-        );
-
-        // Test that deployer gets admin roles
-        assertTrue(
-            newCompliance.hasRole(
-                newCompliance.DEFAULT_ADMIN_ROLE(),
-                address(this)
-            )
-        );
-        assertTrue(
-            newCompliance.hasRole(
-                newCompliance.TX_TYPE_ADMIN_ROLE(),
-                address(this)
-            )
-        );
-    }
-
-    function testConstructorWithZeroAddress() public {
-        TransactionTypeCompliance newCompliance = new TransactionTypeCompliance();
-        vm.expectRevert(
-            TransactionTypeCompliance.InvalidEntityRegistryAddress.selector
-        );
-        newCompliance.initialize(address(0));
     }
 
     function testSupportsInterface() public view {

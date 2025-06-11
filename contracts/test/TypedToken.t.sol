@@ -6,7 +6,8 @@ import {CompliantToken} from "../src/CompliantToken.sol";
 import {ICompliance} from "../src/interfaces/ICompliance.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {TxType} from "../src/interfaces/ITypes.sol";
-
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 // Simple mock compliance for testing typed transfers
 contract SimpleCompliance is ICompliance {
     function supportsInterface(
@@ -71,8 +72,20 @@ contract TypedTokenTest is Test {
 
         vm.startPrank(owner);
         compliance = new SimpleCompliance();
-        token = new CompliantToken();
-        token.initialize("Typed Token", "TYPED", address(compliance));
+        token = CompliantToken(
+            address(
+                new TransparentUpgradeableProxy(
+                    address(new CompliantToken()),
+                    address(new ProxyAdmin(owner)),
+                    abi.encodeWithSelector(
+                        CompliantToken.initialize.selector,
+                        "Typed Token",
+                        "TYPED",
+                        address(compliance)
+                    )
+                )
+            )
+        );
         vm.stopPrank();
     }
 

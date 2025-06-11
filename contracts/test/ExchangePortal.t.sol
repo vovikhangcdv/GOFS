@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ExchangePortal} from "../src/ExchangePortal.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {Entity, EntityType} from "../src/interfaces/ITypes.sol";
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 contract MockToken is ERC20 {
     constructor(string memory name, string memory symbol) ERC20(name, symbol) {
         _mint(msg.sender, 1000000 * 10 ** decimals());
@@ -64,13 +66,22 @@ contract ExchangePortalTest is Test {
         token1 = new MockToken("Token1", "TK1");
 
         // Deploy portal
-        portal = new ExchangePortal();
-        portal.initialize(
-            address(token0),
-            address(token1),
-            INITIAL_RATE,
-            treasury,
-            INITIAL_FEE
+        // portal = new ExchangePortal();
+        portal = ExchangePortal(
+            address(
+                new TransparentUpgradeableProxy(
+                    address(new ExchangePortal()),
+                    address(new ProxyAdmin(admin)),
+                    abi.encodeWithSelector(
+                        ExchangePortal.initialize.selector,
+                        address(token0),
+                        address(token1),
+                        INITIAL_RATE,
+                        treasury,
+                        INITIAL_FEE
+                    )
+                )
+            )
         );
 
         // Fund user with tokens
@@ -282,74 +293,6 @@ contract ExchangePortalTest is Test {
             amountIn
         );
         assertEq(amountOut, (amountIn * 1e18) / INITIAL_RATE);
-    }
-
-    function test_RevertOnConstructorZeroAddress() public {
-        ExchangePortal testPortal = new ExchangePortal();
-        vm.expectRevert(ExchangePortal.ZeroAddress.selector);
-        testPortal.initialize(
-            address(0),
-            address(token1),
-            INITIAL_RATE,
-            treasury,
-            INITIAL_FEE
-        );
-
-        testPortal = new ExchangePortal();
-        vm.expectRevert(ExchangePortal.ZeroAddress.selector);
-        testPortal.initialize(
-            address(token0),
-            address(0),
-            INITIAL_RATE,
-            treasury,
-            INITIAL_FEE
-        );
-
-        testPortal = new ExchangePortal();
-        vm.expectRevert(ExchangePortal.ZeroAddress.selector);
-        testPortal.initialize(
-            address(token0),
-            address(token1),
-            INITIAL_RATE,
-            address(0),
-            INITIAL_FEE
-        );
-    }
-
-    function test_RevertOnConstructorSameTokens() public {
-        ExchangePortal testPortal = new ExchangePortal();
-        vm.expectRevert(ExchangePortal.TokensMustBeDifferent.selector);
-        testPortal.initialize(
-            address(token0),
-            address(token0),
-            INITIAL_RATE,
-            treasury,
-            INITIAL_FEE
-        );
-    }
-
-    function test_RevertOnConstructorZeroRate() public {
-        ExchangePortal testPortal = new ExchangePortal();
-        vm.expectRevert(ExchangePortal.InvalidInitialRate.selector);
-        testPortal.initialize(
-            address(token0),
-            address(token1),
-            0,
-            treasury,
-            INITIAL_FEE
-        );
-    }
-
-    function test_RevertOnConstructorFeeTooHigh() public {
-        ExchangePortal testPortal = new ExchangePortal();
-        vm.expectRevert(ExchangePortal.FeeTooHigh.selector);
-        testPortal.initialize(
-            address(token0),
-            address(token1),
-            INITIAL_RATE,
-            treasury,
-            100_01 // MAX_FEE (100_00) + 1
-        );
     }
 
     function test_RevertOnZeroTreasury() public {

@@ -46,6 +46,10 @@ contract EntityTypeCompliance is ICompliance, AccessControlUpgradeable {
         _disableInitializers();
     }
 
+    function name() external pure override returns (string memory) {
+        return "EntityTypeCompliance";
+    }
+
     /**
      * @dev Initialize the contract with EntityRegistry address and grant admin roles
      * @param _entityRegistry The address of the EntityRegistry contract
@@ -59,6 +63,12 @@ contract EntityTypeCompliance is ICompliance, AccessControlUpgradeable {
         entityRegistry = EntityRegistry(_entityRegistry);
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(COMPLIANCE_ADMIN_ROLE, msg.sender);
+    }
+
+    function setEntityRegistry(
+        address _entityRegistry
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        entityRegistry = EntityRegistry(_entityRegistry);
     }
 
     /**

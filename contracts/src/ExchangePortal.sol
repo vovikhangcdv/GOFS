@@ -32,6 +32,7 @@ contract ExchangePortal is
         keccak256("EXCHANGE_FEE_ADMIN_ROLE");
 
     uint256 public constant MAX_FEE = 100_00; // 10% max fee (scaled by 1e4)
+    uint256 public constant EXCHANGE_RATE_DECIMALS = 1e18;
     uint256 public constant FEE_DENOMINATOR = 10000;
 
     address public override token0; // Changed from immutable
@@ -181,9 +182,9 @@ contract ExchangePortal is
     ) public view override returns (uint256) {
         uint256 baseAmount;
         if (fromToken == token0 && toToken == token1) {
-            baseAmount = (amountIn * _exchangeRate) / 1e18;
+            baseAmount = (amountIn * _exchangeRate) / EXCHANGE_RATE_DECIMALS;
         } else if (fromToken == token1 && toToken == token0) {
-            baseAmount = (amountIn * 1e18) / _exchangeRate;
+            baseAmount = (amountIn * EXCHANGE_RATE_DECIMALS) / _exchangeRate;
         } else {
             revert InvalidTokenPair();
         }

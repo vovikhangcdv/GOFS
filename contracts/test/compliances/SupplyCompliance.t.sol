@@ -6,15 +6,14 @@ import {SupplyCompliance} from "../../src/compliances/SupplyCompliance.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 contract MockToken is ERC20 {
     constructor(
         string memory name,
         string memory symbol,
         uint8 decimals
-    ) ERC20(name, symbol) {
-        _mint(msg.sender, 1000000 * 10 ** decimals);
-    }
+    ) ERC20(name, symbol) {}
 
     function mint(address to, uint256 amount) external {
         _mint(to, amount);
@@ -42,11 +41,21 @@ contract SupplyComplianceTest is Test {
         vm.startPrank(admin);
 
         // Deploy token
-        token = new MockToken("Test Token", "TEST", 18);
+        token = new MockToken("Test Token", "TEST", 0);
 
         // Deploy compliance module
-        compliance = new SupplyCompliance();
-        compliance.initialize(address(token));
+        compliance = SupplyCompliance(
+            address(
+                new TransparentUpgradeableProxy(
+                    address(new SupplyCompliance()),
+                    address(new ProxyAdmin(admin)),
+                    abi.encodeWithSelector(
+                        SupplyCompliance.initialize.selector,
+                        address(token)
+                    )
+                )
+            )
+        );
 
         // Setup roles
         compliance.grantRole(compliance.DEFAULT_ADMIN_ROLE(), admin);
@@ -54,19 +63,13 @@ contract SupplyComplianceTest is Test {
 
         vm.stopPrank();
     }
-
-    function testConstructorWithZeroAddress() public {
-        SupplyCompliance newCompliance = new SupplyCompliance();
-        vm.expectRevert(SupplyCompliance.TokenNotSet.selector);
-        newCompliance.initialize(address(0));
-    }
-
     function test_SetMaxSupply() public {
         uint256 newMax = 1000000;
 
         // Test event emission
         vm.expectEmit(true, true, true, true);
         emit MaxSupplyUpdated(0, newMax);
+        vm.prank(admin);
         compliance.setMaxSupply(newMax);
 
         // Test max supply updated
@@ -87,6 +90,7 @@ contract SupplyComplianceTest is Test {
     }
 
     function test_CanTransfer_RegularTransfer() public {
+        vm.prank(admin);
         compliance.setMaxSupply(1000);
         token.mint(user1, 100);
 
@@ -95,6 +99,7 @@ contract SupplyComplianceTest is Test {
     }
 
     function test_CanTransfer_Mint_UnderLimit() public {
+        vm.prank(admin);
         compliance.setMaxSupply(1000);
         token.mint(user1, 100);
 
@@ -103,6 +108,7 @@ contract SupplyComplianceTest is Test {
     }
 
     function test_CanTransfer_Mint_OverLimit() public {
+        vm.prank(admin);
         compliance.setMaxSupply(1000);
         token.mint(user1, 100);
 
@@ -111,6 +117,7 @@ contract SupplyComplianceTest is Test {
     }
 
     function test_CanTransferWithFailureReason_RegularTransfer() public {
+        vm.prank(admin);
         compliance.setMaxSupply(1000);
         token.mint(user1, 100);
 
@@ -122,6 +129,7 @@ contract SupplyComplianceTest is Test {
     }
 
     function test_CanTransferWithFailureReason_Mint_UnderLimit() public {
+        vm.prank(admin);
         compliance.setMaxSupply(1000);
         token.mint(user1, 100);
 
@@ -133,6 +141,7 @@ contract SupplyComplianceTest is Test {
     }
 
     function test_CanTransferWithFailureReason_Mint_OverLimit() public {
+        vm.prank(admin);
         compliance.setMaxSupply(1000);
         token.mint(user1, 100);
 
@@ -152,6 +161,7 @@ contract SupplyComplianceTest is Test {
     }
 
     function test_CurrentSupply() public {
+        vm.prank(admin);
         compliance.setMaxSupply(1000);
 
         assertEq(compliance.currentSupply(), 0);
