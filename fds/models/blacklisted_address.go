@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -13,4 +15,20 @@ type BlacklistedAddress struct {
 	Reason      string // Reason for blacklisting
 	Severity    string // Severity level of the suspicious behavior
 	Details     string // Additional details about the blacklisting
+}
+
+// WhitelistAddress represents a whitelisted address
+type WhitelistAddress struct {
+	ID        uint   `gorm:"primaryKey"`
+	Address   string `gorm:"uniqueIndex"`
+	Reason    string
+	CreatedAt time.Time
+}
+
+// SuspiciousAddress represents a suspicious address
+type SuspiciousAddress struct {
+	ID        uint   `gorm:"primaryKey"`
+	Address   string `gorm:"uniqueIndex"`
+	Reason    string
+	CreatedAt time.Time
 }

@@ -19,6 +19,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+
+	"encoding/json"
+	"time"
 )
 
 var (
@@ -361,4 +364,170 @@ func getEVNDBalance(c *gin.Context) {
 		"balance": balance,
 		"unit":    "eVND",
 	})
+}
+
+// getRules returns all compliance rules
+func getRules(c *gin.Context) {
+	var rules []Rule
+	if err := db.Order("id").Find(&rules).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, rules)
+}
+
+// getRuleViolations returns all rules with their violation counts in the last 24h
+func getRuleViolations(c *gin.Context) {
+	var rules []Rule
+	if err := db.Order("id").Find(&rules).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// For each rule, count violations in the last 24h
+	var result []gin.H
+	cutoff := time.Now().Add(-24 * time.Hour)
+	for _, rule := range rules {
+		var count int64
+		db.Model(&RuleViolation{}).Where("rule_id = ? AND created_at >= ?", rule.ID, cutoff).Count(&count)
+		result = append(result, gin.H{
+			"id":         rule.ID,
+			"name":       rule.Name,
+			"status":     rule.Status,
+			"violations": count,
+		})
+	}
+	c.JSON(http.StatusOK, result)
+}
+
+// Add address to suspicious_addresses
+func addSuspiciousAddress(c *gin.Context) {
+	var req struct {
+		Address string `json:"address"`
+		Reason  string `json:"reason"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil || req.Address == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "address required"})
+		return
+	}
+	addr := SuspiciousAddress{
+		Address: req.Address,
+		Reason:  req.Reason,
+	}
+	if err := db.Create(&addr).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, addr)
+}
+
+// Remove address from suspicious_addresses
+func removeSuspiciousAddress(c *gin.Context) {
+	var req struct {
+		Address string `json:"address"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil || req.Address == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "address required"})
+		return
+	}
+	if err := db.Where("address = ?", req.Address).Delete(&SuspiciousAddress{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "deleted", "address": req.Address})
+}
+
+// Add address to whitelist_addresses
+func addWhitelistAddress(c *gin.Context) {
+	var req struct {
+		Address string `json:"address"`
+		Reason  string `json:"reason"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil || req.Address == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "address required"})
+		return
+	}
+	addr := WhitelistAddress{
+		Address: req.Address,
+		Reason:  req.Reason,
+	}
+	if err := db.Create(&addr).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, addr)
+}
+
+// Remove address from whitelist_addresses
+func removeWhitelistAddress(c *gin.Context) {
+	var req struct {
+		Address string `json:"address"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil || req.Address == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "address required"})
+		return
+	}
+	if err := db.Where("address = ?", req.Address).Delete(&WhitelistAddress{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "deleted", "address": req.Address})
+}
+
+// Get all suspicious addresses
+func getSuspiciousAddresses(c *gin.Context) {
+	var addresses []SuspiciousAddress
+	if err := db.Order("created_at DESC").Find(&addresses).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, addresses)
+}
+
+// Get all whitelist addresses
+func getWhitelistAddresses(c *gin.Context) {
+	var addresses []WhitelistAddress
+	if err := db.Order("created_at DESC").Find(&addresses).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, addresses)
+}
+
+// UpdateRule updates a rule's parameters
+func updateRule(c *gin.Context) {
+	var req struct {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Status      string `json:"status"`
+		Parameters  string `json:"parameters"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Validate parameters JSON
+	var params map[string]interface{}
+	if err := json.Unmarshal([]byte(req.Parameters), &params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid parameters JSON"})
+		return
+	}
+
+	// Update rule
+	result := db.Model(&Rule{}).Where("name = ?", req.Name).Updates(map[string]interface{}{
+		"description": req.Description,
+		"status":      req.Status,
+		"parameters":  req.Parameters,
+	})
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "rule not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "updated", "rule": req.Name})
 }

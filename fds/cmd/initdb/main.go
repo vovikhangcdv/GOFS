@@ -55,6 +55,8 @@ func main() {
 			&models.PendingTransaction{},
 			&models.Transaction{},
 			&models.BlacklistedAddress{},
+			&models.RuleViolation{},
+			&models.Rule{},
 		); err != nil {
 			log.Fatalf("Failed to drop tables: %v", err)
 		}
@@ -69,6 +71,7 @@ func main() {
 		&models.Transaction{},
 		&models.PendingTransaction{},
 		&models.BlacklistedAddress{},
+		&models.Rule{},
 	); err != nil {
 		log.Fatalf("Failed to migrate base tables: %v", err)
 	}
@@ -78,8 +81,76 @@ func main() {
 		&models.TokenTransfer{},
 		&models.SuspiciousTransfer{},
 		&models.SuspiciousTransferRelatedTx{},
+		&models.RuleViolation{},
 	); err != nil {
 		log.Fatalf("Failed to migrate tables with foreign keys: %v", err)
+	}
+
+	// Initialize default rules
+	defaultRules := []models.Rule{
+		{
+			Name:        "large_transfer",
+			Description: "Detects transfers exceeding a large amount threshold",
+			Status:      "active",
+			Severity:    "high",
+			Parameters:  `{"threshold": "1000000000000000000000", "description": "Transfer amount threshold in wei"}`,
+			Actions:     `{"action": "record_violation", "description": "Record violation when transfer amount exceeds threshold"}`,
+		},
+		{
+			Name:        "multiple_transfers",
+			Description: "Detects multiple transfers from the same address in a short time period",
+			Status:      "active",
+			Severity:    "medium",
+			Parameters:  `{
+				"min_transfers": 4,
+				"block_range": 10,
+				"description": "Minimum number of transfers and block range to check"
+			}`,
+			Actions:     `{"action": "record_violation", "description": "Record violation when address makes multiple transfers in short time"}`,
+		},
+		{
+			Name:        "multiple_incoming_transfers",
+			Description: "Detects multiple incoming transfers to the same address in a short time period",
+			Status:      "active",
+			Severity:    "high",
+			Parameters:  `{
+				"threshold": "1000000000000000000000",
+				"block_range": 10,
+				"description": "Total amount threshold in wei and block range to check"
+			}`,
+			Actions:     `{"action": "record_violation", "description": "Record violation when address receives multiple transfers exceeding threshold"}`,
+		},
+		{
+			Name:        "suspicious_address",
+			Description: "Detects transactions involving known suspicious addresses",
+			Status:      "active",
+			Severity:    "high",
+			Parameters:  `{
+				"addresses": [],
+				"description": "List of known suspicious addresses to monitor"
+			}`,
+			Actions:     `{"action": "record_violation", "description": "Record violation when transaction involves suspicious address"}`,
+		},
+		{
+			Name:        "insufficient_balance",
+			Description: "Detects transfers where the sender's balance is less than the transfer amount",
+			Status:      "active",
+			Severity:    "high",
+			Parameters:  `{
+				"description": "Check if sender has sufficient balance before transfer",
+				"check_blocks": 5,
+				"description": "Number of blocks to check for previous balance"
+			}`,
+			Actions:     `{"action": "record_violation", "description": "Record violation when transfer amount exceeds sender's previous balance"}`,
+		},
+	}
+
+	// Insert default rules
+	for _, rule := range defaultRules {
+		result := db.Where("name = ?", rule.Name).FirstOrCreate(&rule)
+		if result.Error != nil {
+			log.Printf("Warning: Failed to create rule %s: %v", rule.Name, result.Error)
+		}
 	}
 
 	// Print schema information

@@ -35,4 +35,33 @@ export interface BlacklistedAddress {
 export interface RelatedAddresses {
   address: string;
   related: string[];
+}
+
+export interface Rule {
+  id: number;
+  name: string;
+  status: string;
+  violations: number;
+}
+
+export interface RuleViolation {
+  id: number;
+  rule_id: number;
+  tx_hash: string;
+  block_number: number;
+  created_at: string;
+}
+
+export interface SuspiciousAddress {
+  id: number;
+  address: string;
+  reason: string;
+  created_at: string;
+}
+
+export interface WhitelistAddress {
+  id: number;
+  address: string;
+  reason: string;
+  created_at: string;
 } 

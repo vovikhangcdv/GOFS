@@ -7,12 +7,15 @@ import (
 	"log"
 	"math/big"
 	"os"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
 	"token-monitor/contracts/restrict"
 	"token-monitor/models"
 
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -33,6 +36,7 @@ type Analyzer struct {
 	mu              sync.RWMutex
 	maxBlocks       int
 	interval        time.Duration
+	rules           map[string]*models.Rule
 }
 
 // NewAnalyzer creates a new analyzer instance
@@ -42,7 +46,7 @@ func NewAnalyzer(db *gorm.DB, largeAmount float64, shortTimeBlocks int64, suspic
 		suspiciousMap[addr] = true
 	}
 
-	return &Analyzer{
+	analyzer := &Analyzer{
 		db:              db,
 		largeAmount:     new(big.Float).SetFloat64(largeAmount),
 		shortTimeBlocks: shortTimeBlocks,
@@ -52,7 +56,49 @@ func NewAnalyzer(db *gorm.DB, largeAmount float64, shortTimeBlocks int64, suspic
 		stopChan:        make(chan struct{}),
 		maxBlocks:       20,
 		interval:        interval,
+		rules:           make(map[string]*models.Rule),
 	}
+
+	// Load rules from database
+	analyzer.loadRules()
+
+	return analyzer
+}
+
+// loadRules loads all active rules from the database
+func (a *Analyzer) loadRules() {
+	var rules []models.Rule
+	if err := a.db.Where("status = ?", "active").Find(&rules).Error; err != nil {
+		log.Printf("Error loading rules: %v", err)
+		return
+	}
+
+	for _, rule := range rules {
+		// Create a copy of the rule to avoid pointer issues
+		ruleCopy := rule
+		a.rules[rule.Name] = &ruleCopy
+		log.Printf("Loaded rule: %s with parameters: %s", rule.Name, rule.Parameters)
+	}
+}
+
+// getRuleParameter gets a parameter value from a rule's parameters JSON
+func (a *Analyzer) getRuleParameter(ruleName, paramName string) (string, error) {
+	rule, exists := a.rules[ruleName]
+	if !exists {
+		return "", fmt.Errorf("rule %s not found", ruleName)
+	}
+
+	var params map[string]interface{}
+	if err := json.Unmarshal([]byte(rule.Parameters), &params); err != nil {
+		return "", fmt.Errorf("error unmarshaling rule parameters: %w", err)
+	}
+
+	value, exists := params[paramName]
+	if !exists {
+		return "", fmt.Errorf("parameter %s not found in rule %s", paramName, ruleName)
+	}
+
+	return fmt.Sprintf("%v", value), nil
 }
 
 // Start begins processing transactions and periodic analysis
@@ -154,6 +200,13 @@ func (a *Analyzer) QueueTransaction(tx *models.Transaction) {
 
 // AnalyzeTransaction analyzes a single transaction for suspicious behaviors
 func (a *Analyzer) AnalyzeTransaction(ctx context.Context, tx *models.Transaction) ([]map[string]interface{}, error) {
+	// Check whitelist: skip rule checks if from or to is whitelisted
+	var whitelisted []models.WhitelistAddress
+	if err := a.db.Model(&models.WhitelistAddress{}).Where("address IN (?, ?)", tx.From, tx.To).Find(&whitelisted).Error; err == nil && len(whitelisted) > 0 {
+		log.Printf("Skipping analysis for whitelisted addresses in transaction %s", tx.Hash)
+		return nil, nil
+	}
+
 	var behaviors []map[string]interface{}
 
 	// Convert transaction value to big.Float
@@ -161,44 +214,123 @@ func (a *Analyzer) AnalyzeTransaction(ctx context.Context, tx *models.Transactio
 	value.SetString(tx.Value)
 
 	// 1. Check for large amount transfers
-	if value.Cmp(a.largeAmount) > 0 {
-		behaviors = append(behaviors, map[string]interface{}{
-			"type":        "large_transfer",
-			"description": "Large amount transfer detected",
-			"severity":    "high",
-			"details": map[string]interface{}{
-				"from":   tx.From,
-				"to":     tx.To,
-				"amount": tx.Value,
-			},
-		})
+	if threshold, err := a.getRuleParameter("large_transfer", "threshold"); err == nil {
+		thresholdFloat := new(big.Float)
+		thresholdFloat.SetString(threshold)
+		if value.Cmp(thresholdFloat) > 0 {
+			log.Printf("Large transfer detected in transaction %s: %s > %s", tx.Hash, value.String(), threshold)
+			details := map[string]interface{}{
+				"from":      tx.From,
+				"to":        tx.To,
+				"amount":    tx.Value,
+				"threshold": threshold,
+			}
+			behaviors = append(behaviors, map[string]interface{}{
+				"type":        "large_transfer",
+				"description": "Large amount transfer detected",
+				"severity":    "high",
+				"details":     details,
+			})
+			a.recordRuleViolation("large_transfer", tx, details)
+		}
+	} else {
+		log.Printf("Error getting large_transfer threshold: %v", err)
 	}
 
 	// 2. Check for multiple transfers in short time
-	if multipleBehaviors := a.checkMultipleTransfers(tx); len(multipleBehaviors) > 0 {
-		behaviors = append(behaviors, multipleBehaviors...)
+	if minTransfers, err := a.getRuleParameter("multiple_transfers", "min_transfers"); err == nil {
+		if blockRange, err := a.getRuleParameter("multiple_transfers", "block_range"); err == nil {
+			minTransfersInt, _ := strconv.Atoi(minTransfers)
+			blockRangeInt, _ := strconv.Atoi(blockRange)
+			if multipleBehaviors := a.checkMultipleTransfers(tx, minTransfersInt, blockRangeInt); len(multipleBehaviors) > 0 {
+				log.Printf("Multiple transfers detected in transaction %s", tx.Hash)
+				details := map[string]interface{}{
+					"from":          tx.From,
+					"count":         len(multipleBehaviors),
+					"min_transfers": minTransfers,
+					"block_range":   blockRange,
+				}
+				behaviors = append(behaviors, multipleBehaviors...)
+				a.recordRuleViolation("multiple_transfers", tx, details)
+			}
+		} else {
+			log.Printf("Error getting multiple_transfers block_range: %v", err)
+		}
+	} else {
+		log.Printf("Error getting multiple_transfers min_transfers: %v", err)
 	}
 
 	// 3. Check for multiple incoming transfers in short time
-	if incomingBehaviors := a.checkMultipleIncomingTransfers(tx); len(incomingBehaviors) > 0 {
-		behaviors = append(behaviors, incomingBehaviors...)
+	if threshold, err := a.getRuleParameter("multiple_incoming_transfers", "threshold"); err == nil {
+		if blockRange, err := a.getRuleParameter("multiple_incoming_transfers", "block_range"); err == nil {
+			thresholdFloat := new(big.Float)
+			thresholdFloat.SetString(threshold)
+			blockRangeInt, _ := strconv.Atoi(blockRange)
+			if incomingBehaviors := a.checkMultipleIncomingTransfers(tx, thresholdFloat, blockRangeInt); len(incomingBehaviors) > 0 {
+				log.Printf("Multiple incoming transfers detected in transaction %s -- number tx %d", tx.Hash, blockRangeInt)
+				details := map[string]interface{}{
+					"to":          tx.To,
+					"count":       len(incomingBehaviors),
+					"threshold":   threshold,
+					"block_range": blockRange,
+				}
+				behaviors = append(behaviors, incomingBehaviors...)
+				a.recordRuleViolation("multiple_incoming_transfers", tx, details)
+			}
+		} else {
+			log.Printf("Error getting multiple_incoming_transfers block_range: %v", err)
+		}
+	} else {
+		log.Printf("Error getting multiple_incoming_transfers threshold: %v", err)
 	}
 
 	// 4. Check for transfers to/from suspicious addresses
-	if a.suspiciousAddrs[tx.From] || a.suspiciousAddrs[tx.To] {
-		behaviors = append(behaviors, map[string]interface{}{
-			"type":        "suspicious_address",
-			"description": "Transaction involves suspicious address",
-			"severity":    "high",
-			"details": map[string]interface{}{
-				"from": tx.From,
-				"to":   tx.To,
-			},
-		})
+	var suspiciousAddrs []models.SuspiciousAddress
+	if err := a.db.Model(&models.SuspiciousAddress{}).Find(&suspiciousAddrs).Error; err == nil {
+		for _, addr := range suspiciousAddrs {
+			if tx.From == addr.Address || tx.To == addr.Address {
+				log.Printf("Suspicious address detected in transaction %s: %s", tx.Hash, addr.Address)
+				details := map[string]interface{}{
+					"from": tx.From,
+					"to":   tx.To,
+				}
+				behaviors = append(behaviors, map[string]interface{}{
+					"type":        "suspicious_address",
+					"description": "Transaction involves suspicious address",
+					"severity":    "high",
+					"details":     details,
+				})
+				a.recordRuleViolation("suspicious_address", tx, details)
+				break
+			}
+		}
+	} else {
+		log.Printf("Error checking suspicious addresses: %v", err)
 	}
+
+	// 5. Check for insufficient balance transfers
+	/* 	if checkBlocks, err := a.getRuleParameter("insufficient_balance", "check_blocks"); err == nil {
+	   		if insufficientBehaviors := a.checkInsufficientBalance(tx, value, checkBlocks); len(insufficientBehaviors) > 0 {
+	   			log.Printf("Insufficient balance detected in transaction %s", tx.Hash)
+	   			details := map[string]interface{}{
+	   				"from":         tx.From,
+	   				"to":           tx.To,
+	   				"amount":       tx.Value,
+	   				"check_blocks": checkBlocks,
+	   			}
+	   			behaviors = append(behaviors, insufficientBehaviors...)
+	   			a.recordRuleViolation("insufficient_balance", tx, details)
+	   		}
+	   	} else {
+	   		log.Printf("Error getting insufficient_balance check_blocks: %v", err)
+	   	} */
 
 	// Update recent transfers and balances
 	a.updateState(tx)
+
+	if len(behaviors) > 0 {
+		log.Printf("Found %d suspicious behaviors in transaction %s", len(behaviors), tx.Hash)
+	}
 
 	return behaviors, nil
 }
@@ -373,6 +505,21 @@ func (a *Analyzer) handleSuspiciousBehaviors(tx *models.Transaction, behaviors [
 	}
 	detailsJSON = append(detailsJSON, []byte(" blocked by fds")...)
 
+	// Set reason as the description(s) of the rules that marked the transaction as suspicious
+	var reason string
+	if len(behaviors) == 1 {
+		desc, _ := behaviors[0]["description"].(string)
+		reason = desc
+	} else if len(behaviors) > 1 {
+		var descs []string
+		for _, b := range behaviors {
+			if desc, ok := b["description"].(string); ok {
+				descs = append(descs, desc)
+			}
+		}
+		reason = strings.Join(descs, "; ")
+	}
+
 	// Use a database transaction to ensure atomicity
 	err = a.db.Transaction(func(db *gorm.DB) error {
 		// Create a single suspicious transfer record for all behaviors
@@ -383,7 +530,7 @@ func (a *Analyzer) handleSuspiciousBehaviors(tx *models.Transaction, behaviors [
 			TxHash:        tx.Hash,
 			BlockNumber:   tx.BlockNumber,
 			Timestamp:     time.Now(),
-			Reason:        fmt.Sprintf("Multiple suspicious behaviors detected (%d)", len(behaviors)),
+			Reason:        reason,
 			Severity:      highestSeverity,
 			Details:       string(detailsJSON),
 			IsBlacklisted: isBlacklisted,
@@ -502,22 +649,20 @@ func (a *Analyzer) processUnanalyzedTransactions() {
 }
 
 // checkMultipleTransfers checks if an address has made multiple transfers in a short time
-func (a *Analyzer) checkMultipleTransfers(tx *models.Transaction) []map[string]interface{} {
+func (a *Analyzer) checkMultipleTransfers(tx *models.Transaction, minTransfers, blockRange int) []map[string]interface{} {
 	var behaviors []map[string]interface{}
 
-	// Use a more efficient query with proper index hints
 	var recentTxs []models.Transaction
 	query := a.db.Model(&models.Transaction{}).
 		Select("hash, from_address, to_address, value, block_number, timestamp")
 
-	// Handle case where block number is less than shortTimeBlocks
-	if tx.BlockNumber >= uint64(a.shortTimeBlocks) {
-		query = query.Where("from_address = ? AND block_number >= ?", tx.From, tx.BlockNumber-uint64(a.shortTimeBlocks))
+	if tx.BlockNumber >= uint64(blockRange) {
+		query = query.Where("from_address = ? AND block_number >= ?", tx.From, tx.BlockNumber-uint64(blockRange))
 	} else {
 		query = query.Where("from_address = ? AND block_number >= ?", tx.From, 0)
 	}
 
-	query = query.Order("block_number DESC") // Limit to most recent 10 transactions for better performance
+	query = query.Order("block_number DESC")
 
 	err := query.Find(&recentTxs).Error
 	if err != nil {
@@ -526,7 +671,7 @@ func (a *Analyzer) checkMultipleTransfers(tx *models.Transaction) []map[string]i
 	}
 
 	transferCount := len(recentTxs)
-	if transferCount >= 4 {
+	if transferCount >= minTransfers {
 		var oldestBlock, newestBlock uint64
 		if len(recentTxs) > 0 {
 			oldestBlock = recentTxs[len(recentTxs)-1].BlockNumber
@@ -566,14 +711,13 @@ func (a *Analyzer) checkMultipleTransfers(tx *models.Transaction) []map[string]i
 }
 
 // checkMultipleIncomingTransfers checks if an address receives multiple transfers in a short time period
-func (a *Analyzer) checkMultipleIncomingTransfers(tx *models.Transaction) []map[string]interface{} {
+func (a *Analyzer) checkMultipleIncomingTransfers(tx *models.Transaction, threshold *big.Float, blockRange int) []map[string]interface{} {
 	var behaviors []map[string]interface{}
 
-	// Get recent incoming transactions for the recipient
 	var recentTxs []models.Transaction
 	query := a.db.Where("to_address = ?", tx.To)
-	if tx.BlockNumber > 10 { // Check last 10 blocks
-		query = query.Where("block_number >= ?", tx.BlockNumber-10)
+	if tx.BlockNumber > uint64(blockRange) {
+		query = query.Where("block_number >= ?", tx.BlockNumber-uint64(blockRange))
 	}
 	err := query.Order("block_number DESC").Find(&recentTxs).Error
 
@@ -592,13 +736,10 @@ func (a *Analyzer) checkMultipleIncomingTransfers(tx *models.Transaction) []map[
 	}
 
 	// Check if total amount exceeds threshold
-	if totalAmount.Cmp(a.largeAmount) > 0 {
-		// Calculate block range safely
+	if totalAmount.Cmp(threshold) > 0 {
 		var blockRange uint64
 		if len(recentTxs) > 0 {
 			blockRange = tx.BlockNumber - recentTxs[len(recentTxs)-1].BlockNumber
-		} else {
-			blockRange = 0
 		}
 
 		behaviors = append(behaviors, map[string]interface{}{
@@ -610,7 +751,7 @@ func (a *Analyzer) checkMultipleIncomingTransfers(tx *models.Transaction) []map[
 				"total_amount": totalAmount.String(),
 				"tx_count":     len(recentTxs) + 1,
 				"block_range":  blockRange,
-				"threshold":    a.largeAmount.String(),
+				"threshold":    threshold.String(),
 			},
 		})
 	}
@@ -679,4 +820,127 @@ func (a *Analyzer) cleanupOldBlocks(currentBlock uint64) {
 		oldestBlock := currentBlock - uint64(a.maxBlocks)
 		a.db.Where("block_number < ?", oldestBlock).Delete(&models.Transaction{})
 	}
+}
+
+// checkRuleStatus checks if a rule is active
+func (a *Analyzer) checkRuleStatus(ruleName string) bool {
+	var rule models.Rule
+	if err := a.db.Where("name = ? AND status = ?", ruleName, "active").First(&rule).Error; err != nil {
+		return false
+	}
+	return true
+}
+
+// recordRuleViolation records a violation for an active rule
+func (a *Analyzer) recordRuleViolation(ruleName string, tx *models.Transaction, details map[string]interface{}) {
+	var rule models.Rule
+	if err := a.db.Where("name = ? AND status = ?", ruleName, "active").First(&rule).Error; err != nil {
+		return // Rule not found or not active
+	}
+
+	// Convert details to JSON
+	detailsJSON, err := json.Marshal(details)
+	if err != nil {
+		log.Printf("Error marshaling violation details: %v", err)
+		return
+	}
+
+	// Create violation record
+	violation := &models.RuleViolation{
+		RuleID:      rule.ID,
+		TxHash:      tx.Hash,
+		BlockNumber: tx.BlockNumber,
+		Details:     string(detailsJSON),
+	}
+
+	// Use transaction to ensure atomicity
+	err = a.db.Transaction(func(db *gorm.DB) error {
+		// Create violation record
+		if err := db.Create(violation).Error; err != nil {
+			return fmt.Errorf("error creating violation record: %w", err)
+		}
+
+		// Update rule violation count
+		if err := db.Model(&rule).Updates(map[string]interface{}{
+			"violations":        rule.Violations + 1,
+			"last_violation_at": time.Now(),
+		}).Error; err != nil {
+			return fmt.Errorf("error updating rule violation count: %w", err)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		log.Printf("Error recording %s violation: %v", ruleName, err)
+	}
+}
+
+// getERC20BalanceAt returns the ERC20 token balance for a given address at a specific block (or nil for latest)
+func getERC20BalanceAt(client *ethclient.Client, tokenAddress string, userAddress string, blockNumber *big.Int) (*big.Int, error) {
+	balanceOfSignature := []byte("balanceOf(address)")
+	balanceOfHash := crypto.Keccak256(balanceOfSignature)[:4]
+
+	addr := common.HexToAddress(userAddress)
+	paddedAddress := common.LeftPadBytes(addr.Bytes(), 32)
+	data := append(balanceOfHash, paddedAddress...)
+
+	tokenAddr := common.HexToAddress(tokenAddress)
+	msg := ethereum.CallMsg{
+		To:   &tokenAddr,
+		Data: data,
+	}
+
+	ctx := context.Background()
+	result, err := client.CallContract(ctx, msg, blockNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	balance := new(big.Int).SetBytes(result)
+	return balance, nil
+}
+
+// checkInsufficientBalance checks if the sender had sufficient token balance before the transfer
+func (a *Analyzer) checkInsufficientBalance(tx *models.Transaction, transferAmount *big.Float, checkBlocks string) []map[string]interface{} {
+	var behaviors []map[string]interface{}
+
+	mainnetClient, err := ethclient.Dial(os.Getenv("MAINNET_RPC_URL"))
+	if err != nil {
+		log.Printf("Failed to connect to mainnet for balance check: %v", err)
+		return behaviors
+	}
+	defer mainnetClient.Close()
+
+	blockNumber := new(big.Int).SetUint64(tx.BlockNumber)
+	blockNumber.Sub(blockNumber, big.NewInt(1))
+
+	tokenAddress := tx.To    // string
+	senderAddress := tx.From // string
+
+	balance, err := getERC20BalanceAt(mainnetClient, tokenAddress, senderAddress, blockNumber)
+	if err != nil {
+		log.Printf("Error getting token balance for address %s at block %d: %v", tx.From, blockNumber, err)
+		return behaviors
+	}
+
+	balanceFloat := new(big.Float).SetInt(balance)
+
+	if transferAmount.Cmp(balanceFloat) > 0 {
+		behaviors = append(behaviors, map[string]interface{}{
+			"type":        "insufficient_balance",
+			"description": "Token transfer amount exceeds sender's previous balance",
+			"severity":    "high",
+			"details": map[string]interface{}{
+				"from":             tx.From,
+				"to":               tx.To,
+				"token_address":    tokenAddress,
+				"transfer_amount":  transferAmount.String(),
+				"previous_balance": balanceFloat.String(),
+				"block_number":     blockNumber.String(),
+			},
+		})
+	}
+
+	return behaviors
 }

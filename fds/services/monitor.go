@@ -328,3 +328,136 @@ func (m *monitor) parseTopic(t abi.Type, topic common.Hash) (interface{}, error)
 		return nil, fmt.Errorf("unsupported topic type: %v", t)
 	}
 }
+
+// handleSuspiciousBehaviors handles suspicious behaviors detected by the analyzer
+func (m *monitor) handleSuspiciousBehaviors(tx *models.Transaction, behaviors []string) error {
+	if len(behaviors) == 0 {
+		return nil
+	}
+
+	log.Printf("Suspicious behaviors detected for transaction %s:", tx.Hash)
+
+	// Track already processed addresses to avoid duplicates
+	processedAddresses := make(map[string]bool)
+
+	// Process each behavior
+	for _, behavior := range behaviors {
+		// Get the rule
+		var rule models.Rule
+		if err := m.db.Where("name = ?", behavior).First(&rule).Error; err != nil {
+			return fmt.Errorf("error getting rule %s: %w", behavior, err)
+		}
+
+		// Record the violation
+		if err := m.recordRuleViolation(rule.ID, tx.Hash, tx.BlockNumber, map[string]interface{}{"behavior": behavior}); err != nil {
+			log.Printf("Error recording %s violation: %v", behavior, err)
+			continue
+		}
+
+		// Handle blacklisting if severity is high
+		if rule.Severity == "high" {
+			// Check addresses involved in the behavior
+			addresses := []string{}
+			if tx.From != "" {
+				addresses = append(addresses, tx.From)
+			}
+			if tx.To != "" {
+				addresses = append(addresses, tx.To)
+			}
+
+			// Process each address
+			for _, addr := range addresses {
+				// Skip if already processed in this transaction
+				if processedAddresses[addr] {
+					log.Printf("Address %s already processed in this transaction, skipping", addr)
+					continue
+				}
+				processedAddresses[addr] = true
+
+				// Check if address is already blacklisted
+				var existing models.BlacklistedAddress
+				if err := m.db.Where("address = ?", addr).First(&existing).Error; err == nil {
+					log.Printf("Address %s is already blacklisted, skipping", addr)
+					continue
+				} else if err != gorm.ErrRecordNotFound {
+					log.Printf("Error checking blacklist status for address %s: %v", addr, err)
+					continue
+				}
+
+				// Add to blacklist
+				blacklistAddr := models.BlacklistedAddress{
+					Address:     addr,
+					TxHash:      tx.Hash,
+					BlockNumber: tx.BlockNumber,
+					Reason:      fmt.Sprintf("%s (Severity: %s): %s", behavior, rule.Severity, behavior),
+					Severity:    rule.Severity,
+					Details:     fmt.Sprintf("%v", map[string]interface{}{"behavior": behavior}),
+				}
+
+				// Use a transaction to ensure atomicity
+				err := m.db.Transaction(func(tx *gorm.DB) error {
+					// Double-check if address is still not blacklisted
+					if err := tx.Where("address = ?", addr).First(&models.BlacklistedAddress{}).Error; err == nil {
+						return fmt.Errorf("address %s was blacklisted concurrently", addr)
+					} else if err != gorm.ErrRecordNotFound {
+						return err
+					}
+
+					// Create the blacklist entry
+					if err := tx.Create(&blacklistAddr).Error; err != nil {
+						return err
+					}
+
+					// Call blacklist contract
+					if err := m.callBlacklistContract([]string{addr}); err != nil {
+						log.Printf("Error calling blacklist contract for address %s: %v", addr, err)
+						// Don't return error here to avoid rolling back the database transaction
+					} else {
+						log.Printf("Successfully blacklisted address %s", addr)
+					}
+
+					return nil
+				})
+
+				if err != nil {
+					if strings.Contains(err.Error(), "duplicate key value") || strings.Contains(err.Error(), "was blacklisted concurrently") {
+						log.Printf("Address %s was blacklisted concurrently, skipping", addr)
+						continue
+					}
+					log.Printf("Error adding address %s to blacklist: %v", addr, err)
+					continue
+				}
+
+				log.Printf("Added address %s to blacklist table", addr)
+			}
+		}
+
+		// Log the behavior
+		log.Printf("- %s (Severity: %s): %s", behavior, rule.Severity, behavior)
+	}
+
+	return nil
+}
+
+// recordRuleViolation records a rule violation in the database
+func (m *monitor) recordRuleViolation(ruleID uint, txHash string, blockNumber uint64, details map[string]interface{}) error {
+	violation := models.RuleViolation{
+		RuleID:      ruleID,
+		TxHash:      txHash,
+		BlockNumber: blockNumber,
+		Details:     fmt.Sprintf("%v", details),
+	}
+	return m.db.Create(&violation).Error
+}
+
+// callBlacklistContract calls the blacklist contract to add addresses to the blacklist
+func (m *monitor) callBlacklistContract(addresses []string) error {
+	if len(addresses) == 0 {
+		return nil
+	}
+
+	// TODO: Implement actual contract call
+	// This is a placeholder for the actual implementation
+	log.Printf("Would call blacklist contract for addresses: %v", addresses)
+	return nil
+}

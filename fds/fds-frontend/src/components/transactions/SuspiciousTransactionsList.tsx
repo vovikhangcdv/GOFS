@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { getSuspiciousTransactions, getRelatedTransactionsOfSuspicious } from '../../api';
 import { SuspiciousTransfer } from '../../types';
+import { formatTokenAmount } from '../../utils/format';
 
 export const SuspiciousTransactionsList = () => {
   const [loading, setLoading] = useState(true);
@@ -127,7 +128,7 @@ export const SuspiciousTransactionsList = () => {
                 <TableCell>{tx.txHash.slice(0, 8)}...{tx.txHash.slice(-8)}</TableCell>
                 <TableCell>{tx.from_address.slice(0, 8)}...{tx.from_address.slice(-8)}</TableCell>
                 <TableCell>{tx.to_address.slice(0, 8)}...{tx.to_address.slice(-8)}</TableCell>
-                <TableCell>{(Number(tx.amount) / 1e18).toFixed(4)} ETH</TableCell>
+                <TableCell>{formatTokenAmount(tx.amount, 18)} eVND</TableCell>
                 <TableCell>
                   <Chip
                     label={tx.severity}
@@ -164,7 +165,7 @@ export const SuspiciousTransactionsList = () => {
               <strong>To:</strong> {selectedTx.to_address}
             </Typography>
             <Typography variant="body2" paragraph>
-              <strong>Amount:</strong> {(Number(selectedTx.amount) / 1e18).toFixed(4)} ETH
+              <strong>Amount:</strong> {formatTokenAmount(selectedTx.amount, 18)} eVND
             </Typography>
             <Typography variant="body2" paragraph>
               <strong>Reason:</strong> {selectedTx.reason}
@@ -195,7 +196,7 @@ export const SuspiciousTransactionsList = () => {
                           <TableCell>{tx.txHash.slice(0, 8)}...{tx.txHash.slice(-8)}</TableCell>
                           <TableCell>{tx.from_address.slice(0, 8)}...{tx.from_address.slice(-8)}</TableCell>
                           <TableCell>{tx.to_address.slice(0, 8)}...{tx.to_address.slice(-8)}</TableCell>
-                          <TableCell>{(Number(tx.amount) / 1e18).toFixed(4)} ETH</TableCell>
+                          <TableCell>{formatTokenAmount(tx.amount, 18)} eVND</TableCell>
                           <TableCell>
                             <Chip
                               label={tx.status}
