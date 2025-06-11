@@ -20,22 +20,23 @@ Blacklister 1 Address: 0x90F79bf6EB2c4f870365E785982E1f101E93b906 (DeriveKey 3)
 Blacklister 2 Address: 0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65 (DeriveKey 4)
 
 ========== Entity Type Transfer Policies ==========
-  From \ To | UNKNOWN | INDIV | PRIV_ENT | LLC_ONE | LLC_MULTI | JSC | PARTNER | COOP | COOP_UNI | COOP_GRP | HOUSE_BIZ | FOR_INDIV | FOR_ORG | FOR_ECO |
-  ----------|---------|---------|---------|---------|---------|---------|---------|---------|---------|---------|---------|---------|---------|---------|
-  UNKNOWN |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |
-  INDIV |    N    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    N    |    N    |    Y    |    N    |    N    |    N    |
-  PRIV_ENT |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |
-  LLC_ONE |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |
-  LLC_MULTI |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |
-  JSC |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |
-  PARTNER |    N    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    N    |    N    |    N    |    N    |    N    |    N    |
-  COOP |    N    |    Y    |    N    |    N    |    N    |    N    |    N    |    Y    |    Y    |    Y    |    N    |    N    |    N    |    N    |
-  COOP_UNI |    N    |    Y    |    N    |    N    |    N    |    N    |    N    |    Y    |    Y    |    Y    |    N    |    N    |    N    |    N    |
-  COOP_GRP |    N    |    Y    |    N    |    N    |    N    |    N    |    N    |    Y    |    Y    |    Y    |    N    |    N    |    N    |    N    |
-  HOUSE_BIZ |    N    |    Y    |    Y    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    Y    |    N    |    N    |    N    |
-  FOR_INDIV |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |
-  FOR_ORG |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |
-  FOR_ECO |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |
+  From \ To | UNKNOWN | INDIV | PRIV_ENT | LLC_ONE | LLC_MULTI | JSC | PARTNER | COOP | COOP_UNI | COOP_GRP | HOUSE_BIZ | FOR_INDIV | FOR_ORG | FOR_ECO | EXCHANGE_PORTAL |
+  ----------|---------|---------|---------|---------|---------|---------|---------|---------|---------|---------|---------|---------|---------|---------|---------|
+  UNKNOWN |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |
+  INDIV |    N    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    N    |    N    |    Y    |    N    |    N    |    N    |    N    |
+  PRIV_ENT |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |
+  LLC_ONE |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |
+  LLC_MULTI |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |
+  JSC |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |
+  PARTNER |    N    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |
+  COOP |    N    |    Y    |    N    |    N    |    N    |    N    |    N    |    Y    |    Y    |    Y    |    N    |    N    |    N    |    N    |    N    |
+  COOP_UNI |    N    |    Y    |    N    |    N    |    N    |    N    |    N    |    Y    |    Y    |    Y    |    N    |    N    |    N    |    N    |    N    |
+  COOP_GRP |    N    |    Y    |    N    |    N    |    N    |    N    |    N    |    Y    |    Y    |    Y    |    N    |    N    |    N    |    N    |    N    |
+  HOUSE_BIZ |    N    |    Y    |    Y    |    N    |    N    |    N    |    N    |    N    |    N    |    N    |    Y    |    N    |    N    |    N    |    N    |
+  FOR_INDIV |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |
+  FOR_ORG |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |
+  FOR_ECO |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |
+  EXCHANGE_PORTAL |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |    Y    |
   
 Entity Type Metadata:
   -------------------
@@ -53,6 +54,7 @@ Entity Type Metadata:
   FOR_INDIV: FOREIGN_INDIVIDUAL_INVESTOR: Foreign individual investor (Nha dau tu ca nhan nuoc ngoai)
   FOR_ORG: FOREIGN_ORGANIZATION_INVESTOR: Foreign organization investor (Nha dau tu to chuc nuoc ngoai)
   FOR_ECO: FOREIGN_INVESTED_ECONOMIC_ORGANIZATION: Foreign invested economic organization (To chuc kinh te co von dau tu nuoc ngoai)
+  EXCHANGE_PORTAL: EXCHANGE_PORTAL: Exchange portal (Cong giao dich ngoai te)
 
 ========== Transaction Type Transfer Policies ==========
   ------------------------
