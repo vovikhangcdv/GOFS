@@ -40,24 +40,24 @@ var (
 
 	ComplianceRegistry = &cli.StringFlag{
 		Name:  "compliance-registry",
-		Value: "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+		Value: "0x0165878A594ca255338adfa4d48449f69242Eb8F",
 		Usage: "Compliance registry address",
 	}
 
 	EVNDToken = &cli.StringFlag{
 		Name:  "evnd-token",
-		Value: "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+		Value: "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
 		Usage: "EVND token address",
 	}
 	USDTToken = &cli.StringFlag{
 		Name:  "musd-token",
-		Value: "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
+		Value: "0x09635F643e140090A9A8Dcd712eD6285858ceBef",
 		Usage: "mUSD token address",
 	}
 
 	ExchangePortal = &cli.StringFlag{
 		Name:  "exchange-portal",
-		Value: "0x09635F643e140090A9A8Dcd712eD6285858ceBef",
+		Value: "0x67d269191c92Caf3cD7723F116c85e6E9bf55933",
 		Usage: "Exchange portal address",
 	}
 
