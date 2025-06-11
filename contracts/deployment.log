@@ -63,11 +63,13 @@ UNKNOWN:
          PRIVATE_ENTERPRISE
          HOUSEHOLD_BUSINESS
          UNKNOWN
+         EXCHANGE_PORTAL
   To Types:
          INDIVIDUAL
          PRIVATE_ENTERPRISE
          HOUSEHOLD_BUSINESS
          UNKNOWN
+         EXCHANGE_PORTAL
   Usable: Yes
   
 PAYMENT:
