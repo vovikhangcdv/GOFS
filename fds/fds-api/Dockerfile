@@ -21,7 +21,7 @@ RUN go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux go build -o api .
 
 # Expose the API port
-EXPOSE 8888
+EXPOSE 9999
 
 # Run the application
 CMD ["./api"] 

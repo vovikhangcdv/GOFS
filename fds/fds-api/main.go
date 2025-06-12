@@ -167,7 +167,7 @@ func main() {
 	// Start the server
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8888"
+		port = "9999"
 	}
 	log.Printf("Starting API server on port %s", port)
 	if err := r.Run(":" + port); err != nil {
