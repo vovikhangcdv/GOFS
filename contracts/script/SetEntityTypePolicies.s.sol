@@ -113,11 +113,15 @@ contract SetEntityTypePolicies is BaseScript {
             EntityLibrary.FOREIGN_INVESTED_ECONOMIC_ORGANIZATION,
             "FOREIGN_INVESTED_ECONOMIC_ORGANIZATION: Foreign invested economic organization (To chuc kinh te co von dau tu nuoc ngoai)"
         );
+        entityRegistry.setEntityTypeMetadata(
+            EntityLibrary.EXCHANGE_PORTAL,
+            "EXCHANGE_PORTAL: Exchange portal (Cong giao dich ngoai te)"
+        );
     }
 
     function setupIndividualPolicies() internal {
         // Individuals can transfer to most domestic entities
-        EntityType[] memory allowedTypes = new EntityType[](8);
+        EntityType[] memory allowedTypes = new EntityType[](9);
         allowedTypes[0] = EntityLibrary.INDIVIDUAL;
         allowedTypes[1] = EntityLibrary.PRIVATE_ENTERPRISE;
         allowedTypes[2] = EntityLibrary.LLC_ONE_MEMBER;
@@ -126,6 +130,7 @@ contract SetEntityTypePolicies is BaseScript {
         allowedTypes[5] = EntityLibrary.PARTNERSHIP;
         allowedTypes[6] = EntityLibrary.COOPERATIVE;
         allowedTypes[7] = EntityLibrary.HOUSEHOLD_BUSINESS;
+        allowedTypes[8] = EntityLibrary.EXCHANGE_PORTAL;
 
         bool[] memory alloweds = new bool[](allowedTypes.length);
         for (uint i = 0; i < allowedTypes.length; i++) {
@@ -296,7 +301,7 @@ contract SetEntityTypePolicies is BaseScript {
     }
 
     function getAllEntityTypes() internal pure returns (EntityType[] memory) {
-        EntityType[] memory types = new EntityType[](14);
+        EntityType[] memory types = new EntityType[](15);
         types[0] = EntityLibrary.UNKNOWN;
         types[1] = EntityLibrary.INDIVIDUAL;
         types[2] = EntityLibrary.PRIVATE_ENTERPRISE;
@@ -311,6 +316,7 @@ contract SetEntityTypePolicies is BaseScript {
         types[11] = EntityLibrary.FOREIGN_INDIVIDUAL_INVESTOR;
         types[12] = EntityLibrary.FOREIGN_ORGANIZATION_INVESTOR;
         types[13] = EntityLibrary.FOREIGN_INVESTED_ECONOMIC_ORGANIZATION;
+        types[14] = EntityLibrary.EXCHANGE_PORTAL;
         return types;
     }
 
@@ -374,7 +380,7 @@ contract SetEntityTypePolicies is BaseScript {
     }
 
     function getTypeNames() internal pure returns (string[] memory) {
-        string[] memory names = new string[](14);
+        string[] memory names = new string[](15);
         names[0] = "UNKNOWN";
         names[1] = "INDIV";
         names[2] = "PRIV_ENT";
@@ -389,6 +395,7 @@ contract SetEntityTypePolicies is BaseScript {
         names[11] = "FOR_INDIV";
         names[12] = "FOR_ORG";
         names[13] = "FOR_ECO";
+        names[14] = "EXCHANGE_PORTAL";
         return names;
     }
 }

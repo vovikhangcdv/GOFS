@@ -85,11 +85,12 @@ contract SetTransactionTypePolicies is BaseScript {
 
     function setupUnknownPolicies() internal {
         // UNKNOWN type can be used by most basic domestic entities
-        EntityType[] memory fromTypes = new EntityType[](4);
+        EntityType[] memory fromTypes = new EntityType[](5);
         fromTypes[0] = EntityLibrary.INDIVIDUAL;
         fromTypes[1] = EntityLibrary.PRIVATE_ENTERPRISE;
         fromTypes[2] = EntityLibrary.HOUSEHOLD_BUSINESS;
         fromTypes[3] = EntityLibrary.UNKNOWN;
+        fromTypes[4] = EntityLibrary.EXCHANGE_PORTAL;
 
         transactionTypeCompliance.setTransactionTypePolicy(
             UNKNOWN_TYPE,
