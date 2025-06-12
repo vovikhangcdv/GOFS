@@ -145,7 +145,7 @@ export const WalletTab = () => {
                 <CardContent>
                   <Typography variant="h6">ETH Balance</Typography>
                   <Typography variant="h4" sx={{ mt: 1 }}>
-                    {ethBalance.balance.toFixed(4)} {ethBalance.unit}
+                    {Number(ethBalance.balance).toFixed(4)} {ethBalance.unit}
                   </Typography>
                 </CardContent>
               </Card>
@@ -158,7 +158,7 @@ export const WalletTab = () => {
                 <CardContent>
                   <Typography variant="h6">eVND Balance</Typography>
                   <Typography variant="h4" sx={{ mt: 1 }}>
-                    {evndBalance.balance.toFixed(4)} {evndBalance.unit}
+                    {Number(evndBalance.balance).toFixed(4)} {evndBalance.unit}
                   </Typography>
                 </CardContent>
               </Card>

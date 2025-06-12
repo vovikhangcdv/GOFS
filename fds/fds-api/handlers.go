@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
@@ -284,9 +285,9 @@ func getETHBalance(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get ETH balance"})
 		return
 	}
-
+	fmt.Println(balance)
 	// Convert balance from wei to ETH (1 ETH = 10^18 wei)
-	ethBalance := float64(balance.Int64()) / 1e18
+	ethBalance := new(big.Float).Quo(new(big.Float).SetInt(balance), big.NewFloat(1e18))
 
 	c.JSON(http.StatusOK, gin.H{
 		"address": address,
@@ -322,6 +323,7 @@ func getERC20Balance(client *ethclient.Client, tokenAddress string, userAddress 
 	}
 
 	// Convert the result to a big.Int
+	fmt.Println(result)
 	balance := new(big.Int).SetBytes(result)
 
 	// Convert to float64 (assuming 18 decimals like most ERC20 tokens)
