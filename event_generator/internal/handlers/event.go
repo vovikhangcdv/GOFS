@@ -49,6 +49,7 @@ func HandleLargeAmountTransfers(config *config.Config, sk *ecdsa.PrivateKey, lar
 	if err != nil {
 		return nil, fmt.Errorf("failed to send transaction: %w", err)
 	}
+	log.Println("Transaction sent: ", txHash.Hex())
 	txHashes = append(txHashes, txHash)
 	return txHashes, nil
 }
@@ -117,7 +118,13 @@ func HandleMultipleIncomingTransfers(config *config.Config, addr common.Address,
 			continue
 		}
 		randomValue := utils.RandomBigInt(balance)
-		txHash, err := sendTransferEVNDTx(config, senderPrivateKey, addr, randomValue, utils.UNKNOWN_TX, true)
+		allowedTransactionTypes := GetAllowedTransactionTypes(config, sender, addr)
+		if len(allowedTransactionTypes) == 0 {
+			return nil, fmt.Errorf("no allowed transaction types, skipping")
+		}
+		randomTransactionType := allowedTransactionTypes[rand.Intn(len(allowedTransactionTypes))]
+		log.Println("Random transaction type: ", utils.GetTransactionTypeName(randomTransactionType))
+		txHash, err := sendTransferEVNDTx(config, senderPrivateKey, addr, randomValue, randomTransactionType, true)
 		if err != nil {
 			return nil, fmt.Errorf("failed to send transaction: %w", err)
 		}

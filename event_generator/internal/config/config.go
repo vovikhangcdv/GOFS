@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/urfave/cli/v2"
 	complianceRegistry "github.com/vovikhangcdv/GOFS/chainspammer/internal/generated_contracts/compliance_registry"
 	compliantToken "github.com/vovikhangcdv/GOFS/chainspammer/internal/generated_contracts/compliant_token"
@@ -210,7 +211,7 @@ func NewConfigFromContext(c *cli.Context) (*Config, error) {
 
 	eventsConfig := []types.Event{
 		&types.LargeAmountTransfersConfig{
-			TotalAmount:   big.NewInt(c.Int64("large-amount-transfers.total-amount")),
+			TotalAmount:   new(big.Int).Mul(big.NewInt(c.Int64("large-amount-transfers.total-amount")), big.NewInt(params.Ether)),
 			Weight:        c.Int("large-amount-transfers.weight"),
 		},
 		&types.MultipleOutgoingTransfersConfig{
@@ -220,7 +221,7 @@ func NewConfigFromContext(c *cli.Context) (*Config, error) {
 		},
 		&types.MultipleIncomingTransfersConfig{
 			BlockDuration: c.Int64("multiple-incoming-transfers.block-duration"),
-			TotalAmount:   big.NewInt(c.Int64("multiple-incoming-transfers.total-amount")),
+			TotalAmount:   new(big.Int).Mul(big.NewInt(c.Int64("multiple-incoming-transfers.total-amount")), big.NewInt(params.Ether)),
 			Weight:        c.Int("multiple-incoming-transfers.weight"),
 		},
 		&types.SuspiciousAddressInteractionsConfig{
