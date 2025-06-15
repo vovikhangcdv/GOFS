@@ -111,8 +111,8 @@ var (
 
 	LargeAmountTransfersTotalAmount = &cli.Int64Flag{
 		Name:  "large-amount-transfers.total-amount",
-		Value: 1_000_000_000_000_000_000,
-		Usage: "Total amount for Event: Large amount transfers",
+		Value: 1_000,
+		Usage: "Total amount for Event: Large amount transfers (in Ether)",
 	}
 
 	MultipleOutgoingTransfersBlockDuration = &cli.Int64Flag{
@@ -135,15 +135,14 @@ var (
 
 	MultipleIncomingTransfersTotalAmount = &cli.Int64Flag{
 		Name:  "multiple-incoming-transfers.total-amount",
-		Value: 1_000_000_000_000_000_000,
-		Usage: "Total amount for Event: Multiple incoming transfers",
+		Value: 1_000,
+		Usage: "Total amount for Event: Multiple incoming transfers (in Ether)",
 	}
 
 	SuspiciousAddressInteractionsBlacklistAddresses = &cli.StringSliceFlag{
 		Name:  "suspicious-address-interactions.blacklisted-addresses",
 		Value: cli.NewStringSlice(
-			"0x0000000000000000000000000000000000006969",
-			"0x0000000000000000000000000000000000696969",
+			"0xb1Ee7A142d267C1f36714E4a8F75612F20a79720",
 		),
 		Usage: "Blacklist addresses for Event: Suspicious address interactions",
 	}

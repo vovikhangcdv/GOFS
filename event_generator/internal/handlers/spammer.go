@@ -39,7 +39,7 @@ func Spam(config *config.Config) (common.Hash, error) {
 	case "send_evnd":
 		log.Println("💸 Sending EVND")
 		if len(config.Keys) < 2 {
-			log.Println("❌ Not enough users, len=", len(config.Keys))
+			log.Println("Not enough users, len=", len(config.Keys))
 			return common.Hash{}, nil
 		}
 		skFrom := config.GetRandomKey()
@@ -51,7 +51,7 @@ func Spam(config *config.Config) (common.Hash, error) {
 	case "exchange_vnd_usd":
 		log.Println("🔄 Exchanging VND to USD")
 		if len(config.Keys) == 0 {
-			log.Println("❌ Not enough users, len=", len(config.Keys))
+			log.Println("Not enough users, len=", len(config.Keys))
 			return common.Hash{}, nil
 		}
 		skFrom := config.GetRandomKey()

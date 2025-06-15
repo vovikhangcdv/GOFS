@@ -39,10 +39,17 @@ func HandleLargeAmountTransfers(config *config.Config, sk *ecdsa.PrivateKey, lar
 	}
 	txHashes := make([]common.Hash, 0)
 	receiver := crypto.PubkeyToAddress(config.GetRandomKey().PublicKey)
-	txHash, err := sendTransferEVNDTx(config, sk, receiver, largeAmount, true)
+	allowedTransactionTypes := GetAllowedTransactionTypes(config, addr, receiver)
+	if len(allowedTransactionTypes) == 0 {
+		return nil, fmt.Errorf("no allowed transaction types, skipping")
+	}
+	randomTransactionType := allowedTransactionTypes[rand.Intn(len(allowedTransactionTypes))]
+	log.Println("Random transaction type: ", utils.GetTransactionTypeName(randomTransactionType))
+	txHash, err := sendTransferEVNDTx(config, sk, receiver, largeAmount, randomTransactionType, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send transaction: %w", err)
 	}
+	log.Println("Transaction sent: ", txHash.Hex())
 	txHashes = append(txHashes, txHash)
 	return txHashes, nil
 }
@@ -70,8 +77,14 @@ func HandleMultipleOutgoingTransfers(config *config.Config, sk *ecdsa.PrivateKey
 		// Distribute balance evenly across transactions
 		amount := new(big.Int).Div(balance, big.NewInt(numOfTxs))
 		receiver := crypto.PubkeyToAddress(config.GetRandomKey().PublicKey)
-
-		txHash, err := sendTransferEVNDTx(config, sk, receiver, amount, true)
+		allowedTransactionTypes := GetAllowedTransactionTypes(config, addr, receiver)
+		if len(allowedTransactionTypes) == 0 {
+			return nil, fmt.Errorf("no allowed transaction types, skipping")
+		}
+		randomTransactionType := allowedTransactionTypes[rand.Intn(len(allowedTransactionTypes))]
+		log.Println("Random transaction type: ", utils.GetTransactionTypeName(randomTransactionType))
+		
+		txHash, err := sendTransferEVNDTx(config, sk, receiver, amount, randomTransactionType, true)
 		if err != nil {
 			return txHashes, fmt.Errorf("failed to send transaction %d: %w", i+1, err)
 		}
@@ -105,7 +118,13 @@ func HandleMultipleIncomingTransfers(config *config.Config, addr common.Address,
 			continue
 		}
 		randomValue := utils.RandomBigInt(balance)
-		txHash, err := sendTransferEVNDTx(config, senderPrivateKey, addr, randomValue, true)
+		allowedTransactionTypes := GetAllowedTransactionTypes(config, sender, addr)
+		if len(allowedTransactionTypes) == 0 {
+			return nil, fmt.Errorf("no allowed transaction types, skipping")
+		}
+		randomTransactionType := allowedTransactionTypes[rand.Intn(len(allowedTransactionTypes))]
+		log.Println("Random transaction type: ", utils.GetTransactionTypeName(randomTransactionType))
+		txHash, err := sendTransferEVNDTx(config, senderPrivateKey, addr, randomValue, randomTransactionType, true)
 		if err != nil {
 			return nil, fmt.Errorf("failed to send transaction: %w", err)
 		}
@@ -121,6 +140,9 @@ func HandleMultipleIncomingTransfers(config *config.Config, addr common.Address,
 }
 
 func HandleSuspiciousAddressInteractions(config *config.Config, sk *ecdsa.PrivateKey, blacklistAddresses []common.Address) ([]common.Hash, error) {
+	if len(blacklistAddresses) == 0 {
+		return nil, fmt.Errorf("no blacklist addresses provided")
+	}
 	addr := crypto.PubkeyToAddress(sk.PublicKey)
 	balance, err := config.SystemContracts.EVNDToken.BalanceOf(&bind.CallOpts{}, addr)
 	if err != nil {
@@ -129,7 +151,13 @@ func HandleSuspiciousAddressInteractions(config *config.Config, sk *ecdsa.Privat
 	randomValue := utils.RandomBigInt(balance)
 	txHashes := make([]common.Hash, 0)
 	randomBlacklistAddress := blacklistAddresses[rand.Intn(len(blacklistAddresses))]
-	txHash, err := sendTransferEVNDTx(config, sk, randomBlacklistAddress, randomValue, true)
+	allowedTransactionTypes := GetAllowedTransactionTypes(config, addr, randomBlacklistAddress)
+	if len(allowedTransactionTypes) == 0 {
+		return nil, fmt.Errorf("no allowed transaction types, skipping")
+	}
+	randomTransactionType := allowedTransactionTypes[rand.Intn(len(allowedTransactionTypes))]
+	log.Println("Random transaction type: ", utils.GetTransactionTypeName(randomTransactionType))
+	txHash, err := sendTransferEVNDTx(config, sk, randomBlacklistAddress, randomValue, randomTransactionType, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send transaction: %w", err)
 	}

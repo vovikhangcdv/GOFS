@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
-
+	"math/rand"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -136,6 +136,22 @@ func SendExchangeVNDToUSDTx(config *config.Config, skFrom *ecdsa.PrivateKey, isU
 	if _, err := AirdropGas(config, addr); err != nil {
 		return common.Hash{}, err
 	}
+	if !IsTransferBetweenAddressesAllowed(config, addr, config.SystemContracts.ExchangePortalAddress) {
+		return common.Hash{}, fmt.Errorf("transfer not allowed between addresses, skipping")
+	}
+	// Temporary check if UNKNOWN_TX is allowed
+	allowedTransactionTypes := GetAllowedTransactionTypes(config, addr, config.SystemContracts.ExchangePortalAddress)
+	isUnknownTxAllowed := false
+	for _, txType := range allowedTransactionTypes {
+		if txType == utils.UNKNOWN_TX {
+			isUnknownTxAllowed = true
+			break
+		}
+	}
+	if !isUnknownTxAllowed {
+		return common.Hash{}, fmt.Errorf("UNKNOWN_TX is not allowed, skipping")
+	}
+
 	verifiered, err := config.SystemContracts.EntityRegistry.IsVerifiedEntity(&bind.CallOpts{}, addr)
 	if err != nil {
 		return common.Hash{}, err
@@ -213,6 +229,18 @@ func SendTransferEVNDRandomAmountTx(config *config.Config, skFrom *ecdsa.Private
 	if !toVerified {
 		return common.Hash{}, fmt.Errorf("address is not verified, skipping")
 	}
+
+	if !IsTransferBetweenAddressesAllowed(config, from, to) {
+		return common.Hash{}, fmt.Errorf("transfer not allowed between addresses, skipping")
+	}
+
+	allowedTransactionTypes := GetAllowedTransactionTypes(config, from, to)
+	if len(allowedTransactionTypes) == 0 {
+		return common.Hash{}, fmt.Errorf("no allowed transaction types, skipping")
+	}
+	randomTransactionType := allowedTransactionTypes[rand.Intn(len(allowedTransactionTypes))]
+	log.Println("Random transaction type: ", utils.GetTransactionTypeName(randomTransactionType))
+
 	if _, err := AirdropGas(config, from); err != nil {
 		return common.Hash{}, err
 	}
@@ -225,7 +253,7 @@ func SendTransferEVNDRandomAmountTx(config *config.Config, skFrom *ecdsa.Private
 		return common.Hash{}, err
 	}
 	randomValue := utils.RandomBigInt(fromBalance)
-	txHash, err := sendTransferEVNDTx(config, skFrom, to, randomValue, isUseRPC)
+	txHash, err := sendTransferEVNDTx(config, skFrom, to, randomValue, randomTransactionType, isUseRPC)
 	if err != nil {
 		return common.Hash{}, err
 	}
@@ -233,7 +261,7 @@ func SendTransferEVNDRandomAmountTx(config *config.Config, skFrom *ecdsa.Private
 	return txHash, nil
 }
 
-func sendTransferEVNDTx(config *config.Config, sk *ecdsa.PrivateKey, to common.Address, value *big.Int, isUseRPC bool) (common.Hash, error) {
+func sendTransferEVNDTx(config *config.Config, sk *ecdsa.PrivateKey, to common.Address, value *big.Int, txType utils.TransactionType, isUseRPC bool) (common.Hash, error) {
 	opts := &bind.TransactOpts{
 		GasLimit: 500_000,
 		NoSend:   true,
@@ -241,7 +269,13 @@ func sendTransferEVNDTx(config *config.Config, sk *ecdsa.PrivateKey, to common.A
 			return tx, nil
 		},
 	}
-	tx, err := config.SystemContracts.EVNDToken.Transfer(opts, to, value)
+	var tx *types.Transaction
+	var err error
+	if txType == utils.UNKNOWN_TX {
+		tx, err = config.SystemContracts.EVNDToken.Transfer(opts, to, value)
+	} else {
+		tx, err = config.SystemContracts.EVNDToken.TransferWithType(opts, to, value, uint8(txType))
+	}
 	if err != nil {
 		return common.Hash{}, err
 	}
@@ -307,7 +341,7 @@ func createRegisterTx(config *config.Config, opts *bind.TransactOpts, skVerifier
 	}
 	entity := entityRegistry.Entity{
 		EntityAddress: crypto.PubkeyToAddress(skUser.PublicKey),
-		EntityType:    3, // utils.GetRandomEntityType(),
+		EntityType:    utils.GetRandomEntityType(),
 		EntityData:    structAbiEncoded,
 		Verifier:      crypto.PubkeyToAddress(skVerifier.PublicKey),
 	}
@@ -387,4 +421,33 @@ func SendSetExchangeRateTx(config *config.Config, newExchangeRate *big.Int, isUs
 	}
 	log.Println("Set exchange rate to ", newExchangeRate.String(), " tx hash: ", txHash.Hex())
 	return txHash, nil
+}
+
+func IsTransferBetweenAddressesAllowed(config *config.Config, from, to common.Address) bool {
+	fromEntity, err := config.SystemContracts.EntityRegistry.GetEntity(&bind.CallOpts{}, from)
+	if err != nil {
+		return false
+	}
+	toEntity, err := config.SystemContracts.EntityRegistry.GetEntity(&bind.CallOpts{}, to)
+	if err != nil {
+		return false
+	}
+	fromType := utils.EntityType(fromEntity.EntityType)
+	toType := utils.EntityType(toEntity.EntityType)
+	log.Println("From type: ", fromType, " To type: ", toType)
+	return utils.IsTransferAllowed(fromType, toType)
+}
+
+func GetAllowedTransactionTypes(config *config.Config, from, to common.Address) []utils.TransactionType {
+	fromEntity, err := config.SystemContracts.EntityRegistry.GetEntity(&bind.CallOpts{}, from)
+	if err != nil {
+		return []utils.TransactionType{}
+	}
+	toEntity, err := config.SystemContracts.EntityRegistry.GetEntity(&bind.CallOpts{}, to)
+	if err != nil {
+		return []utils.TransactionType{}
+	}
+	fromType := utils.EntityType(fromEntity.EntityType)
+	toType := utils.EntityType(toEntity.EntityType)
+	return utils.GetAllowedTransactionTypes(fromType, toType)
 }
