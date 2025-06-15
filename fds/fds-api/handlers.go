@@ -533,3 +533,65 @@ func updateRule(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"status": "updated", "rule": req.Name})
 }
+
+// getTransactionStats returns transaction statistics for charts
+func getTransactionStats(c *gin.Context) {
+	// Get total transaction count
+	var totalCount int64
+	if err := db.Model(&Transaction{}).Count(&totalCount).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Get transaction count by day for the last 7 days
+	var dailyStats []gin.H
+	for i := 6; i >= 0; i-- {
+		date := time.Now().AddDate(0, 0, -i)
+		startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+		endOfDay := startOfDay.Add(24 * time.Hour)
+
+		var count int64
+		if err := db.Unscoped().Model(&Transaction{}).Where("created_at >= ? AND created_at < ?", startOfDay, endOfDay).Count(&count).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		dailyStats = append(dailyStats, gin.H{
+			"date":  startOfDay.Format("2006-01-02"),
+			"count": count,
+		})
+	}
+
+	// Get transaction count by hour for the last 24 hours
+	var hourlyStats []gin.H
+	for i := 23; i >= 0; i-- {
+		hour := time.Now().Add(time.Duration(-i) * time.Hour)
+		startOfHour := time.Date(hour.Year(), hour.Month(), hour.Day(), hour.Hour(), 0, 0, 0, hour.Location())
+		endOfHour := startOfHour.Add(time.Hour)
+
+		var count int64
+		if err := db.Unscoped().Model(&Transaction{}).Where("created_at >= ? AND created_at < ?", startOfHour, endOfHour).Count(&count).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		hourlyStats = append(hourlyStats, gin.H{
+			"hour":  startOfHour.Format("15:04"),
+			"count": count,
+		})
+	}
+
+	// Get suspicious transaction count
+	var suspiciousCount int64
+	if err := db.Model(&SuspiciousTransfer{}).Count(&suspiciousCount).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"total_transactions":      totalCount,
+		"suspicious_transactions": suspiciousCount,
+		"daily_stats":             dailyStats,
+		"hourly_stats":            hourlyStats,
+	})
+}

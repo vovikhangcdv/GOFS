@@ -64,4 +64,31 @@ export interface WhitelistAddress {
   address: string;
   reason: string;
   created_at: string;
+}
+
+export interface Rule {
+  id: number;
+  name: string;
+  description: string;
+  status: string;
+  severity: string;
+  parameters: string;
+  actions: string;
+  violations: number;
+  last_violation_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TransactionStats {
+  total_transactions: number;
+  suspicious_transactions: number;
+  daily_stats: Array<{
+    date: string;
+    count: number;
+  }>;
+  hourly_stats: Array<{
+    hour: string;
+    count: number;
+  }>;
 } 

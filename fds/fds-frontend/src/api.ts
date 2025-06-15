@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AddressTotals, SuspiciousTransfer, BlacklistedAddress, RelatedAddresses } from './types';
+import { AddressTotals, SuspiciousTransfer, BlacklistedAddress, RelatedAddresses, Rule, TransactionStats } from './types';
 
 // Create axios instance with base URL from environment variable
 const api = axios.create({
@@ -170,6 +170,41 @@ export const getEVNDBalance = async (address: string) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching eVND balance:', error);
+    throw error;
+  }
+};
+
+export const getRules = async (): Promise<Rule[]> => {
+  try {
+    const response = await api.get<Rule[]>('/api/rules');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching rules:', error);
+    throw error;
+  }
+};
+
+export const updateRule = async (ruleData: {
+  name: string;
+  description: string;
+  status: string;
+  parameters: string;
+}): Promise<any> => {
+  try {
+    const response = await api.put('/api/rules', ruleData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating rule:', error);
+    throw error;
+  }
+};
+
+export const getTransactionStats = async (): Promise<TransactionStats> => {
+  try {
+    const response = await api.get<TransactionStats>('/api/transactions/stats');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching transaction stats:', error);
     throw error;
   }
 };

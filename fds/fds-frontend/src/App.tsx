@@ -21,9 +21,6 @@ import {
   CircularProgress,
   Alert,
   Stack,
-  CssBaseline,
-  ThemeProvider,
-  createTheme,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -37,6 +34,7 @@ import { DashboardStats } from './components/dashboard/DashboardStats';
 import { SuspiciousTransactionsList } from './components/transactions/SuspiciousTransactionsList';
 import { WalletTab } from './components/dashboard/WalletTab';
 import { BlacklistView } from './components/dashboard/BlacklistView';
+import { RulesView } from './components/dashboard/RulesView';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -78,34 +76,6 @@ export const deleteBlacklistAddress = async (address: string) => {
   return res.data;
 };
 
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#2196f3',
-    },
-    background: {
-      default: '#f5f5f5',
-      paper: '#ffffff',
-    },
-  },
-  typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-  },
-  shape: {
-    borderRadius: 8,
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-        },
-      },
-    },
-  },
-});
-
 const mockTransactions = [
   {
     hash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
@@ -129,41 +99,61 @@ const mockTransactions = [
 
 function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
+  const [searchAddress, setSearchAddress] = useState<string | undefined>(undefined);
+
+  const handleSearchAddress = (address: string) => {
+    setSearchAddress(address);
+    setCurrentPage('wallet');
+  };
+
+  const handlePageChange = (page: string) => {
+    // Clear search address when manually navigating to wallet (not through search)
+    if (page === 'wallet' && currentPage !== 'wallet') {
+      setSearchAddress(undefined);
+    }
+    setCurrentPage(page);
+  };
 
   const renderContent = () => {
     switch (currentPage) {
       case 'dashboard':
-        return <DashboardStats />;
+        return <DashboardStats onPageChange={handlePageChange} />;
       case 'transactions':
         return <SuspiciousTransactionsList />;
       case 'wallet':
-        return <WalletTab />;
+        return <WalletTab searchAddress={searchAddress} />;
+      case 'rules':
+        return <RulesView />;
       case 'blacklist':
         return <BlacklistView />;
       default:
-        return <DashboardStats />;
+        return <DashboardStats onPageChange={handlePageChange} />;
     }
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box sx={{ display: 'flex' }}>
-        <Sidebar onPageChange={setCurrentPage} />
-        <Box
-          component="main"
-          sx={{
-            flexGrow: 1,
-            p: 3,
-            width: { sm: `calc(100% - 240px)` },
-            mt: '64px',
-          }}
-        >
-          <Header />
-          {renderContent()}
-        </Box>
+    <Box sx={{ 
+      display: 'flex',
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)',
+      overflow: 'hidden',
+    }}>
+      <Header onSearchAddress={handleSearchAddress} />
+      <Sidebar onPageChange={handlePageChange} />
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 0.5,
+          ml: '40px', // Slightly overlap with sidebar
+          mt: '64px',   // Header height
+          minHeight: 'calc(100vh - 64px)',
+          width: 'calc(100vw - 238px)', // Ensure full width usage
+        }}
+      >
+        {renderContent()}
       </Box>
-    </ThemeProvider>
+    </Box>
   );
 }
 
