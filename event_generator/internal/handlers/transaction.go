@@ -7,6 +7,8 @@ import (
 	"log"
 	"math/big"
 	"math/rand"
+
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -117,7 +119,16 @@ func SendRegisterEntityTx(config *config.Config, skUser *ecdsa.PrivateKey, isUse
 		return common.Hash{}, err
 	}
 
-	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, skUser, *tx.To(), tx.Value(), tx.Gas(), tx.Data(), isUseRPC)
+	msg := ethereum.CallMsg{
+		From: crypto.PubkeyToAddress(skUser.PublicKey),
+		To:   &config.SystemContracts.EntityRegistryAddress,
+		Data: tx.Data(),
+	}
+	gas, err := config.Client.EstimateGas(context.Background(), msg)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, skUser, *tx.To(), tx.Value(), gas, tx.Data(), isUseRPC)
 	if err != nil {
 		return common.Hash{}, err
 	}
@@ -204,7 +215,16 @@ func SendExchangeVNDToUSDTx(config *config.Config, skFrom *ecdsa.PrivateKey, isU
 	if err != nil {
 		return common.Hash{}, err
 	}
-	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, skFrom, *tx.To(), tx.Value(), tx.Gas(), tx.Data(), isUseRPC)
+	msg := ethereum.CallMsg{
+		From: crypto.PubkeyToAddress(skFrom.PublicKey),
+		To:   &config.SystemContracts.ExchangePortalAddress,
+		Data: tx.Data(),
+	}
+	gas, err := config.Client.EstimateGas(context.Background(), msg)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, skFrom, *tx.To(), tx.Value(), gas, tx.Data(), isUseRPC)
 	if err != nil {
 		return common.Hash{}, err
 	}
