@@ -161,6 +161,7 @@ func HandleSuspiciousAddressInteractions(config *config.Config, sk *ecdsa.Privat
 	if err != nil {
 		return nil, fmt.Errorf("failed to send transaction: %w", err)
 	}
+	log.Println("Transaction sent: ", txHash.Hex())
 	txHashes = append(txHashes, txHash)
 	return txHashes, nil
 }
