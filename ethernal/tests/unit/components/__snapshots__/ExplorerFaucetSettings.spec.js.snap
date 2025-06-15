@@ -1,0 +1,385 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ExplorerFaucetSettings.vue > SHould display inactive faucet UI 1`] = `
+"<div class="v-container v-container--fluid v-locale--is-ltr">
+  <div class="v-row">
+    <div class="v-col v-col-6">
+      <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated mb-6">
+        <!---->
+        <div class="v-card__loader">
+          <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+            <!---->
+            <div class="v-progress-linear__background"></div>
+            <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+            <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+              <div class="v-progress-linear__indeterminate">
+                <div class="v-progress-linear__indeterminate long"></div>
+                <div class="v-progress-linear__indeterminate short"></div>
+              </div>
+            </transition-stub>
+            <!---->
+          </div>
+        </div>
+        <!---->
+        <!---->
+        <div class="v-card-text">
+          <!--v-if-->
+          <!--v-if-->
+          <div class="v-input v-input--horizontal v-input--center-affix v-input--density-default v-theme--light v-locale--is-ltr v-input--dirty v-switch v-switch--inset mt-1">
+            <!---->
+            <div class="v-input__control">
+              <div class="v-selection-control v-selection-control--density-default">
+                <div class="v-selection-control__wrapper">
+                  <div class="v-switch__track">
+                    <!---->
+                    <!---->
+                  </div>
+                  <div class="v-selection-control__input"><input id="switch-0" aria-disabled="false" aria-label="Inactive" type="checkbox" aria-describedby="switch-0-messages" value="true">
+                    <div class="v-switch__thumb">
+                      <transition-stub name="scale-transition" appear="false" persisted="false" css="true">
+                        <!---->
+                      </transition-stub>
+                    </div>
+                  </div>
+                </div><label class="v-label v-label--clickable" for="switch-0">
+                  <!---->Inactive
+                </label>
+              </div>
+            </div>
+            <!---->
+            <div id="switch-0-messages" class="v-input__details" role="alert" aria-live="polite">
+              <transition-group-stub name="slide-y-transition" tag="div" appear="false" persisted="false" css="true" class="v-messages">
+                <!---->
+              </transition-group-stub>
+              <!---->
+            </div>
+          </div><strong>URL:</strong> <a href="//ethernal.com/faucet" target="_blank">https://ethernal.com/faucet</a><br><strong>Address:</strong>
+          <hash-link-stub type="address" hash="0x4150e51980114468aa8309bb72f027d8bff41353" fullhash="true" withname="false" notcopiable="false" withtokenname="false" xshash="false" unlink="false" loadcontract="false"></hash-link-stub><br><strong>Balance:</strong>&nbsp; 0.09 ETL
+          <hr class="v-divider v-theme--light mt-4 mb-6" aria-orientation="horizontal" role="separator">
+          <form class="v-form" novalidate="">
+            <div class="v-input v-input--horizontal v-input--center-affix v-input--density-compact v-theme--light v-locale--is-ltr v-input--dirty v-input--disabled v-text-field v-text-field--suffixed">
+              <!---->
+              <div class="v-input__control">
+                <div class="v-field v-field--active v-field--center-affix v-field--disabled v-field--dirty v-field--variant-outlined v-theme--light v-locale--is-ltr">
+                  <div class="v-field__overlay"></div>
+                  <div class="v-field__loader">
+                    <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+                      <!---->
+                      <div class="v-progress-linear__background"></div>
+                      <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+                      <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+                        <div class="v-progress-linear__indeterminate">
+                          <div class="v-progress-linear__indeterminate long"></div>
+                          <div class="v-progress-linear__indeterminate short"></div>
+                        </div>
+                      </transition-stub>
+                      <!---->
+                    </div>
+                  </div>
+                  <!---->
+                  <div class="v-field__field" data-no-activator="">
+                    <!----><label class="v-label v-field-label" for="input-3">
+                      <!---->Drip Amount
+                    </label>
+                    <!----><input disabled="" size="1" type="number" id="input-3" aria-describedby="input-3-messages" required="" class="v-field__input" value="0.1"><span class="v-text-field__suffix"><span class="v-text-field__suffix__text">ETL</span></span>
+                  </div>
+                  <!---->
+                  <!---->
+                  <div class="v-field__outline">
+                    <div class="v-field__outline__start"></div>
+                    <div class="v-field__outline__notch"><label class="v-label v-field-label v-field-label--floating" aria-hidden="true" for="input-3">
+                        <!---->Drip Amount
+                      </label></div>
+                    <div class="v-field__outline__end"></div>
+                    <!---->
+                  </div>
+                </div>
+              </div>
+              <!---->
+              <div id="input-3-messages" class="v-input__details" role="alert" aria-live="polite">
+                <transition-group-stub name="slide-y-transition" tag="div" appear="false" persisted="false" css="true" class="v-messages">
+                  <div class="v-messages__message">Amount to send for each request</div>
+                </transition-group-stub>
+                <!---->
+              </div>
+            </div>
+            <div class="v-input v-input--horizontal v-input--center-affix v-input--density-compact v-theme--light v-locale--is-ltr v-input--dirty v-input--disabled v-text-field v-text-field--suffixed mt-4">
+              <!---->
+              <div class="v-input__control">
+                <div class="v-field v-field--active v-field--center-affix v-field--disabled v-field--dirty v-field--variant-outlined v-theme--light v-locale--is-ltr">
+                  <div class="v-field__overlay"></div>
+                  <div class="v-field__loader">
+                    <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+                      <!---->
+                      <div class="v-progress-linear__background"></div>
+                      <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+                      <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+                        <div class="v-progress-linear__indeterminate">
+                          <div class="v-progress-linear__indeterminate long"></div>
+                          <div class="v-progress-linear__indeterminate short"></div>
+                        </div>
+                      </transition-stub>
+                      <!---->
+                    </div>
+                  </div>
+                  <!---->
+                  <div class="v-field__field" data-no-activator="">
+                    <!----><label class="v-label v-field-label" for="input-5">
+                      <!---->Interval Between Drips
+                    </label>
+                    <!----><input disabled="" size="1" type="number" id="input-5" aria-describedby="input-5-messages" required="" class="v-field__input" value="24"><span class="v-text-field__suffix"><span class="v-text-field__suffix__text">hours</span></span>
+                  </div>
+                  <!---->
+                  <!---->
+                  <div class="v-field__outline">
+                    <div class="v-field__outline__start"></div>
+                    <div class="v-field__outline__notch"><label class="v-label v-field-label v-field-label--floating" aria-hidden="true" for="input-5">
+                        <!---->Interval Between Drips
+                      </label></div>
+                    <div class="v-field__outline__end"></div>
+                    <!---->
+                  </div>
+                </div>
+              </div>
+              <!---->
+              <div id="input-5-messages" class="v-input__details" role="alert" aria-live="polite">
+                <transition-group-stub name="slide-y-transition" tag="div" appear="false" persisted="false" css="true" class="v-messages">
+                  <div class="v-messages__message">Minimum time between requests for each address</div>
+                </transition-group-stub>
+                <!---->
+              </div>
+            </div>
+            <div class="v-card-actions pr-0 pb-0">
+              <div class="v-spacer"></div><button type="submit" class="v-btn v-btn--disabled v-btn--slim v-theme--light bg-primary v-btn--density-default v-btn--size-default v-btn--variant-flat" disabled=""><span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+                <!----><span class="v-btn__content" data-no-activator="">Update</span>
+                <!---->
+                <!---->
+              </button>
+            </div>
+          </form>
+        </div>
+        <!---->
+        <!----><span class="v-card__underlay"></span>
+      </div>
+      <h4 class="text-error">Danger Zone</h4>
+      <explorer-faucet-settings-danger-zone-stub faucetid="1"></explorer-faucet-settings-danger-zone-stub>
+    </div>
+  </div>
+</div>"
+`;
+
+exports[`ExplorerFaucetSettings.vue > Should display active faucet UI 1`] = `
+"<div class="v-container v-container--fluid v-locale--is-ltr">
+  <div class="v-row">
+    <div class="v-col v-col-6">
+      <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated mb-6">
+        <!---->
+        <div class="v-card__loader">
+          <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+            <!---->
+            <div class="v-progress-linear__background"></div>
+            <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+            <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+              <div class="v-progress-linear__indeterminate">
+                <div class="v-progress-linear__indeterminate long"></div>
+                <div class="v-progress-linear__indeterminate short"></div>
+              </div>
+            </transition-stub>
+            <!---->
+          </div>
+        </div>
+        <!---->
+        <!---->
+        <div class="v-card-text">
+          <!--v-if-->
+          <!--v-if-->
+          <div class="v-input v-input--horizontal v-input--center-affix v-input--density-default v-theme--light v-locale--is-ltr v-input--dirty v-switch v-switch--inset mt-1">
+            <!---->
+            <div class="v-input__control">
+              <div class="v-selection-control v-selection-control--dirty v-selection-control--density-default">
+                <div class="v-selection-control__wrapper">
+                  <div class="v-switch__track">
+                    <!---->
+                    <!---->
+                  </div>
+                  <div class="v-selection-control__input"><input checked="" id="switch-0" aria-disabled="false" aria-label="Active" type="checkbox" aria-describedby="switch-0-messages" value="true">
+                    <div class="v-switch__thumb">
+                      <transition-stub name="scale-transition" appear="false" persisted="false" css="true">
+                        <!---->
+                      </transition-stub>
+                    </div>
+                  </div>
+                </div><label class="v-label v-label--clickable" for="switch-0">
+                  <!---->Active
+                </label>
+              </div>
+            </div>
+            <!---->
+            <div id="switch-0-messages" class="v-input__details" role="alert" aria-live="polite">
+              <transition-group-stub name="slide-y-transition" tag="div" appear="false" persisted="false" css="true" class="v-messages">
+                <!---->
+              </transition-group-stub>
+              <!---->
+            </div>
+          </div><strong>URL:</strong> <a href="//ethernal.com/faucet" target="_blank">https://ethernal.com/faucet</a><br><strong>Address:</strong>
+          <hash-link-stub type="address" hash="0x4150e51980114468aa8309bb72f027d8bff41353" fullhash="true" withname="false" notcopiable="false" withtokenname="false" xshash="false" unlink="false" loadcontract="false"></hash-link-stub><br><strong>Balance:</strong>&nbsp; 0.09 ETL
+          <hr class="v-divider v-theme--light mt-4 mb-6" aria-orientation="horizontal" role="separator">
+          <form class="v-form" novalidate="">
+            <div class="v-input v-input--horizontal v-input--center-affix v-input--density-compact v-theme--light v-locale--is-ltr v-input--dirty v-text-field v-text-field--suffixed">
+              <!---->
+              <div class="v-input__control">
+                <div class="v-field v-field--active v-field--center-affix v-field--dirty v-field--variant-outlined v-theme--light v-locale--is-ltr">
+                  <div class="v-field__overlay"></div>
+                  <div class="v-field__loader">
+                    <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+                      <!---->
+                      <div class="v-progress-linear__background"></div>
+                      <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+                      <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+                        <div class="v-progress-linear__indeterminate">
+                          <div class="v-progress-linear__indeterminate long"></div>
+                          <div class="v-progress-linear__indeterminate short"></div>
+                        </div>
+                      </transition-stub>
+                      <!---->
+                    </div>
+                  </div>
+                  <!---->
+                  <div class="v-field__field" data-no-activator="">
+                    <!----><label class="v-label v-field-label" for="input-3">
+                      <!---->Drip Amount
+                    </label>
+                    <!----><input size="1" type="number" id="input-3" aria-describedby="input-3-messages" required="" class="v-field__input" value="0.1"><span class="v-text-field__suffix"><span class="v-text-field__suffix__text">ETL</span></span>
+                  </div>
+                  <!---->
+                  <!---->
+                  <div class="v-field__outline">
+                    <div class="v-field__outline__start"></div>
+                    <div class="v-field__outline__notch"><label class="v-label v-field-label v-field-label--floating" aria-hidden="true" for="input-3">
+                        <!---->Drip Amount
+                      </label></div>
+                    <div class="v-field__outline__end"></div>
+                    <!---->
+                  </div>
+                </div>
+              </div>
+              <!---->
+              <div id="input-3-messages" class="v-input__details" role="alert" aria-live="polite">
+                <transition-group-stub name="slide-y-transition" tag="div" appear="false" persisted="false" css="true" class="v-messages">
+                  <div class="v-messages__message">Amount to send for each request</div>
+                </transition-group-stub>
+                <!---->
+              </div>
+            </div>
+            <div class="v-input v-input--horizontal v-input--center-affix v-input--density-compact v-theme--light v-locale--is-ltr v-input--dirty v-text-field v-text-field--suffixed mt-4">
+              <!---->
+              <div class="v-input__control">
+                <div class="v-field v-field--active v-field--center-affix v-field--dirty v-field--variant-outlined v-theme--light v-locale--is-ltr">
+                  <div class="v-field__overlay"></div>
+                  <div class="v-field__loader">
+                    <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+                      <!---->
+                      <div class="v-progress-linear__background"></div>
+                      <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+                      <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+                        <div class="v-progress-linear__indeterminate">
+                          <div class="v-progress-linear__indeterminate long"></div>
+                          <div class="v-progress-linear__indeterminate short"></div>
+                        </div>
+                      </transition-stub>
+                      <!---->
+                    </div>
+                  </div>
+                  <!---->
+                  <div class="v-field__field" data-no-activator="">
+                    <!----><label class="v-label v-field-label" for="input-5">
+                      <!---->Interval Between Drips
+                    </label>
+                    <!----><input size="1" type="number" id="input-5" aria-describedby="input-5-messages" required="" class="v-field__input" value="24"><span class="v-text-field__suffix"><span class="v-text-field__suffix__text">hours</span></span>
+                  </div>
+                  <!---->
+                  <!---->
+                  <div class="v-field__outline">
+                    <div class="v-field__outline__start"></div>
+                    <div class="v-field__outline__notch"><label class="v-label v-field-label v-field-label--floating" aria-hidden="true" for="input-5">
+                        <!---->Interval Between Drips
+                      </label></div>
+                    <div class="v-field__outline__end"></div>
+                    <!---->
+                  </div>
+                </div>
+              </div>
+              <!---->
+              <div id="input-5-messages" class="v-input__details" role="alert" aria-live="polite">
+                <transition-group-stub name="slide-y-transition" tag="div" appear="false" persisted="false" css="true" class="v-messages">
+                  <div class="v-messages__message">Minimum time between requests for each address</div>
+                </transition-group-stub>
+                <!---->
+              </div>
+            </div>
+            <div class="v-card-actions pr-0 pb-0">
+              <div class="v-spacer"></div><button type="submit" class="v-btn v-btn--slim v-theme--light bg-primary v-btn--density-default v-btn--size-default v-btn--variant-flat"><span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+                <!----><span class="v-btn__content" data-no-activator="">Update</span>
+                <!---->
+                <!---->
+              </button>
+            </div>
+          </form>
+        </div>
+        <!---->
+        <!----><span class="v-card__underlay"></span>
+      </div>
+      <h4 class="text-error">Danger Zone</h4>
+      <explorer-faucet-settings-danger-zone-stub faucetid="1"></explorer-faucet-settings-danger-zone-stub>
+    </div>
+  </div>
+</div>"
+`;
+
+exports[`ExplorerFaucetSettings.vue > Should display faucet intro 1`] = `
+"<div class="v-container v-container--fluid v-locale--is-ltr">
+  <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
+    <!---->
+    <div class="v-card__loader">
+      <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+        <!---->
+        <div class="v-progress-linear__background"></div>
+        <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+        <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+          <div class="v-progress-linear__indeterminate">
+            <div class="v-progress-linear__indeterminate long"></div>
+            <div class="v-progress-linear__indeterminate short"></div>
+          </div>
+        </transition-stub>
+        <!---->
+      </div>
+    </div>
+    <!---->
+    <!---->
+    <create-explorer-faucet-modal-stub></create-explorer-faucet-modal-stub>
+    <div class="v-card-text">
+      <div class="v-row">
+        <div class="v-col" align="center"><i class="mdi-faucet mdi v-icon notranslate v-theme--light text-primary-lighten-1" style="font-size: 200px; height: 200px; width: 200px; opacity: 0.25;" aria-hidden="true"></i></div>
+      </div>
+      <div class="v-row">
+        <div class="v-spacer"></div>
+        <div class="v-col v-col-6 text-body-1"> Setup your faucet in two easy steps: <ol>
+            <li>Enter the drip amount, and the interval between requests.</li>
+            <li>Top-up your assigned faucet address with test tokens.</li>
+          </ol><br> Having a faucet integrated in your explorer will make it easier for your users to request test tokens, and save you time by having one less tool to build &amp; maintain. </div>
+        <div class="v-spacer"></div>
+      </div>
+    </div>
+    <div class="v-card-actions mb-4">
+      <div class="v-spacer"></div><button type="button" class="v-btn v-btn--slim v-theme--light bg-primary v-btn--density-default v-btn--size-default v-btn--variant-flat"><span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+        <!----><span class="v-btn__content" data-no-activator="">Setup your Faucet</span>
+        <!---->
+        <!---->
+      </button>
+      <div class="v-spacer"></div>
+    </div>
+    <!---->
+    <!----><span class="v-card__underlay"></span>
+  </div>
+</div>"
+`;

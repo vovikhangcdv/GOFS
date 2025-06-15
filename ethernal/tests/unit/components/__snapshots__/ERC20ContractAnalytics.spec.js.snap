@@ -1,0 +1,85 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ERC20ContractAnalytics.vue > Should display contract analytics with bignumber formatted amounts 1`] = `
+"<div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
+  <!---->
+  <div class="v-card__loader">
+    <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+      <!---->
+      <div class="v-progress-linear__background"></div>
+      <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+      <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+        <div class="v-progress-linear__indeterminate">
+          <div class="v-progress-linear__indeterminate long"></div>
+          <div class="v-progress-linear__indeterminate short"></div>
+        </div>
+      </transition-stub>
+      <!---->
+    </div>
+  </div>
+  <!---->
+  <!---->
+  <div class="v-card-text pt-2">
+    <div class="v-row">
+      <div class="v-col v-col-12 d-flex justify-end ma-0 pb-0">
+        <date-range-selector-stub initialrange="30"></date-range-selector-stub>
+      </div>
+    </div>
+    <div class="v-row mt-0">
+      <div class="v-col-md-6 v-col-12">
+        <line-chart-stub title="Transfer Volume" xlabels="0,1" data="2,2" tooltipunit="transfer" index="1"></line-chart-stub>
+      </div>
+      <div class="v-col-md-6 v-col-12">
+        <line-chart-stub title="Circulating Supply" xlabels="0,1" data="0.2,0.3" tokensymbol="ETL" index="2"></line-chart-stub>
+      </div>
+      <div class="v-col-md-6 v-col-12">
+        <line-chart-stub title="Token Holder History" xlabels="0,1" data="2,2" tooltipunit="holder" index="3"></line-chart-stub>
+      </div>
+    </div>
+  </div>
+  <!---->
+  <!----><span class="v-card__underlay"></span>
+</div>"
+`;
+
+exports[`ERC20ContractAnalytics.vue > Should display contract analytics without bignumber formatted amount 1`] = `
+"<div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
+  <!---->
+  <div class="v-card__loader">
+    <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+      <!---->
+      <div class="v-progress-linear__background"></div>
+      <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+      <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+        <div class="v-progress-linear__indeterminate">
+          <div class="v-progress-linear__indeterminate long"></div>
+          <div class="v-progress-linear__indeterminate short"></div>
+        </div>
+      </transition-stub>
+      <!---->
+    </div>
+  </div>
+  <!---->
+  <!---->
+  <div class="v-card-text pt-2">
+    <div class="v-row">
+      <div class="v-col v-col-12 d-flex justify-end ma-0 pb-0">
+        <date-range-selector-stub initialrange="30"></date-range-selector-stub>
+      </div>
+    </div>
+    <div class="v-row mt-0">
+      <div class="v-col-md-6 v-col-12">
+        <line-chart-stub title="Transfer Volume" xlabels="0,1" data="2,2" tooltipunit="transfer" index="1"></line-chart-stub>
+      </div>
+      <div class="v-col-md-6 v-col-12">
+        <line-chart-stub title="Circulating Supply" xlabels="0,1" data="2,3" tokensymbol="ETL" index="2"></line-chart-stub>
+      </div>
+      <div class="v-col-md-6 v-col-12">
+        <line-chart-stub title="Token Holder History" xlabels="0,1" data="2,2" tooltipunit="holder" index="3"></line-chart-stub>
+      </div>
+    </div>
+  </div>
+  <!---->
+  <!----><span class="v-card__underlay"></span>
+</div>"
+`;
