@@ -156,6 +156,8 @@ func main() {
 	r.GET("/api/rules", getRules)
 	r.GET("/api/rules/violations", getRuleViolations)
 	r.PUT("/api/rules", updateRule)
+	// Transaction statistics endpoint
+	r.GET("/api/transactions/stats", getTransactionStats)
 	// New endpoints for suspicious/whitelist/blacklist management
 	r.GET("/api/suspicious-addresses", getSuspiciousAddresses)
 	r.GET("/api/whitelist-addresses", getWhitelistAddresses)

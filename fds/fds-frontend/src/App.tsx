@@ -21,9 +21,7 @@ import {
   CircularProgress,
   Alert,
   Stack,
-  CssBaseline,
-  ThemeProvider,
-  createTheme,
+  GlobalStyles,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -32,11 +30,13 @@ import { AddressTotals, SuspiciousTransfer, BlacklistedAddress, RelatedAddresses
 import axios from 'axios';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
+import { TechBackground } from './components/layout/TechBackground';
 import { TransactionCard } from './components/transactions/TransactionCard';
 import { DashboardStats } from './components/dashboard/DashboardStats';
 import { SuspiciousTransactionsList } from './components/transactions/SuspiciousTransactionsList';
 import { WalletTab } from './components/dashboard/WalletTab';
 import { BlacklistView } from './components/dashboard/BlacklistView';
+import { RulesView } from './components/dashboard/RulesView';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -78,34 +78,6 @@ export const deleteBlacklistAddress = async (address: string) => {
   return res.data;
 };
 
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#2196f3',
-    },
-    background: {
-      default: '#f5f5f5',
-      paper: '#ffffff',
-    },
-  },
-  typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-  },
-  shape: {
-    borderRadius: 8,
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-        },
-      },
-    },
-  },
-});
-
 const mockTransactions = [
   {
     hash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
@@ -129,41 +101,86 @@ const mockTransactions = [
 
 function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
+  const [searchAddress, setSearchAddress] = useState<string | undefined>(undefined);
+
+  const handleSearchAddress = (address: string) => {
+    setSearchAddress(address);
+    setCurrentPage('wallet');
+  };
+
+  const handlePageChange = (page: string) => {
+    // Clear search address when manually navigating to wallet (not through search)
+    if (page === 'wallet' && currentPage !== 'wallet') {
+      setSearchAddress(undefined);
+    }
+    setCurrentPage(page);
+  };
 
   const renderContent = () => {
     switch (currentPage) {
       case 'dashboard':
-        return <DashboardStats />;
+        return <DashboardStats onPageChange={handlePageChange} />;
       case 'transactions':
         return <SuspiciousTransactionsList />;
       case 'wallet':
-        return <WalletTab />;
+        return <WalletTab searchAddress={searchAddress} />;
+      case 'rules':
+        return <RulesView />;
       case 'blacklist':
         return <BlacklistView />;
       default:
-        return <DashboardStats />;
+        return <DashboardStats onPageChange={handlePageChange} />;
     }
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box sx={{ display: 'flex' }}>
-        <Sidebar onPageChange={setCurrentPage} />
+    <>
+      <GlobalStyles
+        styles={{
+          'body': {
+            margin: 0,
+            fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+            background: '#0a0a0f',
+          },
+          '*::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '*::-webkit-scrollbar-track': {
+            background: 'rgba(30, 41, 59, 0.3)',
+            borderRadius: '4px',
+          },
+          '*::-webkit-scrollbar-thumb': {
+            background: 'rgba(59, 130, 246, 0.6)',
+            borderRadius: '4px',
+          },
+        }}
+      />
+      <Box sx={{ 
+        display: 'flex',
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0f1419 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        <TechBackground />
+        <Header onSearchAddress={handleSearchAddress} />
+        <Sidebar onPageChange={handlePageChange} />
         <Box
           component="main"
           sx={{
             flexGrow: 1,
-            p: 3,
-            width: { sm: `calc(100% - 240px)` },
+            p: 0.5,
+            ml: '40px',
             mt: '64px',
+            minHeight: 'calc(100vh - 64px)',
+            width: 'calc(100vw - 238px)',
+            position: 'relative',
           }}
         >
-          <Header />
           {renderContent()}
         </Box>
       </Box>
-    </ThemeProvider>
+    </>
   );
 }
 
