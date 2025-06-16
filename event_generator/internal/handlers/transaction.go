@@ -7,6 +7,9 @@ import (
 	"log"
 	"math/big"
 	"math/rand"
+	"slices"
+
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -117,7 +120,16 @@ func SendRegisterEntityTx(config *config.Config, skUser *ecdsa.PrivateKey, isUse
 		return common.Hash{}, err
 	}
 
-	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, skUser, *tx.To(), tx.Value(), tx.Gas(), tx.Data(), isUseRPC)
+	msg := ethereum.CallMsg{
+		From: crypto.PubkeyToAddress(skUser.PublicKey),
+		To:   &config.SystemContracts.EntityRegistryAddress,
+		Data: tx.Data(),
+	}
+	gas, err := config.Client.EstimateGas(context.Background(), msg)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, skUser, *tx.To(), tx.Value(), gas, tx.Data(), isUseRPC)
 	if err != nil {
 		return common.Hash{}, err
 	}
@@ -141,13 +153,7 @@ func SendExchangeVNDToUSDTx(config *config.Config, skFrom *ecdsa.PrivateKey, isU
 	}
 	// Temporary check if UNKNOWN_TX is allowed
 	allowedTransactionTypes := GetAllowedTransactionTypes(config, addr, config.SystemContracts.ExchangePortalAddress)
-	isUnknownTxAllowed := false
-	for _, txType := range allowedTransactionTypes {
-		if txType == utils.UNKNOWN_TX {
-			isUnknownTxAllowed = true
-			break
-		}
-	}
+	isUnknownTxAllowed := slices.Contains(allowedTransactionTypes, utils.UNKNOWN_TX)
 	if !isUnknownTxAllowed {
 		return common.Hash{}, fmt.Errorf("UNKNOWN_TX is not allowed, skipping")
 	}
@@ -204,7 +210,16 @@ func SendExchangeVNDToUSDTx(config *config.Config, skFrom *ecdsa.PrivateKey, isU
 	if err != nil {
 		return common.Hash{}, err
 	}
-	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, skFrom, *tx.To(), tx.Value(), tx.Gas(), tx.Data(), isUseRPC)
+	msg := ethereum.CallMsg{
+		From: crypto.PubkeyToAddress(skFrom.PublicKey),
+		To:   &config.SystemContracts.ExchangePortalAddress,
+		Data: tx.Data(),
+	}
+	gas, err := config.Client.EstimateGas(context.Background(), msg)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	txHash, err := utils.SendNormalTx(config.Backend, config.ChainID, skFrom, *tx.To(), tx.Value(), gas, tx.Data(), isUseRPC)
 	if err != nil {
 		return common.Hash{}, err
 	}
@@ -238,7 +253,7 @@ func SendTransferEVNDRandomAmountTx(config *config.Config, skFrom *ecdsa.Private
 	if len(allowedTransactionTypes) == 0 {
 		return common.Hash{}, fmt.Errorf("no allowed transaction types, skipping")
 	}
-	randomTransactionType := allowedTransactionTypes[rand.Intn(len(allowedTransactionTypes))]
+	randomTransactionType := GetRandomAllowedTransactionType(allowedTransactionTypes)
 	log.Println("Random transaction type: ", utils.GetTransactionTypeName(randomTransactionType))
 
 	if _, err := AirdropGas(config, from); err != nil {
@@ -450,4 +465,14 @@ func GetAllowedTransactionTypes(config *config.Config, from, to common.Address) 
 	fromType := utils.EntityType(fromEntity.EntityType)
 	toType := utils.EntityType(toEntity.EntityType)
 	return utils.GetAllowedTransactionTypes(fromType, toType)
+}
+
+func GetRandomAllowedTransactionType(allowedTransactionTypes []utils.TransactionType) utils.TransactionType {
+	if len(allowedTransactionTypes) == 0 {
+		return utils.UNKNOWN_TX
+	}
+	if slices.Contains(allowedTransactionTypes, utils.UNKNOWN_TX) {
+		return utils.UNKNOWN_TX
+	}
+	return allowedTransactionTypes[rand.Intn(len(allowedTransactionTypes))]
 }
