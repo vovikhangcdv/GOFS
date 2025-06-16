@@ -30,18 +30,18 @@ interface DashboardStatsProps {
 }
 
 const StatsCard = styled(Card)(({ theme }) => ({
-  background: 'rgba(30, 41, 59, 0.8)',
+  background: 'rgba(30, 41, 59, 0.85)',
   backdropFilter: 'blur(20px)',
-  border: '1px solid rgba(100, 116, 139, 0.3)',
+  border: '1px solid rgba(100, 116, 139, 0.4)',
   borderRadius: 16,
   overflow: 'hidden',
   position: 'relative',
-  transition: 'all 0.2s ease-in-out',
+  transition: 'all 0.3s ease',
   cursor: 'pointer',
   '&:hover': {
-    transform: 'translateY(-2px)',
-    border: '1px solid rgba(59, 130, 246, 0.5)',
-    boxShadow: '0 8px 32px rgba(59, 130, 246, 0.3)',
+    transform: 'translateY(-4px)',
+    border: '1px solid rgba(59, 130, 246, 0.6)',
+    boxShadow: '0 16px 40px rgba(59, 130, 246, 0.25)',
   },
   '&::before': {
     content: '""',
@@ -50,7 +50,7 @@ const StatsCard = styled(Card)(({ theme }) => ({
     left: 0,
     right: 0,
     height: 3,
-    background: 'linear-gradient(90deg, #64748b, #6b7280, #9ca3af)',
+    background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.8), rgba(34, 197, 94, 0.8))',
   },
 }));
 
@@ -62,32 +62,42 @@ const IconContainer = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   marginBottom: theme.spacing(2),
-  background: 'rgba(100, 116, 139, 0.15)',
-  border: '1px solid rgba(100, 116, 139, 0.3)',
+  background: 'rgba(100, 116, 139, 0.2)',
+  border: '1px solid rgba(100, 116, 139, 0.4)',
 }));
 
 const StatsValue = styled(Typography)(({ theme }) => ({
   fontSize: '2.5rem',
   fontWeight: 700,
-  background: 'linear-gradient(135deg, #f8fafc, #e2e8f0)',
+  background: 'linear-gradient(135deg, #f8fafc 0%, #cbd5e1 50%, #94a3b8 100%)',
   WebkitBackgroundClip: 'text',
   WebkitTextFillColor: 'transparent',
   marginBottom: theme.spacing(1),
 }));
 
 const TableCard = styled(Card)(({ theme }) => ({
-  background: 'rgba(30, 41, 59, 0.8)',
-  backdropFilter: 'blur(20px)',
-  border: '1px solid rgba(100, 116, 139, 0.3)',
+  background: 'rgba(30, 41, 59, 0.85)',
+  backdropFilter: 'blur(25px)',
+  border: '1px solid rgba(100, 116, 139, 0.4)',
   borderRadius: 16,
   overflow: 'hidden',
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 2,
+    background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.6), rgba(34, 197, 94, 0.6))',
+  },
   '& .MuiTableContainer-root': {
     background: 'transparent',
     border: 'none',
   },
   '& .MuiTable-root': {
     '& .MuiTableHead-root': {
-      background: 'rgba(100, 116, 139, 0.2)',
+      background: 'rgba(100, 116, 139, 0.25)',
       '& .MuiTableCell-head': {
         color: theme.palette.text.primary,
         fontWeight: 600,
@@ -95,12 +105,15 @@ const TableCard = styled(Card)(({ theme }) => ({
         textTransform: 'uppercase',
         letterSpacing: '0.05em',
         border: 'none',
+        textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
       },
     },
     '& .MuiTableBody-root': {
       '& .MuiTableRow-root': {
+        transition: 'all 0.2s ease',
         '&:hover': {
-          background: 'rgba(100, 116, 139, 0.1)',
+          background: 'rgba(59, 130, 246, 0.08)',
+          transform: 'translateX(4px)',
         },
         '& .MuiTableCell-body': {
           border: 'none',

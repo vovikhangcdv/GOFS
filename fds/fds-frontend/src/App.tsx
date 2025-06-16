@@ -21,6 +21,7 @@ import {
   CircularProgress,
   Alert,
   Stack,
+  GlobalStyles,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -29,6 +30,7 @@ import { AddressTotals, SuspiciousTransfer, BlacklistedAddress, RelatedAddresses
 import axios from 'axios';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
+import { TechBackground } from './components/layout/TechBackground';
 import { TransactionCard } from './components/transactions/TransactionCard';
 import { DashboardStats } from './components/dashboard/DashboardStats';
 import { SuspiciousTransactionsList } from './components/transactions/SuspiciousTransactionsList';
@@ -132,28 +134,53 @@ function App() {
   };
 
   return (
-    <Box sx={{ 
-      display: 'flex',
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)',
-      overflow: 'hidden',
-    }}>
-      <Header onSearchAddress={handleSearchAddress} />
-      <Sidebar onPageChange={handlePageChange} />
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 0.5,
-          ml: '40px', // Slightly overlap with sidebar
-          mt: '64px',   // Header height
-          minHeight: 'calc(100vh - 64px)',
-          width: 'calc(100vw - 238px)', // Ensure full width usage
+    <>
+      <GlobalStyles
+        styles={{
+          'body': {
+            margin: 0,
+            fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+            background: '#0a0a0f',
+          },
+          '*::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '*::-webkit-scrollbar-track': {
+            background: 'rgba(30, 41, 59, 0.3)',
+            borderRadius: '4px',
+          },
+          '*::-webkit-scrollbar-thumb': {
+            background: 'rgba(59, 130, 246, 0.6)',
+            borderRadius: '4px',
+          },
         }}
-      >
-        {renderContent()}
+      />
+      <Box sx={{ 
+        display: 'flex',
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0f1419 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        <TechBackground />
+        <Header onSearchAddress={handleSearchAddress} />
+        <Sidebar onPageChange={handlePageChange} />
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 0.5,
+            ml: '40px',
+            mt: '64px',
+            minHeight: 'calc(100vh - 64px)',
+            width: 'calc(100vw - 238px)',
+            position: 'relative',
+          }}
+        >
+          {renderContent()}
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 }
 

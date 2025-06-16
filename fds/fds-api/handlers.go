@@ -538,7 +538,7 @@ func updateRule(c *gin.Context) {
 func getTransactionStats(c *gin.Context) {
 	// Get total transaction count
 	var totalCount int64
-	if err := db.Model(&Transaction{}).Count(&totalCount).Error; err != nil {
+	if err := db.Unscoped().Model(&Transaction{}).Count(&totalCount).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -546,8 +546,8 @@ func getTransactionStats(c *gin.Context) {
 	// Get transaction count by day for the last 7 days
 	var dailyStats []gin.H
 	for i := 6; i >= 0; i-- {
-		date := time.Now().AddDate(0, 0, -i)
-		startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+		date := time.Now().UTC().AddDate(0, 0, -i)
+		startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
 		endOfDay := startOfDay.Add(24 * time.Hour)
 
 		var count int64
@@ -565,8 +565,8 @@ func getTransactionStats(c *gin.Context) {
 	// Get transaction count by hour for the last 24 hours
 	var hourlyStats []gin.H
 	for i := 23; i >= 0; i-- {
-		hour := time.Now().Add(time.Duration(-i) * time.Hour)
-		startOfHour := time.Date(hour.Year(), hour.Month(), hour.Day(), hour.Hour(), 0, 0, 0, hour.Location())
+		hour := time.Now().UTC().Add(time.Duration(-i) * time.Hour)
+		startOfHour := time.Date(hour.Year(), hour.Month(), hour.Day(), hour.Hour(), 0, 0, 0, time.UTC)
 		endOfHour := startOfHour.Add(time.Hour)
 
 		var count int64
@@ -583,7 +583,7 @@ func getTransactionStats(c *gin.Context) {
 
 	// Get suspicious transaction count
 	var suspiciousCount int64
-	if err := db.Model(&SuspiciousTransfer{}).Count(&suspiciousCount).Error; err != nil {
+	if err := db.Unscoped().Model(&SuspiciousTransfer{}).Count(&suspiciousCount).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

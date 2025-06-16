@@ -16,18 +16,18 @@ import {
 } from '@mui/icons-material';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  background: 'rgba(15, 23, 42, 0.9)',
+  background: 'rgba(15, 23, 42, 0.95)',
   backdropFilter: 'blur(20px)',
-  borderBottom: '1px solid rgba(100, 116, 139, 0.2)',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+  borderBottom: '1px solid rgba(100, 116, 139, 0.3)',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
 }));
 
 const SearchContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  background: 'rgba(30, 41, 59, 0.7)',
-  backdropFilter: 'blur(10px)',
-  border: '1px solid rgba(100, 116, 139, 0.3)',
+  background: 'rgba(30, 41, 59, 0.8)',
+  backdropFilter: 'blur(15px)',
+  border: '1px solid rgba(100, 116, 139, 0.4)',
   borderRadius: 12,
   padding: theme.spacing(0.5, 2),
   marginLeft: 'auto',
@@ -35,12 +35,13 @@ const SearchContainer = styled(Box)(({ theme }) => ({
   width: 320,
   transition: 'all 0.3s ease',
   '&:hover': {
-    border: '1px solid rgba(100, 116, 139, 0.5)',
-    background: 'rgba(30, 41, 59, 0.9)',
+    border: '1px solid rgba(59, 130, 246, 0.6)',
+    background: 'rgba(30, 41, 59, 0.95)',
+    boxShadow: '0 4px 20px rgba(59, 130, 246, 0.2)',
   },
   '&:focus-within': {
-    border: '1px solid rgba(100, 116, 139, 0.7)',
-    boxShadow: '0 0 0 3px rgba(100, 116, 139, 0.15)',
+    border: '1px solid rgba(59, 130, 246, 0.8)',
+    boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.2)',
   },
 }));
 
@@ -78,12 +79,14 @@ const LogoIcon = styled(Box)(({ theme }) => ({
 }));
 
 const ActionButton = styled(IconButton)(({ theme }) => ({
-  background: 'rgba(30, 41, 59, 0.6)',
-  border: '1px solid rgba(100, 116, 139, 0.2)',
+  background: 'rgba(30, 41, 59, 0.7)',
+  border: '1px solid rgba(100, 116, 139, 0.3)',
   color: theme.palette.text.primary,
+  transition: 'all 0.3s ease',
   '&:hover': {
-    background: 'rgba(30, 41, 59, 0.8)',
-    border: '1px solid rgba(100, 116, 139, 0.4)',
+    background: 'rgba(30, 41, 59, 0.9)',
+    border: '1px solid rgba(59, 130, 246, 0.5)',
+    boxShadow: '0 4px 16px rgba(59, 130, 246, 0.25)',
   },
 }));
 
