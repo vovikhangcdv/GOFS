@@ -43,7 +43,7 @@ func HandleLargeAmountTransfers(config *config.Config, sk *ecdsa.PrivateKey, lar
 	if len(allowedTransactionTypes) == 0 {
 		return nil, fmt.Errorf("no allowed transaction types, skipping")
 	}
-	randomTransactionType := allowedTransactionTypes[rand.Intn(len(allowedTransactionTypes))]
+	randomTransactionType := GetRandomAllowedTransactionType(allowedTransactionTypes)
 	log.Println("Random transaction type: ", utils.GetTransactionTypeName(randomTransactionType))
 	txHash, err := sendTransferEVNDTx(config, sk, receiver, largeAmount, randomTransactionType, true)
 	if err != nil {
@@ -81,7 +81,7 @@ func HandleMultipleOutgoingTransfers(config *config.Config, sk *ecdsa.PrivateKey
 		if len(allowedTransactionTypes) == 0 {
 			return nil, fmt.Errorf("no allowed transaction types, skipping")
 		}
-		randomTransactionType := allowedTransactionTypes[rand.Intn(len(allowedTransactionTypes))]
+		randomTransactionType := GetRandomAllowedTransactionType(allowedTransactionTypes)
 		log.Println("Random transaction type: ", utils.GetTransactionTypeName(randomTransactionType))
 		
 		txHash, err := sendTransferEVNDTx(config, sk, receiver, amount, randomTransactionType, true)
@@ -122,7 +122,7 @@ func HandleMultipleIncomingTransfers(config *config.Config, addr common.Address,
 		if len(allowedTransactionTypes) == 0 {
 			return nil, fmt.Errorf("no allowed transaction types, skipping")
 		}
-		randomTransactionType := allowedTransactionTypes[rand.Intn(len(allowedTransactionTypes))]
+		randomTransactionType := GetRandomAllowedTransactionType(allowedTransactionTypes)
 		log.Println("Random transaction type: ", utils.GetTransactionTypeName(randomTransactionType))
 		txHash, err := sendTransferEVNDTx(config, senderPrivateKey, addr, randomValue, randomTransactionType, true)
 		if err != nil {
@@ -155,7 +155,7 @@ func HandleSuspiciousAddressInteractions(config *config.Config, sk *ecdsa.Privat
 	if len(allowedTransactionTypes) == 0 {
 		return nil, fmt.Errorf("no allowed transaction types, skipping")
 	}
-	randomTransactionType := allowedTransactionTypes[rand.Intn(len(allowedTransactionTypes))]
+	randomTransactionType := GetRandomAllowedTransactionType(allowedTransactionTypes)
 	log.Println("Random transaction type: ", utils.GetTransactionTypeName(randomTransactionType))
 	txHash, err := sendTransferEVNDTx(config, sk, randomBlacklistAddress, randomValue, randomTransactionType, true)
 	if err != nil {

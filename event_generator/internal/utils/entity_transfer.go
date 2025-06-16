@@ -1,5 +1,7 @@
 package utils
 
+import "slices"
+
 // EntityType represents the type of entity in the system
 type EntityType uint8
 
@@ -175,22 +177,10 @@ func GetAllowedTransactionTypes(fromType, toType EntityType) []TransactionType {
 	// Check each transaction type
 	for txType, policy := range txTypeAllowedFromTo {
 		// Check if fromType is allowed
-		fromAllowed := false
-		for _, allowedFrom := range policy.fromTypes {
-			if fromType == allowedFrom {
-				fromAllowed = true
-				break
-			}
-		}
+		fromAllowed := slices.Contains(policy.fromTypes, fromType)
 
 		// Check if toType is allowed
-		toAllowed := false
-		for _, allowedTo := range policy.toTypes {
-			if toType == allowedTo {
-				toAllowed = true
-				break
-			}
-		}
+		toAllowed := slices.Contains(policy.toTypes, toType)
 
 		// If both from and to types are allowed, add this transaction type
 		if fromAllowed && toAllowed {

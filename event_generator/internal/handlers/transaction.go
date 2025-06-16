@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/big"
 	"math/rand"
+	"slices"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -152,13 +153,7 @@ func SendExchangeVNDToUSDTx(config *config.Config, skFrom *ecdsa.PrivateKey, isU
 	}
 	// Temporary check if UNKNOWN_TX is allowed
 	allowedTransactionTypes := GetAllowedTransactionTypes(config, addr, config.SystemContracts.ExchangePortalAddress)
-	isUnknownTxAllowed := false
-	for _, txType := range allowedTransactionTypes {
-		if txType == utils.UNKNOWN_TX {
-			isUnknownTxAllowed = true
-			break
-		}
-	}
+	isUnknownTxAllowed := slices.Contains(allowedTransactionTypes, utils.UNKNOWN_TX)
 	if !isUnknownTxAllowed {
 		return common.Hash{}, fmt.Errorf("UNKNOWN_TX is not allowed, skipping")
 	}
@@ -258,7 +253,7 @@ func SendTransferEVNDRandomAmountTx(config *config.Config, skFrom *ecdsa.Private
 	if len(allowedTransactionTypes) == 0 {
 		return common.Hash{}, fmt.Errorf("no allowed transaction types, skipping")
 	}
-	randomTransactionType := allowedTransactionTypes[rand.Intn(len(allowedTransactionTypes))]
+	randomTransactionType := GetRandomAllowedTransactionType(allowedTransactionTypes)
 	log.Println("Random transaction type: ", utils.GetTransactionTypeName(randomTransactionType))
 
 	if _, err := AirdropGas(config, from); err != nil {
@@ -470,4 +465,14 @@ func GetAllowedTransactionTypes(config *config.Config, from, to common.Address) 
 	fromType := utils.EntityType(fromEntity.EntityType)
 	toType := utils.EntityType(toEntity.EntityType)
 	return utils.GetAllowedTransactionTypes(fromType, toType)
+}
+
+func GetRandomAllowedTransactionType(allowedTransactionTypes []utils.TransactionType) utils.TransactionType {
+	if len(allowedTransactionTypes) == 0 {
+		return utils.UNKNOWN_TX
+	}
+	if slices.Contains(allowedTransactionTypes, utils.UNKNOWN_TX) {
+		return utils.UNKNOWN_TX
+	}
+	return allowedTransactionTypes[rand.Intn(len(allowedTransactionTypes))]
 }
