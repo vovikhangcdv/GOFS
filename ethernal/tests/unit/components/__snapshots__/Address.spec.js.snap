@@ -1,0 +1,41 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Address.vue > Should display address base page 1`] = `
+"<div class="v-container v-container--fluid v-locale--is-ltr" hash="0x123">
+  <h2 class="text-h6 font-weight-medium">Address <span class="text-body-2 text-medium-emphasis"></span></h2>
+  <hr class="v-divider v-theme--light my-4" aria-orientation="horizontal" role="separator">
+  <address-header-stub balance="10000" loadingbalance="false" loadingstats="false" addresstransactionstats="[object Object]"></address-header-stub>
+  <base-chip-group-stub modelvalue="transactions" mandatory=""></base-chip-group-stub>
+  <div>
+    <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
+      <!---->
+      <div class="v-card__loader">
+        <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+          <!---->
+          <div class="v-progress-linear__background"></div>
+          <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+          <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+            <div class="v-progress-linear__indeterminate">
+              <div class="v-progress-linear__indeterminate long"></div>
+              <div class="v-progress-linear__indeterminate short"></div>
+            </div>
+          </transition-stub>
+          <!---->
+        </div>
+      </div>
+      <!---->
+      <!---->
+      <div class="v-card-text">
+        <address-transactions-list-stub></address-transactions-list-stub>
+      </div>
+      <!---->
+      <!----><span class="v-card__underlay"></span>
+    </div>
+  </div>
+  <!--v-if-->
+  <!--v-if-->
+  <!--v-if-->
+  <!--v-if-->
+  <!--v-if-->
+</div>"
+`;

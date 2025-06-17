@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`TransactionEvent.vue > Should display in raw mode if no topics 1`] = `
+"<div data-v-1a031228="" class="my-3 text-medium-emphasis">
+  <!-- Raw Mode Display -->
+  <!-- Full Mode Display -->
+  <log-details-stub data-v-1a031228="" log="[object Object]" self="false" istooltip="false" short="false"></log-details-stub>
+</div>"
+`;
+
+exports[`TransactionEvent.vue > Should display short version 1`] = `
+"<div data-v-1a031228="" class="my-3 text-medium-emphasis">
+  <!-- Raw Mode Display -->
+  <!-- Full Mode Display -->
+  <log-details-stub data-v-1a031228="" log="[object Object]" self="false" istooltip="false" short="true"></log-details-stub>
+</div>"
+`;
+
+exports[`TransactionEvent.vue > Should display transaction event 1`] = `
+"<div data-v-1a031228="" class="my-3 text-medium-emphasis">
+  <!-- Raw Mode Display -->
+  <!-- Full Mode Display -->
+  <log-details-stub data-v-1a031228="" log="[object Object]" self="false" istooltip="false" short="false" parsedlog="[object Object]" contract="[object Object]"></log-details-stub>
+</div>"
+`;

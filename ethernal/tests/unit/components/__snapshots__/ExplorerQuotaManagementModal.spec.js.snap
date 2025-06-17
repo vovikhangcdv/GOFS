@@ -1,0 +1,285 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ExplorerQuotaManagementModal.vue > Should display base cost simulation 1`] = `
+"<div class="v-dialog-stub" max-width="1200" persistent="true">
+  <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
+    <!---->
+    <div class="v-card__loader">
+      <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+        <!---->
+        <div class="v-progress-linear__background"></div>
+        <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+        <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+          <div class="v-progress-linear__indeterminate">
+            <div class="v-progress-linear__indeterminate long"></div>
+            <div class="v-progress-linear__indeterminate short"></div>
+          </div>
+        </transition-stub>
+        <!---->
+      </div>
+    </div>
+    <!---->
+    <!---->
+    <div class="v-card-title d-flex justify-space-between align-center">
+      <h4>Transaction Quota Management</h4><button type="button" class="v-btn v-btn--icon v-theme--light text-grey v-btn--density-default v-btn--size-default v-btn--variant-text"><span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+        <!----><span class="v-btn__content" data-no-activator=""><i class="mdi-close mdi v-icon notranslate v-theme--light v-icon--size-default" aria-hidden="true"></i></span>
+        <!---->
+        <!---->
+      </button>
+    </div>
+    <div class="v-card-text">
+      <!--v-if-->
+      <!--v-if-->
+      <p> Your plan includes 100,000 transactions per month. If you need more, you can extend your quota here. If set, your quota extension will automatically be renewed every month, but you can adjust or remove it anytime. Increases will be charged for right away, and decreases will result in a prorated credit applied to your future invoices. </p><b>Current Quota:</b> 100,000 base + 20,000 extra = 120,000 txs
+      <hr class="v-divider v-theme--light mt-2 mb-4" aria-orientation="horizontal" role="separator">
+      <form class="v-form" novalidate="">
+        <div class="v-input v-input--horizontal v-input--center-affix v-input--density-compact v-theme--light v-locale--is-ltr v-input--dirty v-text-field v-text-field--suffixed">
+          <!---->
+          <div class="v-input__control">
+            <div class="v-field v-field--active v-field--center-affix v-field--dirty v-field--variant-outlined v-theme--light v-locale--is-ltr">
+              <div class="v-field__overlay"></div>
+              <div class="v-field__loader">
+                <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+                  <!---->
+                  <div class="v-progress-linear__background"></div>
+                  <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+                  <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+                    <div class="v-progress-linear__indeterminate">
+                      <div class="v-progress-linear__indeterminate long"></div>
+                      <div class="v-progress-linear__indeterminate short"></div>
+                    </div>
+                  </transition-stub>
+                  <!---->
+                </div>
+              </div>
+              <!---->
+              <div class="v-field__field" data-no-activator="">
+                <!----><label class="v-label v-field-label" for="input-4">
+                  <!---->Extra Transaction Quota
+                </label>
+                <!----><input size="1" type="number" id="input-4" aria-describedby="input-4-messages" class="v-field__input" value="4000000"><span class="v-text-field__suffix"><span class="v-text-field__suffix__text">extra transactions per month</span></span>
+              </div>
+              <!---->
+              <!---->
+              <div class="v-field__outline">
+                <div class="v-field__outline__start"></div>
+                <div class="v-field__outline__notch"><label class="v-label v-field-label v-field-label--floating" aria-hidden="true" for="input-4">
+                    <!---->Extra Transaction Quota
+                  </label></div>
+                <div class="v-field__outline__end"></div>
+                <!---->
+              </div>
+            </div>
+          </div>
+          <!---->
+          <div id="input-4-messages" class="v-input__details" role="alert" aria-live="polite">
+            <transition-group-stub name="slide-y-transition" tag="div" appear="false" persisted="false" css="true" class="v-messages">
+              <!---->
+            </transition-group-stub>
+            <!---->
+          </div>
+        </div>
+        <div class="v-table v-theme--light v-table--density-default">
+          <!---->
+          <div class="v-table__wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th class="text-left">Up to</th>
+                  <th class="text-left">Cost per tx</th>
+                  <th class="text-left">Number of txs</th>
+                  <th class="text-left">Total Monthly Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>100,000 txs</td>
+                  <td>$0.005</td>
+                  <td>100,000</td>
+                  <td>$500</td>
+                </tr>
+                <tr>
+                  <td>1,000,000 txs</td>
+                  <td>$0.0007</td>
+                  <td>900,000</td>
+                  <td>$630</td>
+                </tr>
+                <tr>
+                  <td>10,000,000 txs</td>
+                  <td>$0.00015</td>
+                  <td>3,100,000</td>
+                  <td>$465</td>
+                </tr>
+                <tr>
+                  <td>∞ </td>
+                  <td>$0.000045</td>
+                  <td>0</td>
+                  <td>$0</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td class="font-weight-bold">4,100,000</td>
+                  <td class="font-weight-bold">$1,595</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <!---->
+        </div>
+        <div align="right"><button type="submit" class="v-btn v-btn--elevated v-theme--light bg-primary v-btn--density-default v-btn--size-default v-btn--variant-elevated"><span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+            <!----><span class="v-btn__content" data-no-activator="">Update Quota</span>
+            <!---->
+            <!---->
+          </button></div>
+      </form>
+    </div>
+    <!---->
+    <!----><span class="v-card__underlay"></span>
+  </div>
+</div>"
+`;
+
+exports[`ExplorerQuotaManagementModal.vue > Should display current quota info 1`] = `
+"<div class="v-dialog-stub" max-width="1200" persistent="true">
+  <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
+    <!---->
+    <div class="v-card__loader">
+      <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+        <!---->
+        <div class="v-progress-linear__background"></div>
+        <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+        <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+          <div class="v-progress-linear__indeterminate">
+            <div class="v-progress-linear__indeterminate long"></div>
+            <div class="v-progress-linear__indeterminate short"></div>
+          </div>
+        </transition-stub>
+        <!---->
+      </div>
+    </div>
+    <!---->
+    <!---->
+    <div class="v-card-title d-flex justify-space-between align-center">
+      <h4>Transaction Quota Management</h4><button type="button" class="v-btn v-btn--icon v-theme--light text-grey v-btn--density-default v-btn--size-default v-btn--variant-text"><span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+        <!----><span class="v-btn__content" data-no-activator=""><i class="mdi-close mdi v-icon notranslate v-theme--light v-icon--size-default" aria-hidden="true"></i></span>
+        <!---->
+        <!---->
+      </button>
+    </div>
+    <div class="v-card-text">
+      <!--v-if-->
+      <!--v-if-->
+      <p> Your plan includes 100,000 transactions per month. If you need more, you can extend your quota here. If set, your quota extension will automatically be renewed every month, but you can adjust or remove it anytime. Increases will be charged for right away, and decreases will result in a prorated credit applied to your future invoices. </p><b>Current Quota:</b> 100,000 base + 20,000 extra = 120,000 txs
+      <hr class="v-divider v-theme--light mt-2 mb-4" aria-orientation="horizontal" role="separator">
+      <form class="v-form" novalidate="">
+        <div class="v-input v-input--horizontal v-input--center-affix v-input--density-compact v-theme--light v-locale--is-ltr v-input--dirty v-text-field v-text-field--suffixed">
+          <!---->
+          <div class="v-input__control">
+            <div class="v-field v-field--active v-field--center-affix v-field--dirty v-field--variant-outlined v-theme--light v-locale--is-ltr">
+              <div class="v-field__overlay"></div>
+              <div class="v-field__loader">
+                <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+                  <!---->
+                  <div class="v-progress-linear__background"></div>
+                  <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+                  <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+                    <div class="v-progress-linear__indeterminate">
+                      <div class="v-progress-linear__indeterminate long"></div>
+                      <div class="v-progress-linear__indeterminate short"></div>
+                    </div>
+                  </transition-stub>
+                  <!---->
+                </div>
+              </div>
+              <!---->
+              <div class="v-field__field" data-no-activator="">
+                <!----><label class="v-label v-field-label" for="input-4">
+                  <!---->Extra Transaction Quota
+                </label>
+                <!----><input size="1" type="number" id="input-4" aria-describedby="input-4-messages" class="v-field__input" value="20000"><span class="v-text-field__suffix"><span class="v-text-field__suffix__text">extra transactions per month</span></span>
+              </div>
+              <!---->
+              <!---->
+              <div class="v-field__outline">
+                <div class="v-field__outline__start"></div>
+                <div class="v-field__outline__notch"><label class="v-label v-field-label v-field-label--floating" aria-hidden="true" for="input-4">
+                    <!---->Extra Transaction Quota
+                  </label></div>
+                <div class="v-field__outline__end"></div>
+                <!---->
+              </div>
+            </div>
+          </div>
+          <!---->
+          <div id="input-4-messages" class="v-input__details" role="alert" aria-live="polite">
+            <transition-group-stub name="slide-y-transition" tag="div" appear="false" persisted="false" css="true" class="v-messages">
+              <!---->
+            </transition-group-stub>
+            <!---->
+          </div>
+        </div>
+        <div class="v-table v-theme--light v-table--density-default">
+          <!---->
+          <div class="v-table__wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th class="text-left">Up to</th>
+                  <th class="text-left">Cost per tx</th>
+                  <th class="text-left">Number of txs</th>
+                  <th class="text-left">Total Monthly Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>100,000 txs</td>
+                  <td>$0.005</td>
+                  <td>100,000</td>
+                  <td>$500</td>
+                </tr>
+                <tr>
+                  <td>1,000,000 txs</td>
+                  <td>$0.0007</td>
+                  <td>20,000</td>
+                  <td>$14</td>
+                </tr>
+                <tr>
+                  <td>10,000,000 txs</td>
+                  <td>$0.00015</td>
+                  <td>0</td>
+                  <td>$0</td>
+                </tr>
+                <tr>
+                  <td>∞ </td>
+                  <td>$0.000045</td>
+                  <td>0</td>
+                  <td>$0</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td class="font-weight-bold">120,000</td>
+                  <td class="font-weight-bold">$514</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <!---->
+        </div>
+        <div align="right"><button type="submit" class="v-btn v-btn--elevated v-theme--light bg-primary v-btn--density-default v-btn--size-default v-btn--variant-elevated"><span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+            <!----><span class="v-btn__content" data-no-activator="">Update Quota</span>
+            <!---->
+            <!---->
+          </button></div>
+      </form>
+    </div>
+    <!---->
+    <!----><span class="v-card__underlay"></span>
+  </div>
+</div>"
+`;

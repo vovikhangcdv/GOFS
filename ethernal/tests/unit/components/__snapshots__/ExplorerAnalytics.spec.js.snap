@@ -1,0 +1,127 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ExplorerAnalytics.vue > Should display charts 1`] = `
+"<div class="v-container v-container--fluid v-locale--is-ltr">
+  <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated" style="height: 100%;">
+    <!---->
+    <div class="v-card__loader">
+      <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+        <!---->
+        <div class="v-progress-linear__background"></div>
+        <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+        <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+          <div class="v-progress-linear__indeterminate">
+            <div class="v-progress-linear__indeterminate long"></div>
+            <div class="v-progress-linear__indeterminate short"></div>
+          </div>
+        </transition-stub>
+        <!---->
+      </div>
+    </div>
+    <!---->
+    <!---->
+    <div class="v-card-text">
+      <date-range-selector-stub initialrange="7"></date-range-selector-stub>
+      <div class="v-row">
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Transaction Volume" tooltipunit="transaction" index="0"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="ERC20 Transfer Volume" tooltipunit="transfer" index="1"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Average Gas Price" tokensymbol="gwei" floating="true" index="2"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Transaction Fees" tokensymbol="ETH" floating="true" index="3"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Average Transaction Fee" tokensymbol="ETH" floating="true" index="3"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Active Wallets Count" tooltipunit="wallet" index="4"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Deployed Contracts Count" tooltipunit="contract" index="6"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Cumulative Deployed Contracts Count" tooltipunit="contract" index="6"></line-chart-stub>
+        </div>
+        <!--v-if-->
+      </div>
+    </div>
+    <!---->
+    <!----><span class="v-card__underlay"></span>
+  </div>
+</div>"
+`;
+
+exports[`ExplorerAnalytics.vue > Should display gas analytics 1`] = `
+"<div class="v-container v-container--fluid v-locale--is-ltr">
+  <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated" style="height: 100%;">
+    <!---->
+    <div class="v-card__loader">
+      <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+        <!---->
+        <div class="v-progress-linear__background"></div>
+        <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+        <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+          <div class="v-progress-linear__indeterminate">
+            <div class="v-progress-linear__indeterminate long"></div>
+            <div class="v-progress-linear__indeterminate short"></div>
+          </div>
+        </transition-stub>
+        <!---->
+      </div>
+    </div>
+    <!---->
+    <!---->
+    <div class="v-card-text">
+      <date-range-selector-stub initialrange="7"></date-range-selector-stub>
+      <div class="v-row">
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Transaction Volume" tooltipunit="transaction" index="0"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="ERC20 Transfer Volume" tooltipunit="transfer" index="1"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Average Gas Price" tokensymbol="gwei" floating="true" index="2"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Transaction Fees" tokensymbol="ETH" floating="true" index="3"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Average Transaction Fee" tokensymbol="ETH" floating="true" index="3"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Active Wallets Count" tooltipunit="wallet" index="4"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Deployed Contracts Count" tooltipunit="contract" index="6"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Cumulative Deployed Contracts Count" tooltipunit="contract" index="6"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <multi-line-chart-stub title="Gas Price" tokensymbol="gwei" floating="true"></multi-line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Average Gas Limit" tooltipunit="gas unit" index="7"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Gas Utilization Ratio" tokensymbol="%" yaxissymbol="%" floating="true" index="8"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Average Block Time" tooltipunit="second" floating="true" index="9"></line-chart-stub>
+        </div>
+        <div class="v-col-md-6 v-col-12">
+          <line-chart-stub title="Average Block Size" tooltipunit="transaction" floating="true" index="10"></line-chart-stub>
+        </div>
+      </div>
+    </div>
+    <!---->
+    <!----><span class="v-card__underlay"></span>
+  </div>
+</div>"
+`;

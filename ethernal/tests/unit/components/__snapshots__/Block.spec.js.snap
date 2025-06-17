@@ -1,0 +1,99 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Block.vue > Should show a message if the block does not exist 1`] = `
+"<div data-v-e1a1b265="" class="v-container v-container--fluid v-locale--is-ltr">
+  <h2 data-v-e1a1b265="" class="text-h6 font-weight-medium">Block <span data-v-e1a1b265="" class="text-grey-darken-1">#1</span></h2>
+  <!--v-if-->
+  <hr data-v-e1a1b265="" class="v-divider v-theme--light my-4" aria-orientation="horizontal" role="separator">
+  <div data-v-e1a1b265="" class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
+    <!---->
+    <div class="v-card__loader">
+      <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+        <!---->
+        <div class="v-progress-linear__background"></div>
+        <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+        <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+          <div class="v-progress-linear__indeterminate">
+            <div class="v-progress-linear__indeterminate long"></div>
+            <div class="v-progress-linear__indeterminate short"></div>
+          </div>
+        </transition-stub>
+        <!---->
+      </div>
+    </div>
+    <!---->
+    <!---->
+    <div data-v-e1a1b265="" class="v-card-text">
+      <div data-v-e1a1b265="" class="d-flex align-center justify-center py-8"><i data-v-e1a1b265="" class="mdi-cube-outline mdi v-icon notranslate v-theme--light v-icon--size-large text-grey-lighten-1 mr-4" aria-hidden="true"></i><span data-v-e1a1b265="" class="text-body-1"> This block has not been mined. Current block: <a data-v-e1a1b265="" style="text-decoration: none;">0</a></span></div>
+    </div>
+    <!---->
+    <!----><span class="v-card__underlay"></span>
+  </div>
+</div>"
+`;
+
+exports[`Block.vue > Should show a message if the block is syncing 1`] = `
+"<div data-v-e1a1b265="" class="v-container v-container--fluid v-locale--is-ltr">
+  <h2 data-v-e1a1b265="" class="text-h6 font-weight-medium">Block <span data-v-e1a1b265="" class="text-grey-darken-1">#1</span></h2>
+  <div data-v-e1a1b265="" class="v-alert v-theme--light text-info v-alert--density-compact v-alert--variant-tonal mt-2 mb-4" role="alert">
+    <!----><span class="v-alert__underlay"></span>
+    <!---->
+    <div class="v-alert__prepend"><i class="mdi-information mdi v-icon notranslate v-theme--light" style="font-size: 28px; height: 28px; width: 28px;" aria-hidden="true" density="compact"></i></div>
+    <div class="v-alert__content">
+      <!---->
+      <!----> Some transactions in this block are still being processed (3 / 5).
+    </div>
+    <!---->
+    <!---->
+  </div>
+  <hr data-v-e1a1b265="" class="v-divider v-theme--light my-4" aria-orientation="horizontal" role="separator"><!-- Navigation Tabs -->
+  <div data-v-e1a1b265="" class="v-slide-group v-chip-group v-theme--light" tabindex="0">
+    <!---->
+    <div class="v-slide-group__container">
+      <div class="v-slide-group__content"><span data-v-e1a1b265="" class="v-chip v-chip--link v-theme--light v-chip--density-default v-chip--size-small v-chip--variant-tonal text-primary" draggable="false" tabindex="0"><span class="v-chip__overlay"></span><span class="v-chip__underlay"></span>
+        <!---->
+        <!---->
+        <div class="v-chip__content" data-no-activator="">Overview</div>
+        <!---->
+        <!----></span><span data-v-e1a1b265="" class="v-chip v-chip--link v-theme--light v-chip--density-default v-chip--size-small v-chip--variant-tonal" draggable="false" tabindex="0"><span class="v-chip__overlay"></span><span class="v-chip__underlay"></span>
+        <!---->
+        <!---->
+        <div class="v-chip__content" data-no-activator="">Transactions (5)</div>
+        <!---->
+        <!----></span>
+      </div>
+    </div>
+    <!---->
+  </div><!-- Tab Content -->
+  <block-overview-stub data-v-e1a1b265="" block="[object Object]"></block-overview-stub>
+  <!--v-if-->
+</div>"
+`;
+
+exports[`Block.vue > Should show the block component 1`] = `
+"<div data-v-e1a1b265="" class="v-container v-container--fluid v-locale--is-ltr">
+  <h2 data-v-e1a1b265="" class="text-h6 font-weight-medium">Block <span data-v-e1a1b265="" class="text-grey-darken-1">#1</span></h2>
+  <!--v-if-->
+  <hr data-v-e1a1b265="" class="v-divider v-theme--light my-4" aria-orientation="horizontal" role="separator"><!-- Navigation Tabs -->
+  <div data-v-e1a1b265="" class="v-slide-group v-chip-group v-theme--light" tabindex="0">
+    <!---->
+    <div class="v-slide-group__container">
+      <div class="v-slide-group__content"><span data-v-e1a1b265="" class="v-chip v-chip--link v-theme--light v-chip--density-default v-chip--size-small v-chip--variant-tonal text-primary" draggable="false" tabindex="0"><span class="v-chip__overlay"></span><span class="v-chip__underlay"></span>
+        <!---->
+        <!---->
+        <div class="v-chip__content" data-no-activator="">Overview</div>
+        <!---->
+        <!----></span><span data-v-e1a1b265="" class="v-chip v-chip--link v-theme--light v-chip--density-default v-chip--size-small v-chip--variant-tonal" draggable="false" tabindex="0"><span class="v-chip__overlay"></span><span class="v-chip__underlay"></span>
+        <!---->
+        <!---->
+        <div class="v-chip__content" data-no-activator="">Transactions (5)</div>
+        <!---->
+        <!----></span>
+      </div>
+    </div>
+    <!---->
+  </div><!-- Tab Content -->
+  <block-overview-stub data-v-e1a1b265="" block="[object Object]"></block-overview-stub>
+  <!--v-if-->
+</div>"
+`;

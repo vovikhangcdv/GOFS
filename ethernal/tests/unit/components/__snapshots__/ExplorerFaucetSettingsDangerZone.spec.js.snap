@@ -1,0 +1,114 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ExplorerFaucetSettingsDangerZone.vue > Should display danger zone 1`] = `
+"<div class="v-sheet v-theme--light bg-error v-sheet--border v-sheet--rounded">
+  <div class="v-dialog-stub" max-width="600">
+    <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
+      <!---->
+      <div class="v-card__loader">
+        <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+          <!---->
+          <div class="v-progress-linear__background"></div>
+          <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+          <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+            <div class="v-progress-linear__indeterminate">
+              <div class="v-progress-linear__indeterminate long"></div>
+              <div class="v-progress-linear__indeterminate short"></div>
+            </div>
+          </transition-stub>
+          <!---->
+        </div>
+      </div>
+      <!---->
+      <!---->
+      <div class="v-card-title d-flex justify-space-between align-center">
+        <h4>Faucet Private Key</h4><button type="button" class="v-btn v-btn--icon v-theme--light text-grey v-btn--density-default v-btn--size-default v-btn--variant-text"><span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+          <!----><span class="v-btn__content" data-no-activator=""><i class="mdi-close mdi v-icon notranslate v-theme--light v-icon--size-default" aria-hidden="true"></i></span>
+          <!---->
+          <!---->
+        </button>
+      </div>
+      <div class="v-card-text">
+        <div class="v-input v-input--horizontal v-input--center-affix v-input--density-compact v-theme--light v-locale--is-ltr v-input--readonly v-text-field">
+          <!---->
+          <div class="v-input__control">
+            <div class="v-field v-field--center-affix v-field--no-label v-field--variant-outlined v-theme--light v-locale--is-ltr">
+              <div class="v-field__overlay"></div>
+              <div class="v-field__loader">
+                <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+                  <!---->
+                  <div class="v-progress-linear__background"></div>
+                  <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+                  <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+                    <div class="v-progress-linear__indeterminate">
+                      <div class="v-progress-linear__indeterminate long"></div>
+                      <div class="v-progress-linear__indeterminate short"></div>
+                    </div>
+                  </transition-stub>
+                  <!---->
+                </div>
+              </div>
+              <!---->
+              <div class="v-field__field" data-no-activator="">
+                <!---->
+                <!---->
+                <!----><input readonly="" size="1" type="text" id="input-1" aria-describedby="input-1-messages" class="v-field__input">
+                <!---->
+              </div>
+              <!---->
+              <!---->
+              <div class="v-field__outline">
+                <div class="v-field__outline__start"></div>
+                <!---->
+                <div class="v-field__outline__end"></div>
+                <!---->
+              </div>
+            </div>
+          </div>
+          <div class="v-input__append"><i class="mdi-content-copy mdi v-icon notranslate v-theme--light v-icon--size-default v-icon--clickable" role="button" aria-hidden="false" tabindex="0" aria-label=" appended action"></i>
+            <!---->
+          </div>
+          <!---->
+        </div><input type="hidden" id="copyElement">
+      </div>
+      <!---->
+      <!----><span class="v-card__underlay"></span>
+    </div>
+  </div>
+  <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated elevation-0">
+    <!---->
+    <div class="v-card__loader">
+      <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+        <!---->
+        <div class="v-progress-linear__background"></div>
+        <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+        <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+          <div class="v-progress-linear__indeterminate">
+            <div class="v-progress-linear__indeterminate long"></div>
+            <div class="v-progress-linear__indeterminate short"></div>
+          </div>
+        </transition-stub>
+        <!---->
+      </div>
+    </div>
+    <!---->
+    <!---->
+    <!--v-if-->
+    <div class="v-card-text font-weight-medium text-error">
+      <div class="v-row"> Export your key if you need to access your faucet wallet. Make sure to do it before deleting the faucet. <div class="v-spacer"></div><button type="button" class="v-btn v-theme--light bg-error v-btn--density-default v-btn--size-small v-btn--variant-flat mt-2"><span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+          <!----><span class="v-btn__content" data-no-activator=""><i class="mdi-export mdi v-icon notranslate v-theme--light v-icon--size-default mr-1" aria-hidden="true"></i>Export Private Key</span>
+          <!---->
+          <!---->
+        </button></div>
+      <hr class="v-divider v-theme--light my-5" aria-orientation="horizontal" role="separator">
+      <div class="v-row"> Deleting the faucet is irreversible, if you haven't exported the private key before, funds will be lost. <div class="v-spacer"></div><button type="button" class="v-btn v-theme--light bg-error v-btn--density-default v-btn--size-small v-btn--variant-flat mt-2"><span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+          <!----><span class="v-btn__content" data-no-activator=""><i class="mdi-delete mdi v-icon notranslate v-theme--light v-icon--size-default mr-1" aria-hidden="true"></i>Delete Faucet</span>
+          <!---->
+          <!---->
+        </button></div>
+    </div>
+    <!---->
+    <!----><span class="v-card__underlay"></span>
+  </div>
+</div>"
+`;

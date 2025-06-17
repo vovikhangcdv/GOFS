@@ -1,0 +1,13 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SSO.vue > Should show a link 1`] = `
+"<div class="v-application v-theme--light v-layout v-layout--full-height v-locale--is-ltr">
+  <div class="v-application__wrap">
+    <main class="v-main" style="--v-layout-left: 0px; --v-layout-right: 0px; --v-layout-top: 0px; --v-layout-bottom: 0px; transition: none;">
+      <div class="v-container v-container--fluid v-locale--is-ltr">
+        <explorer-stub id="1" sso="true"></explorer-stub>
+      </div>
+    </main>
+  </div>
+</div>"
+`;

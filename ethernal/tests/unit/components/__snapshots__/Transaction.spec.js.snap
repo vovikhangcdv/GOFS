@@ -1,0 +1,236 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Transaction.vue > Should display parsed error messages 1`] = `
+"<div class="v-container v-container--fluid v-locale--is-ltr">
+  <h2 class="text-h5 font-weight-medium">Transaction Details</h2>
+  <hr class="v-divider v-theme--light my-4" aria-orientation="horizontal" role="separator"><!-- Navigation Tabs -->
+  <div class="v-slide-group v-chip-group v-theme--light" tabindex="0">
+    <!---->
+    <div class="v-slide-group__container">
+      <div class="v-slide-group__content"><span class="v-chip v-chip--label v-chip--link v-theme--light v-chip--density-default v-chip--size-small v-chip--variant-tonal text-primary" draggable="false" tabindex="0"><span class="v-chip__overlay"></span><span class="v-chip__underlay"></span>
+        <!---->
+        <!---->
+        <div class="v-chip__content" data-no-activator="">Overview</div>
+        <!---->
+        <!----></span>
+        <!--v-if-->
+        <!--v-if-->
+        <!--v-if-->
+      </div>
+    </div>
+    <!---->
+  </div><!-- Tab Content -->
+  <transaction-overview-stub transaction="[object Object]"></transaction-overview-stub>
+  <!--v-if-->
+  <!--v-if-->
+  <!--v-if-->
+</div>"
+`;
+
+exports[`Transaction.vue > Should display raw error messages 1`] = `
+"<div class="v-container v-container--fluid v-locale--is-ltr">
+  <h2 class="text-h5 font-weight-medium">Transaction Details</h2>
+  <hr class="v-divider v-theme--light my-4" aria-orientation="horizontal" role="separator"><!-- Navigation Tabs -->
+  <div class="v-slide-group v-chip-group v-theme--light" tabindex="0">
+    <!---->
+    <div class="v-slide-group__container">
+      <div class="v-slide-group__content"><span class="v-chip v-chip--label v-chip--link v-theme--light v-chip--density-default v-chip--size-small v-chip--variant-tonal text-primary" draggable="false" tabindex="0"><span class="v-chip__overlay"></span><span class="v-chip__underlay"></span>
+        <!---->
+        <!---->
+        <div class="v-chip__content" data-no-activator="">Overview</div>
+        <!---->
+        <!----></span>
+        <!--v-if-->
+        <!--v-if-->
+        <!--v-if-->
+      </div>
+    </div>
+    <!---->
+  </div><!-- Tab Content -->
+  <transaction-overview-stub transaction="[object Object]"></transaction-overview-stub>
+  <!--v-if-->
+  <!--v-if-->
+  <!--v-if-->
+</div>"
+`;
+
+exports[`Transaction.vue > Should display skeleton loaders 1`] = `
+"<div class="v-container v-container--fluid v-locale--is-ltr">
+  <h2 class="text-h5 font-weight-medium">Transaction Details</h2>
+  <hr class="v-divider v-theme--light my-4" aria-orientation="horizontal" role="separator">
+  <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
+    <!---->
+    <div class="v-card__loader">
+      <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+        <!---->
+        <div class="v-progress-linear__background"></div>
+        <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+        <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+          <div class="v-progress-linear__indeterminate">
+            <div class="v-progress-linear__indeterminate long"></div>
+            <div class="v-progress-linear__indeterminate short"></div>
+          </div>
+        </transition-stub>
+        <!---->
+      </div>
+    </div>
+    <!---->
+    <!---->
+    <div class="v-card-text">
+      <div class="v-skeleton-loader v-theme--light" arialive="polite" arialabel="Loading..." role="alert">
+        <div class="v-skeleton-loader__bone v-skeleton-loader__list-item-three-line">
+          <div class="v-skeleton-loader__bone v-skeleton-loader__paragraph">
+            <div class="v-skeleton-loader__bone v-skeleton-loader__text"></div>
+            <div class="v-skeleton-loader__bone v-skeleton-loader__text"></div>
+            <div class="v-skeleton-loader__bone v-skeleton-loader__text"></div>
+          </div>
+        </div>
+      </div>
+      <div class="v-skeleton-loader v-theme--light" arialive="polite" arialabel="Loading..." role="alert">
+        <div class="v-skeleton-loader__bone v-skeleton-loader__list-item-three-line">
+          <div class="v-skeleton-loader__bone v-skeleton-loader__paragraph">
+            <div class="v-skeleton-loader__bone v-skeleton-loader__text"></div>
+            <div class="v-skeleton-loader__bone v-skeleton-loader__text"></div>
+            <div class="v-skeleton-loader__bone v-skeleton-loader__text"></div>
+          </div>
+        </div>
+      </div>
+      <div class="v-skeleton-loader v-theme--light" arialive="polite" arialabel="Loading..." role="alert">
+        <div class="v-skeleton-loader__bone v-skeleton-loader__list-item-three-line">
+          <div class="v-skeleton-loader__bone v-skeleton-loader__paragraph">
+            <div class="v-skeleton-loader__bone v-skeleton-loader__text"></div>
+            <div class="v-skeleton-loader__bone v-skeleton-loader__text"></div>
+            <div class="v-skeleton-loader__bone v-skeleton-loader__text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!---->
+    <!----><span class="v-card__underlay"></span>
+  </div>
+</div>"
+`;
+
+exports[`Transaction.vue > Should display the transaction page 1`] = `
+"<div class="v-container v-container--fluid v-locale--is-ltr">
+  <h2 class="text-h5 font-weight-medium">Transaction Details</h2>
+  <hr class="v-divider v-theme--light my-4" aria-orientation="horizontal" role="separator"><!-- Navigation Tabs -->
+  <div class="v-slide-group v-chip-group v-theme--light" tabindex="0">
+    <!---->
+    <div class="v-slide-group__container">
+      <div class="v-slide-group__content"><span class="v-chip v-chip--label v-chip--link v-theme--light v-chip--density-default v-chip--size-small v-chip--variant-tonal text-primary" draggable="false" tabindex="0"><span class="v-chip__overlay"></span><span class="v-chip__underlay"></span>
+        <!---->
+        <!---->
+        <div class="v-chip__content" data-no-activator="">Overview</div>
+        <!---->
+        <!----></span><span class="v-chip v-chip--label v-chip--link v-theme--light v-chip--density-default v-chip--size-small v-chip--variant-tonal" draggable="false" tabindex="0"><span class="v-chip__overlay"></span><span class="v-chip__underlay"></span>
+        <!---->
+        <!---->
+        <div class="v-chip__content" data-no-activator="">Internal Transactions (2)</div>
+        <!---->
+        <!----></span><span class="v-chip v-chip--label v-chip--link v-theme--light v-chip--density-default v-chip--size-small v-chip--variant-tonal" draggable="false" tabindex="0"><span class="v-chip__overlay"></span><span class="v-chip__underlay"></span>
+        <!---->
+        <!---->
+        <div class="v-chip__content" data-no-activator="">Logs (2)</div>
+        <!---->
+        <!----></span><span class="v-chip v-chip--label v-chip--link v-theme--light v-chip--density-default v-chip--size-small v-chip--variant-tonal" draggable="false" tabindex="0"><span class="v-chip__overlay"></span><span class="v-chip__underlay"></span>
+        <!---->
+        <!---->
+        <div class="v-chip__content" data-no-activator="">State Changes (2)</div>
+        <!---->
+        <!----></span>
+      </div>
+    </div>
+    <!---->
+  </div><!-- Tab Content -->
+  <transaction-overview-stub transaction="[object Object]"></transaction-overview-stub>
+  <!--v-if-->
+  <!--v-if-->
+  <!--v-if-->
+</div>"
+`;
+
+exports[`Transaction.vue > Should display the transaction when the receipt is not synced yet 1`] = `
+"<div class="v-container v-container--fluid v-locale--is-ltr">
+  <h2 class="text-h5 font-weight-medium">Transaction Details</h2>
+  <hr class="v-divider v-theme--light my-4" aria-orientation="horizontal" role="separator"><!-- Navigation Tabs -->
+  <div class="v-slide-group v-chip-group v-theme--light" tabindex="0">
+    <!---->
+    <div class="v-slide-group__container">
+      <div class="v-slide-group__content"><span class="v-chip v-chip--label v-chip--link v-theme--light v-chip--density-default v-chip--size-small v-chip--variant-tonal text-primary" draggable="false" tabindex="0"><span class="v-chip__overlay"></span><span class="v-chip__underlay"></span>
+        <!---->
+        <!---->
+        <div class="v-chip__content" data-no-activator="">Overview</div>
+        <!---->
+        <!----></span>
+        <!--v-if-->
+        <!--v-if-->
+        <!--v-if-->
+      </div>
+    </div>
+    <!---->
+  </div><!-- Tab Content -->
+  <transaction-overview-stub transaction="[object Object]"></transaction-overview-stub>
+  <!--v-if-->
+  <!--v-if-->
+  <!--v-if-->
+</div>"
+`;
+
+exports[`Transaction.vue > Should display waiting message 1`] = `
+"<div class="v-container v-container--fluid v-locale--is-ltr">
+  <h2 class="text-h5 font-weight-medium">Transaction Details</h2>
+  <hr class="v-divider v-theme--light my-4" aria-orientation="horizontal" role="separator">
+  <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
+    <!---->
+    <div class="v-card__loader">
+      <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+        <!---->
+        <div class="v-progress-linear__background"></div>
+        <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+        <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+          <div class="v-progress-linear__indeterminate">
+            <div class="v-progress-linear__indeterminate long"></div>
+            <div class="v-progress-linear__indeterminate short"></div>
+          </div>
+        </transition-stub>
+        <!---->
+      </div>
+    </div>
+    <!---->
+    <!---->
+    <div class="v-card-text">
+      <div class="d-flex align-center justify-center py-8"><i class="mdi-alert-circle-outline mdi v-icon notranslate v-theme--light v-icon--size-large text-grey-lighten-1 mr-4" aria-hidden="true"></i><span class="text-body-1"> Cannot find transaction. If you just sent it, it might not have been picked up yet by our indexer. This page will refresh automatically as soon as we find it. </span></div>
+    </div>
+    <!---->
+    <!----><span class="v-card__underlay"></span>
+  </div>
+</div>"
+`;
+
+exports[`Transaction.vue > Should not display the menu if public explorer 1`] = `
+"<div class="v-container v-container--fluid v-locale--is-ltr">
+  <h2 class="text-h5 font-weight-medium">Transaction Details</h2>
+  <hr class="v-divider v-theme--light my-4" aria-orientation="horizontal" role="separator"><!-- Navigation Tabs -->
+  <div class="v-slide-group v-chip-group v-theme--light" tabindex="0">
+    <!---->
+    <div class="v-slide-group__container">
+      <div class="v-slide-group__content"><span class="v-chip v-chip--label v-chip--link v-theme--light v-chip--density-default v-chip--size-small v-chip--variant-tonal text-primary" draggable="false" tabindex="0"><span class="v-chip__overlay"></span><span class="v-chip__underlay"></span>
+        <!---->
+        <!---->
+        <div class="v-chip__content" data-no-activator="">Overview</div>
+        <!---->
+        <!----></span>
+        <!--v-if-->
+        <!--v-if-->
+        <!--v-if-->
+      </div>
+    </div>
+    <!---->
+  </div><!-- Tab Content -->
+  <transaction-overview-stub transaction="[object Object]"></transaction-overview-stub>
+  <!--v-if-->
+  <!--v-if-->
+  <!--v-if-->
+</div>"
+`;
