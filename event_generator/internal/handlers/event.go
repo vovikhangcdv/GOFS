@@ -148,7 +148,10 @@ func HandleSuspiciousAddressInteractions(config *config.Config, sk *ecdsa.Privat
 	if err != nil {
 		return nil, fmt.Errorf("failed to get balance: %w", err)
 	}
-	randomValue := utils.RandomBigInt(balance)
+	randomValue := big.NewInt(0)
+	if balance.Cmp(big.NewInt(0)) != 0 {
+		randomValue = utils.RandomBigInt(balance)
+	}
 	txHashes := make([]common.Hash, 0)
 	randomBlacklistAddress := blacklistAddresses[rand.Intn(len(blacklistAddresses))]
 	allowedTransactionTypes := GetAllowedTransactionTypes(config, addr, randomBlacklistAddress)
