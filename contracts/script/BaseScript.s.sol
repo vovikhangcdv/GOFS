@@ -34,26 +34,25 @@ contract BaseScript is Script {
     address public blacklister_1;
     address public blacklister_2;
     string public mnemonic;
-
     // Default contract addresses - can be overridden
     address constant DEFAULT_ENTITY_REGISTRY =
-        0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0;
+        0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9;
     address constant DEFAULT_COMPLIANCE_REGISTRY =
-        0x0165878A594ca255338adfa4d48449f69242Eb8F;
-    address constant DEFAULT_EVND_TOKEN =
         0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6;
-    address constant DEFAULT_EXCHANGE_PORTAL =
-        0x67d269191c92Caf3cD7723F116c85e6E9bf55933;
-    address constant DEFAULT_ADDRESS_RESTRICTION =
+    address constant DEFAULT_EVND_TOKEN =
         0x610178dA211FEF7D417bC0e6FeD39F05609AD788;
-    address constant DEFAULT_VERIFICATION =
+    address constant DEFAULT_EXCHANGE_PORTAL =
+        0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690;
+    address constant DEFAULT_ADDRESS_RESTRICTION =
         0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0;
-    address constant DEFAULT_SUPPLY =
+    address constant DEFAULT_VERIFICATION =
         0x9A676e781A523b5d0C0e43731313A708CB607508;
-    address constant DEFAULT_TRANSACTION_TYPE =
+    address constant DEFAULT_SUPPLY =
         0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1;
-    address constant DEFAULT_ENTITY_TYPE =
+    address constant DEFAULT_TRANSACTION_TYPE =
         0x68B1D87F95878fE05B998F19b66F4baba5De1aed;
+    address constant DEFAULT_ENTITY_TYPE =
+        0xc6e7DF5E7b4f2A278906862b61205850344D4e7d;
 
     function __BaseScript_init() internal {
         // Get deployer from mnemonic
