@@ -489,16 +489,19 @@ func GetRandomAllowedTransactionType(allowedTransactionTypes []utils.Transaction
 func LoadVerifiedUsers(config *config.Config) {
 	isVerified := true
 	for isVerified {
-		skUser, err := config.GetNewKey()
+		skUser, err := utils.GetNthPrivateKey(config.Wallet, config.AddressCounter)
 		if err != nil {
+			log.Println("❌ Error while getting new key: ", err)
 			return
 		}
 		isVerified, err = isUserVerified(config, crypto.PubkeyToAddress(skUser.PublicKey))
 		if err != nil {
+			log.Println("❌ Error while verifying user: ", err)
 			return
 		}
 		if isVerified {
 			config.Keys = append(config.Keys, skUser)
+			config.AddressCounter++
 			log.Println("Total users: ", len(config.Keys))
 		}
 	}
