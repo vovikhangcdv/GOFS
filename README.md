@@ -97,50 +97,6 @@ graph TB
     DeFiLayer <-->|Global Liquidity| External
 ```
 
-```mermaid
- graph TB
-    %% Smart Contract Layer
-    subgraph ContractLayer ["🧊 Blockchain Infrastructure"]
-        direction TB
-
-        subgraph CoreContracts [" "]
-            CT["💵 e-VND Token<br/> Compliant Token"]
-            EP["🔄 Exchange Portal<br/>Multi-Currency Gateway"]
-        end
-
-        subgraph ComplianceModules ["Regulatory Modules"]
-            VC["✅ Identity Verification"]
-            SC["📊 Supply Controls"]
-            AC["🚫 Sanctions Enforcement"]
-            EC["👥 Entity Type Management"]
-        end
-    end
-
-    %% Application & Monitoring Layer
-    subgraph AppLayer ["Offchain"]
-        direction TB
-        MGOV["🏛️ Monetary, KYC, Compliance <br/> Governor"]
-        FDS["🛡️ Fault Detection System<br/>Real-time Monitoring"]
-     end
-
-    %% Governance flows
-    MGOV -->|Sets Policies| ComplianceModules
-
-    %% Interactions
-    ComplianceModules -->|Compliance Checks| CT
-    CT <-->|Controlled Exchange| EP
-    AppLayer -.->|Tracks All Activity| ContractLayer
-
-    %% External Connections
-    subgraph External ["🌍 Global Financial Ecosystem    "]
-        direction LR
-        DEFI["💵 USDT ,🦄 Uniswap, 🏦 Aave, 💎 Compound,..."]
-    end
-
-    EP <-->|Interact| External
-
-```
-
 ### 🛠 Core Components
 
 | Component             | Function              | Key Features                                     |
