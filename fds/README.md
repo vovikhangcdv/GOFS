@@ -22,3 +22,9 @@ Details relate supspicious transaction selected
 ### 4. Manage blacklisted address block by auto/manual 
 
 ![alt text](./public/image8.png)
+
+###
+To start fds:
+```
+docker-compose up --build -d
+```

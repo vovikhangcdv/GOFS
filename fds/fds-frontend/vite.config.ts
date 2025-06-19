@@ -9,7 +9,7 @@ export default defineConfig({
     host: true, // This is important for Docker
     proxy: {
       '/api': {
-        target: process.env.VITE_API_URL || 'http://localhost:9999',
+        target: process.env.VITE_API_URL || 'https://localhost:9996',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '/api'),
       },
