@@ -94,9 +94,18 @@ func AirdropVNDIfNeeded(config *config.Config, receiver common.Address) (*big.In
 	return balance, nil
 }
 
+func isUserVerified(config *config.Config, addr common.Address) (bool, error) {
+	isVerified, err := config.SystemContracts.EntityRegistry.IsVerifiedEntity(&bind.CallOpts{}, addr)
+	if err != nil {
+		return false, err
+	}
+	return isVerified, nil
+}
+
 func SendRegisterEntityTx(config *config.Config, skUser *ecdsa.PrivateKey, isUseRPC bool) (common.Hash, error) {
 	skVerifier := config.GetRandomVerifier()
-	isVerified, err := config.SystemContracts.EntityRegistry.IsVerifiedEntity(&bind.CallOpts{}, crypto.PubkeyToAddress(skUser.PublicKey))
+
+	isVerified, err := isUserVerified(config, crypto.PubkeyToAddress(skUser.PublicKey))
 	if err != nil {
 		return common.Hash{}, err
 	}
@@ -158,7 +167,7 @@ func SendExchangeVNDToUSDTx(config *config.Config, skFrom *ecdsa.PrivateKey, isU
 		return common.Hash{}, fmt.Errorf("UNKNOWN_TX is not allowed, skipping")
 	}
 
-	verifiered, err := config.SystemContracts.EntityRegistry.IsVerifiedEntity(&bind.CallOpts{}, addr)
+	verifiered, err := isUserVerified(config, addr)
 	if err != nil {
 		return common.Hash{}, err
 	}
@@ -475,4 +484,25 @@ func GetRandomAllowedTransactionType(allowedTransactionTypes []utils.Transaction
 		return utils.UNKNOWN_TX
 	}
 	return allowedTransactionTypes[rand.Intn(len(allowedTransactionTypes))]
+}
+
+func LoadVerifiedUsers(config *config.Config) {
+	isVerified := true
+	for isVerified {
+		skUser, err := utils.GetNthPrivateKey(config.Wallet, config.AddressCounter)
+		if err != nil {
+			log.Println("❌ Error while getting new key: ", err)
+			return
+		}
+		isVerified, err = isUserVerified(config, crypto.PubkeyToAddress(skUser.PublicKey))
+		if err != nil {
+			log.Println("❌ Error while verifying user: ", err)
+			return
+		}
+		if isVerified {
+			config.Keys = append(config.Keys, skUser)
+			config.AddressCounter++
+			log.Println("Total users: ", len(config.Keys))
+		}
+	}
 }

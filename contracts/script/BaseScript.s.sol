@@ -34,7 +34,6 @@ contract BaseScript is Script {
     address public blacklister_1;
     address public blacklister_2;
     string public mnemonic;
-
     // Default contract addresses - can be overridden
     address constant DEFAULT_ENTITY_REGISTRY =
         0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0;

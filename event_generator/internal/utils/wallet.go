@@ -6,7 +6,7 @@ import (
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
 )
 
-func getNthPrivateKey(wallet *hdwallet.Wallet, n int) (*ecdsa.PrivateKey, error) {
+func GetNthPrivateKey(wallet *hdwallet.Wallet, n int) (*ecdsa.PrivateKey, error) {
 	path := hdwallet.MustParseDerivationPath(fmt.Sprintf("m/44'/60'/0'/0/%d", n))
 	account, err := wallet.Derive(path, false)
 	if err != nil {
@@ -16,7 +16,7 @@ func getNthPrivateKey(wallet *hdwallet.Wallet, n int) (*ecdsa.PrivateKey, error)
 }
 
 func GetNextPrivateKey(wallet *hdwallet.Wallet, cnt *int) (*ecdsa.PrivateKey, error) {
-	key, err := getNthPrivateKey(wallet, *cnt)
+	key, err := GetNthPrivateKey(wallet, *cnt)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,6 @@
-# 🏛️ GOFS – e-VND: Vietnam's Next-Generation CBDC Platform
+# 🏛️ GOFS – e-VND: Governable Onchain Finance System
 
-A revolutionary blockchain-based Central Bank Digital Currency (CBDC) design that seamlessly integrates government governance with DeFi ecosystems, enabling Vietnam to capture massive global liquidity while maintaining complete monetary sovereignty.
+A revolutionary blockchain-based financial system that enables the government to maintain full oversight while unlocking access to global DeFi liquidity pools worth hundreds of billions of dollars.
 
 ## 🚀 Project Vision
 

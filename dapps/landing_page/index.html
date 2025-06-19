@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GOFS – e-VND: Governable Onchain Finance System</title>
+        <link rel="icon" type="image/jpeg" href="media/gofs-logo.jpg" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            inter: ["Inter", "sans-serif"],
+                            space: ["Space Grotesk", "sans-serif"],
+                        },
+                        animation: {
+                            float: "float 6s ease-in-out infinite",
+                            glow: "glow 2s ease-in-out infinite alternate",
+                            "slide-up": "slideUp 0.8s ease-out",
+                            "fade-in": "fadeIn 1s ease-out",
+                            "bounce-slow": "bounce 3s infinite",
+                            "pulse-slow": "pulse 4s infinite",
+                        },
+                        keyframes: {
+                            float: {
+                                "0%, 100%": { transform: "translateY(0px)" },
+                                "50%": { transform: "translateY(-20px)" },
+                            },
+                            glow: {
+                                "0%": { boxShadow: "0 0 20px #3b82f6" },
+                                "100%": {
+                                    boxShadow:
+                                        "0 0 40px #6366f1, 0 0 60px #8b5cf6",
+                                },
+                            },
+                            slideUp: {
+                                "0%": {
+                                    transform: "translateY(100px)",
+                                    opacity: "0",
+                                },
+                                "100%": {
+                                    transform: "translateY(0)",
+                                    opacity: "1",
+                                },
+                            },
+                            fadeIn: {
+                                "0%": { opacity: "0" },
+                                "100%": { opacity: "1" },
+                            },
+                        },
+                    },
+                },
+            }
+        </script>
+        <style>
+            :root {
+                --primary-gradient: linear-gradient(
+                    135deg,
+                    #667eea 0%,
+                    #764ba2 100%
+                );
+                --secondary-gradient: linear-gradient(
+                    135deg,
+                    #f093fb 0%,
+                    #f5576c 100%
+                );
+                --accent-gradient: linear-gradient(
+                    135deg,
+                    #4facfe 0%,
+                    #00f2fe 100%
+                );
+                --dark-gradient: linear-gradient(
+                    135deg,
+                    #0c0c0c 0%,
+                    #1a1a2e 50%,
+                    #16213e 100%
+                );
+            }
+
+            * {
+                scroll-behavior: smooth;
+            }
+
+            body {
+                font-family: "Inter", sans-serif;
+                background: var(--dark-gradient);
+                color: #e2e8f0;
+                line-height: 1.6;
+                overflow-x: hidden;
+            }
+
+            .glass-effect {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .neon-border {
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+                border: 1px solid rgba(59, 130, 246, 0.3);
+            }
+
+            .gradient-text {
+                background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .red-gradient-text {
+                background: linear-gradient(
+                    135deg,
+                    #dc2626,
+                    #ef4444,
+                    #f97316,
+                    #dc2626
+                );
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                animation: glow-red 3s ease-in-out infinite alternate;
+            }
+
+            @keyframes glow-red {
+                0% {
+                    filter: drop-shadow(0 0 5px rgba(220, 38, 38, 0.5));
+                }
+                100% {
+                    filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.8));
+                }
+            }
+
+            .hero-bg {
+                background: radial-gradient(
+                        circle at 20% 50%,
+                        rgba(59, 130, 246, 0.3) 0%,
+                        transparent 50%
+                    ),
+                    radial-gradient(
+                        circle at 80% 20%,
+                        rgba(139, 92, 246, 0.3) 0%,
+                        transparent 50%
+                    ),
+                    radial-gradient(
+                        circle at 40% 80%,
+                        rgba(244, 114, 182, 0.2) 0%,
+                        transparent 50%
+                    ),
+                    linear-gradient(
+                        135deg,
+                        #0c0c0c 0%,
+                        #1a1a2e 50%,
+                        #16213e 100%
+                    );
+            }
+
+            .card {
+                background: rgba(30, 41, 59, 0.8);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 1rem;
+                padding: 2rem;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .card::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.1),
+                    transparent
+                );
+                transition: left 0.5s;
+            }
+
+            .card:hover::before {
+                left: 100%;
+            }
+
+            .card:hover {
+                transform: translateY(-10px) scale(1.02);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
+                    0 0 20px rgba(59, 130, 246, 0.2);
+                border-color: rgba(59, 130, 246, 0.3);
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 0.75rem;
+                font-weight: 600;
+                text-decoration: none;
+                display: inline-block;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .btn-primary:hover {
+                transform: translateY(-3px) scale(1.05);
+                box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+            }
+
+            .btn-secondary {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                color: white;
+                padding: 0.75rem 1.5rem;
+                border-radius: 0.5rem;
+                font-weight: 500;
+                text-decoration: none;
+                display: inline-block;
+                transition: all 0.3s ease;
+            }
+
+            .btn-secondary:hover {
+                background: rgba(255, 255, 255, 0.2);
+                border-color: rgba(59, 130, 246, 0.5);
+                transform: translateY(-2px);
+            }
+
+            .navbar {
+                background: rgba(12, 12, 12, 0.95);
+                backdrop-filter: blur(20px);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                position: fixed;
+                top: 0;
+                width: 100%;
+                z-index: 1000;
+                transition: all 0.3s ease;
+            }
+
+            .navbar.scrolled {
+                background: rgba(12, 12, 12, 0.98);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            }
+
+            .section-reveal {
+                opacity: 0;
+                transform: translateY(50px);
+                transition: all 0.8s ease;
+            }
+
+            .section-reveal.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            .floating-shapes {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                z-index: -1;
+            }
+
+            .shape {
+                position: absolute;
+                background: linear-gradient(
+                    135deg,
+                    rgba(59, 130, 246, 0.1),
+                    rgba(139, 92, 246, 0.1)
+                );
+                border-radius: 50%;
+                animation: float 8s infinite ease-in-out;
+            }
+
+            .shape:nth-child(1) {
+                width: 300px;
+                height: 300px;
+                top: 20%;
+                left: 10%;
+                animation-delay: 0s;
+            }
+
+            .shape:nth-child(2) {
+                width: 200px;
+                height: 200px;
+                top: 60%;
+                right: 10%;
+                animation-delay: 2s;
+            }
+
+            .shape:nth-child(3) {
+                width: 150px;
+                height: 150px;
+                bottom: 20%;
+                left: 30%;
+                animation-delay: 4s;
+            }
+
+            .stats-counter {
+                font-size: 3rem;
+                font-weight: 900;
+                color: #3b82f6;
+            }
+
+            @media (max-width: 768px) {
+                .hero-title {
+                    font-size: 2.5rem !important;
+                }
+                .hero-subtitle {
+                    font-size: 1.5rem !important;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Navigation Bar -->
+        <nav class="navbar" id="navbar">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <img
+                            src="media/gofs-logo.jpg"
+                            alt="GOFS Logo"
+                            class="h-10 w-10 rounded-lg mr-3 shadow-lg"
+                        />
+                        <a href="#" class="text-2xl font-bold font-space">
+                            <span class="gradient-text">GOFS</span>
+                            <span class="red-gradient-text ml-1">e-VND</span>
+                        </a>
+                    </div>
+
+                    <!-- Desktop Navigation -->
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-8">
+                            <a
+                                href="#vision"
+                                class="nav-link text-gray-300 hover:text-white transition-all duration-300 relative"
+                                >Vision</a
+                            >
+                            <a
+                                href="#problems"
+                                class="nav-link text-gray-300 hover:text-white transition-all duration-300 relative"
+                                >Problems</a
+                            >
+                            <a
+                                href="#features"
+                                class="nav-link text-gray-300 hover:text-white transition-all duration-300 relative"
+                                >Features</a
+                            >
+                            <a
+                                href="#demo"
+                                class="nav-link text-gray-300 hover:text-white transition-all duration-300 relative"
+                                >Demo</a
+                            >
+                            <a
+                                href="#vietnam-apps"
+                                class="nav-link text-gray-300 hover:text-white transition-all duration-300 relative"
+                                >Vietnam</a
+                            >
+                        </div>
+                    </div>
+
+                    <div class="hidden md:flex items-center space-x-4">
+                        <a href="#demo" class="btn-primary">Try Demo</a>
+                    </div>
+
+                    <!-- Mobile menu button -->
+                    <div class="md:hidden">
+                        <button
+                            onclick="toggleMobileMenu()"
+                            class="text-gray-300 hover:text-white focus:outline-none"
+                        >
+                            <svg
+                                class="h-6 w-6"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation -->
+            <div id="mobile-menu" class="md:hidden hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 glass-effect">
+                    <a
+                        href="#vision"
+                        class="block px-3 py-2 text-gray-300 hover:text-white"
+                        >Vision</a
+                    >
+                    <a
+                        href="#problems"
+                        class="block px-3 py-2 text-gray-300 hover:text-white"
+                        >Problems</a
+                    >
+                    <a
+                        href="#features"
+                        class="block px-3 py-2 text-gray-300 hover:text-white"
+                        >Features</a
+                    >
+                    <a
+                        href="#demo"
+                        class="block px-3 py-2 text-gray-300 hover:text-white"
+                        >Demo</a
+                    >
+                    <a
+                        href="#vietnam-apps"
+                        class="block px-3 py-2 text-gray-300 hover:text-white"
+                        >Vietnam Apps</a
+                    >
+                    <div class="px-3 py-2 space-y-2">
+                        <a href="#demo" class="btn-secondary block text-center"
+                            >Try Demo</a
+                        >
+                        <a href="#contact" class="btn-primary block text-center"
+                            >Get Started</a
+                        >
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section
+            class="relative min-h-screen flex items-center justify-center hero-bg overflow-hidden"
+        >
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+
+            <!-- Background Image with Overlay -->
+            <div class="absolute inset-0">
+                <img
+                    src="media/gofs-background.png"
+                    alt="GOFS Background"
+                    class="w-full h-full object-cover opacity-10"
+                />
+                <div
+                    class="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/40"
+                ></div>
+            </div>
+
+            <div
+                class="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto"
+            >
+                <div class="animate-fade-in">
+                    <h1
+                        class="hero-title text-6xl md:text-8xl font-black font-space mb-6 leading-tight"
+                    >
+                        <span class="gradient-text">GOFS</span>
+                        <span class="red-gradient-text">e-VND</span>
+                    </h1>
+                    <h2
+                        class="hero-subtitle text-2xl md:text-4xl font-bold text-white mb-8 animate-slide-up"
+                    >
+                        Vietnam's Central Bank Digital Currency
+                    </h2>
+                    <p
+                        class="text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto mb-12 leading-relaxed animate-slide-up"
+                        style="animation-delay: 0.2s"
+                    >
+                        A revolutionary blockchain-based CBDC that enables
+                        <span class="red-gradient-text font-semibold"
+                            >Vietnam</span
+                        >
+                        to maintain complete monetary sovereignty while
+                        unlocking access to global DeFi liquidity pools worth
+                        <span class="text-blue-400 font-semibold"
+                            >$200+ billion</span
+                        >.
+                    </p>
+
+                    <div
+                        class="flex flex-col sm:flex-row gap-6 justify-center items-center animate-slide-up"
+                        style="animation-delay: 0.4s"
+                    >
+                        <a
+                            href="#vision"
+                            class="btn-primary text-xl px-8 py-4 animate-glow"
+                        >
+                            Explore the Vision
+                        </a>
+                        <a href="#demo" class="btn-secondary text-xl px-8 py-4">
+                            Try Demo
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Stats Section -->
+                <div
+                    class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 animate-slide-up"
+                    style="animation-delay: 0.6s"
+                >
+                    <div class="text-center">
+                        <div class="stats-counter">$200B+</div>
+                        <p class="text-gray-400 text-lg">
+                            DeFi Liquidity Access
+                        </p>
+                    </div>
+                    <div class="text-center">
+                        <div class="stats-counter">100%</div>
+                        <p class="text-gray-400 text-lg">Government Control</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="stats-counter">24/7</div>
+                        <p class="text-gray-400 text-lg">
+                            Real-time Monitoring
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <main class="relative z-10">
+            <!-- Project Vision Section -->
+            <section id="vision" class="py-24 section-reveal">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2
+                            class="text-5xl font-bold font-space gradient-text mb-6"
+                        >
+                            🚀 Revolutionary Vision
+                        </h2>
+                        <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                            Bridging traditional finance with decentralized
+                            innovation
+                        </p>
+                    </div>
+
+                    <div
+                        class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
+                    >
+                        <div class="card">
+                            <h3 class="text-3xl font-bold mb-6 text-blue-400">
+                                The Challenge
+                            </h3>
+                            <p class="text-lg text-gray-300 mb-6">
+                                Central banks worldwide struggle to balance
+                                monetary sovereignty with the explosive growth
+                                of decentralized finance. Traditional CBDCs lack
+                                DeFi integration, while existing crypto
+                                solutions sacrifice regulatory control.
+                            </p>
+                            <p class="text-lg text-gray-300">
+                                <strong class="text-white">GOFS e-VND</strong>
+                                solves this by creating the world's first
+                                governance-first CBDC that seamlessly integrates
+                                with global DeFi protocols while maintaining
+                                complete regulatory oversight.
+                            </p>
+                        </div>
+
+                        <div class="card">
+                            <h3 class="text-3xl font-bold mb-6 text-green-400">
+                                The Solution
+                            </h3>
+                            <ul class="space-y-4 text-lg text-gray-300">
+                                <li class="flex items-start">
+                                    <span class="text-green-400 mr-3 mt-1"
+                                        >✓</span
+                                    >
+                                    <span
+                                        ><strong
+                                            >Regulated Onchain Smart
+                                            Contracts:</strong
+                                        >
+                                        Government-controlled smart contracts
+                                        with built-in automated compliance and
+                                        configurable policy modules</span
+                                    >
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-green-400 mr-3 mt-1"
+                                        >✓</span
+                                    >
+                                    <span
+                                        ><strong
+                                            >Active Fault Detection
+                                            System:</strong
+                                        >
+                                        Proactive monitoring with real-time
+                                        KYC/AML enforcement and intervention
+                                        before transactions execute</span
+                                    >
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-green-400 mr-3 mt-1"
+                                        >✓</span
+                                    >
+                                    <span
+                                        ><strong
+                                            >Seamless DeFi Integration:</strong
+                                        >
+                                        Inherit existing DeFi liquidity and
+                                        protocols without modification</span
+                                    >
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Core Problems Solved Section -->
+            <section id="problems" class="py-24 section-reveal">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2
+                            class="text-5xl font-bold font-space gradient-text mb-6"
+                        >
+                            🎯 Core Problems Solved
+                        </h2>
+                        <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                            Addressing Vietnam's most critical financial
+                            challenges with blockchain innovation
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="card group">
+                            <div
+                                class="text-4xl mb-4 transition-transform group-hover:scale-110"
+                            >
+                                💎
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4 text-blue-400">
+                                Governable Digital Assets
+                            </h3>
+                            <ul class="space-y-3 text-gray-300">
+                                <li class="flex items-start">
+                                    <span class="text-blue-400 mr-2 mt-1"
+                                        >🆔</span
+                                    >
+                                    <span
+                                        ><strong>Identity Management:</strong>
+                                        Vietnam National ID integration</span
+                                    >
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-blue-400 mr-2 mt-1"
+                                        >⚖️</span
+                                    >
+                                    <span
+                                        ><strong>Regulatory Compliance:</strong>
+                                        EIP-3643 standard adherence</span
+                                    >
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-blue-400 mr-2 mt-1"
+                                        >💰</span
+                                    >
+                                    <span
+                                        ><strong>Cash Flow Control:</strong>
+                                        Real-time policy enforcement</span
+                                    >
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="card group">
+                            <div
+                                class="text-4xl mb-4 transition-transform group-hover:scale-110"
+                            >
+                                🛡️
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4 text-red-400">
+                                Crime Prevention & AML
+                            </h3>
+                            <ul class="space-y-3 text-gray-300">
+                                <li class="flex items-start">
+                                    <span class="text-red-400 mr-2 mt-1"
+                                        >⚡</span
+                                    >
+                                    <span
+                                        ><strong>Proactive:</strong> Mempool
+                                        interception prevents fraud before
+                                        execution</span
+                                    >
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-red-400 mr-2 mt-1"
+                                        >🤖</span
+                                    >
+                                    <span
+                                        ><strong>Automated:</strong> Real-time
+                                        AML screening and compliance</span
+                                    >
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-red-400 mr-2 mt-1"
+                                        >📋</span
+                                    >
+                                    <span
+                                        ><strong>Complete:</strong> Full
+                                        compliance with
+                                        <a
+                                            href="https://chinhphu.vn/?pageid=27160&docid=207710&classid=1&typegroupid=3"
+                                            target="_blank"
+                                            class="text-blue-400"
+                                            >Law 14/2022/QH15</a
+                                        ></span
+                                    >
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="card group">
+                            <div
+                                class="text-4xl mb-4 transition-transform group-hover:scale-110"
+                            >
+                                🌐
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4 text-green-400">
+                                DeFi Compatibility
+                            </h3>
+                            <ul class="space-y-3 text-gray-300">
+                                <li class="flex items-start">
+                                    <span class="text-green-400 mr-2 mt-1"
+                                        >🏊</span
+                                    >
+                                    <span
+                                        ><strong>Liquidity Inheritance:</strong>
+                                        Access to $200B+ DeFi pools</span
+                                    >
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-green-400 mr-2 mt-1"
+                                        >🔗</span
+                                    >
+                                    <span
+                                        ><strong>Ecosystem Integration:</strong>
+                                        Uniswap, Aave, Compound
+                                        compatibility</span
+                                    >
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-green-400 mr-2 mt-1"
+                                        >🌍</span
+                                    >
+                                    <span
+                                        ><strong>Global Connectivity:</strong>
+                                        Bridge to international finance</span
+                                    >
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section
+                id="features"
+                class="py-24 bg-gradient-to-b from-transparent to-gray-900/20 section-reveal"
+            >
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2
+                            class="text-5xl font-bold font-space gradient-text mb-6"
+                        >
+                            ⭐ Game-Changing Features
+                        </h2>
+                        <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                            Cutting-edge capabilities that redefine digital
+                            currency systems
+                        </p>
+                    </div>
+
+                    <div
+                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                    >
+                        <div class="card group">
+                            <div
+                                class="text-4xl mb-4 transition-transform group-hover:scale-110"
+                            >
+                                🏛️
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4 text-blue-400">
+                                Governance
+                            </h3>
+                            <p class="text-gray-300">
+                                Multi-tier authority structure with Vietnamese
+                                Monetary Authorities maintaining complete
+                                control over monetary policy, supply management,
+                                and regulatory enforcement through smart
+                                contracts.
+                            </p>
+                        </div>
+
+                        <div class="card group">
+                            <div
+                                class="text-4xl mb-4 transition-transform group-hover:scale-110"
+                            >
+                                ⚖️
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4 text-yellow-400">
+                                Automated Compliance
+                            </h3>
+                            <p class="text-gray-300">
+                                Smart contract-based KYC/AML with EIP-3643
+                                compliance, configurable regulatory modules, and
+                                full adherence to Vietnam's Anti-Money
+                                Laundering Law 14/2022/QH15.
+                            </p>
+                        </div>
+
+                        <div class="card group">
+                            <div
+                                class="text-4xl mb-4 transition-transform group-hover:scale-110"
+                            >
+                                🛡️
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4 text-red-400">
+                                Real-Time Security
+                            </h3>
+                            <p class="text-gray-300">
+                                Advanced mempool interception technology,
+                                AI-powered anomaly detection, and proactive
+                                governance intervention capabilities for maximum
+                                security and fraud prevention.
+                            </p>
+                        </div>
+
+                        <div class="card group">
+                            <div
+                                class="text-4xl mb-4 transition-transform group-hover:scale-110"
+                            >
+                                💰
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4 text-green-400">
+                                DeFi Integration
+                            </h3>
+                            <p class="text-gray-300">
+                                Native compatibility with all major DeFi
+                                protocols (Uniswap, Aave, Compound), unlocking
+                                access to massive global liquidity pools worth
+                                $200+ billion while maintaining regulatory
+                                control.
+                            </p>
+                        </div>
+
+                        <div class="card group">
+                            <div
+                                class="text-4xl mb-4 transition-transform group-hover:scale-110"
+                            >
+                                🔍
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4 text-purple-400">
+                                Complete Transparency
+                            </h3>
+                            <p class="text-gray-300">
+                                On-chain governance with public verifiability of
+                                all policy decisions, creating unprecedented
+                                transparency in monetary policy while
+                                maintaining privacy through Merkle Tree
+                                cryptography.
+                            </p>
+                        </div>
+
+                        <div class="card group">
+                            <div
+                                class="text-4xl mb-4 transition-transform group-hover:scale-110"
+                            >
+                                🌐
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4 text-cyan-400">
+                                Cross-Border Ready
+                            </h3>
+                            <p class="text-gray-300">
+                                Interoperable with other CBDCs and international
+                                payment systems, enabling seamless global
+                                transactions with SWIFT integration and
+                                multi-currency gateway support.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Architecture Section -->
+            <section id="architecture" class="py-24 section-reveal">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2
+                            class="text-5xl font-bold font-space gradient-text mb-6"
+                        >
+                            🏗️ Governance-First Architecture
+                        </h2>
+                        <p class="text-xl text-gray-400 max-w-4xl mx-auto">
+                            Our revolutionary design puts governance at the
+                            center, enabling seamless integration with global
+                            DeFi while maintaining complete sovereign control
+                        </p>
+                    </div>
+
+                    <div class="glass-effect rounded-2xl p-8 neon-border">
+                        <div
+                            class="mermaid-diagram bg-white rounded-xl p-6 shadow-2xl"
+                        >
+                            <pre class="mermaid">
+graph TB
+    %% Governance Layer
+    subgraph GovLayer ["🏛️ Vietnamese Monetary Authorities"]
+        direction TB
+        MGOV["🏛️ Monetary Governor<br/>Policy & Supply Control"]
+        KGOV["🔎 KYC Governor<br/>Identity Oversight"]
+        BGOV["🏦 Bank Governors<br/>Liquidity Management"]
+        CGOV["⚖️ Compliance Governor<br/>Regulatory Enforcement"]
+    end
+
+    %% Smart Contract Layer
+    subgraph ContractLayer ["🧊 Blockchain Infrastructure"]
+        direction TB
+
+        subgraph CoreContracts ["Core CBDC Infrastructure"]
+            ER["🛂 Entity Registry<br/>National ID Integration"]
+            CR["⚖️ Compliance Registry<br/>Policy Enforcement Engine"]
+            CT["💵 e-VND Token<br/>DeFi-Compatible CBDC"]
+            EP["🔄 Exchange Portal<br/>Multi-Currency Gateway"]
+        end
+
+        subgraph ComplianceModules ["Regulatory Modules"]
+            VC["✅ Identity Verification"]
+            SC["📊 Supply Controls"]
+            AC["🚫 Sanctions Enforcement"]
+            EC["👥 Entity Type Management"]
+        end
+    end
+
+    %% DeFi Integration Layer
+    subgraph DeFiLayer ["🌐 Global DeFi Integration"]
+        direction TB
+        DEFIS["🦄 Uniswap, 🏦 Aave, 💎 Compound,..."]
+    end
+
+    %% Application & Monitoring Layer
+    subgraph AppLayer ["🖥️ Monitoring & Applications"]
+        direction TB
+        FDS["🛡️ Fault Detection System<br/>Real-time Monitoring"]
+        EXP["🔍 Governance Explorer<br/>Public Transparency"]
+        DAPP["📱 Citizen Applications<br/>User Interfaces"]
+    end
+
+    %% Governance flows
+    MGOV -->|Sets Monetary Policies| CR
+    KGOV -->|Manages National ID| ER
+    BGOV -->|Controls Liquidity| CT
+    CGOV -->|Updates Regulations| ComplianceModules
+
+    %% Contract interactions
+    CR -->|Enforces Policies| CT
+    ER -->|Validates Citizens| CT
+    ComplianceModules -->|Compliance Checks| CT
+    CT <-->|Controlled Exchange| EP
+
+    %% DeFi Integration - The Key Innovation
+    CT <-->|Massive Liquidity Access| DeFiLayer
+    EP <-->|Cross-Chain Bridges| DeFiLayer
+
+    %% Monitoring
+    AppLayer -.->|Tracks All Activity| ContractLayer
+    AppLayer -.->|Reports to Authorities| GovLayer
+
+    %% External Connections
+    subgraph External ["🌍 Global Financial Ecosystem"]
+        direction LR
+        OtherCBDCs["Other CBDCs<br/>(China, Singapore, EU)"]
+        Stablecoins["Major Stablecoins<br/>(USDT, USDC, DAI)"]
+        TradFi["Traditional Banking<br/>Swift Integration"]
+        Exchanges["Crypto Exchanges<br/>(Binance, Coinbase)"]
+    end
+
+    EP <-->|International Payments| External
+    DeFiLayer <-->|Global Liquidity| External
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Components Section -->
+            <section
+                id="components"
+                class="py-24 bg-gradient-to-b from-transparent to-gray-900/20 section-reveal"
+            >
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2
+                            class="text-5xl font-bold font-space gradient-text mb-6"
+                        >
+                            🛠️ Core Components
+                        </h2>
+                        <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                            The building blocks of the future of digital
+                            currency
+                        </p>
+                    </div>
+
+                    <div
+                        class="glass-effect rounded-2xl p-8 mb-12 overflow-x-auto"
+                    >
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b border-gray-600">
+                                    <th
+                                        class="py-4 px-6 text-blue-400 font-semibold text-lg"
+                                    >
+                                        Component
+                                    </th>
+                                    <th
+                                        class="py-4 px-6 text-green-400 font-semibold text-lg"
+                                    >
+                                        Function
+                                    </th>
+                                    <th
+                                        class="py-4 px-6 text-purple-400 font-semibold text-lg"
+                                    >
+                                        Key Features
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    class="border-b border-gray-700 hover:bg-white/5 transition-colors"
+                                >
+                                    <td
+                                        class="py-4 px-6 font-semibold text-white"
+                                    >
+                                        Entity Registry
+                                    </td>
+                                    <td class="py-4 px-6 text-gray-300">
+                                        Identity Management
+                                    </td>
+                                    <td class="py-4 px-6 text-gray-300">
+                                        National ID integration, KYC
+                                        verification, citizen onboarding
+                                    </td>
+                                </tr>
+                                <tr
+                                    class="border-b border-gray-700 hover:bg-white/5 transition-colors"
+                                >
+                                    <td
+                                        class="py-4 px-6 font-semibold text-white"
+                                    >
+                                        e-VND Token
+                                    </td>
+                                    <td class="py-4 px-6 text-gray-300">
+                                        Digital Currency
+                                    </td>
+                                    <td class="py-4 px-6 text-gray-300">
+                                        ERC-20 compatible, compliance-enforced
+                                        transfers, DeFi native
+                                    </td>
+                                </tr>
+                                <tr
+                                    class="border-b border-gray-700 hover:bg-white/5 transition-colors"
+                                >
+                                    <td
+                                        class="py-4 px-6 font-semibold text-white"
+                                    >
+                                        Compliance Engine
+                                    </td>
+                                    <td class="py-4 px-6 text-gray-300">
+                                        Policy Enforcement
+                                    </td>
+                                    <td class="py-4 px-6 text-gray-300">
+                                        Modular rules, real-time validation,
+                                        automated enforcement
+                                    </td>
+                                </tr>
+                                <tr
+                                    class="border-b border-gray-700 hover:bg-white/5 transition-colors"
+                                >
+                                    <td
+                                        class="py-4 px-6 font-semibold text-white"
+                                    >
+                                        Exchange Portal
+                                    </td>
+                                    <td class="py-4 px-6 text-gray-300">
+                                        Currency Conversion
+                                    </td>
+                                    <td class="py-4 px-6 text-gray-300">
+                                        Multi-asset support, controlled rates,
+                                        DeFi bridging
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-white/5 transition-colors">
+                                    <td
+                                        class="py-4 px-6 font-semibold text-white"
+                                    >
+                                        Monitoring System
+                                    </td>
+                                    <td class="py-4 px-6 text-gray-300">
+                                        Transaction Oversight
+                                    </td>
+                                    <td class="py-4 px-6 text-gray-300">
+                                        Real-time tracking, anomaly detection,
+                                        governance alerts
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-3xl font-bold mb-6 gradient-text">
+                            🌌 Design Philosophy
+                        </h3>
+                        <p class="text-lg text-gray-300 leading-relaxed">
+                            The
+                            <strong class="text-blue-400"
+                                >Entity Registry</strong
+                            >
+                            and
+                            <strong class="text-green-400"
+                                >Monitoring System</strong
+                            >
+                            establish comprehensive KYC/AML compliance and
+                            real-time oversight, creating a transparent
+                            environment that reduces regulatory risks while
+                            enabling controlled market access. The
+                            <strong class="text-purple-400">e-VND Token</strong
+                            >, governed by the
+                            <strong class="text-yellow-400"
+                                >Compliance Engine</strong
+                            >, implements dynamic policy enforcement through
+                            smart contracts, ensuring regulatory adherence while
+                            maintaining operational flexibility.
+                        </p>
+                        <br />
+                        <p class="text-lg text-gray-300 leading-relaxed">
+                            The
+                            <strong class="text-cyan-400"
+                                >Exchange Portal</strong
+                            >
+                            bridges DeFi protocols with government oversight,
+                            enabling access to external liquidity pools while
+                            preserving monetary control. This modular compliance
+                            architecture allows for adaptive regulatory
+                            frameworks that can evolve with policy requirements,
+                            demonstrating how blockchain technology can serve
+                            both innovation and governance objectives.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Live Demo Section -->
+            <section id="demo" class="py-24 section-reveal">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2
+                            class="text-5xl font-bold font-space gradient-text mb-6"
+                        >
+                            🚀 Live Demo Experience
+                        </h2>
+                        <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                            Explore our cutting-edge GOFS e-VND system in action
+                            with real-time monitoring and governance tools
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Explorer Demo -->
+                        <div class="card group">
+                            <div
+                                class="text-6xl mb-6 text-center transition-transform group-hover:scale-110"
+                            >
+                                🔍
+                            </div>
+                            <h3
+                                class="text-3xl font-bold mb-4 text-blue-400 text-center"
+                            >
+                                Governance Explorer
+                            </h3>
+                            <p class="text-lg text-gray-300 mb-6 text-center">
+                                Explore the complete GOFS ecosystem with
+                                real-time transaction monitoring, governance
+                                actions, and compliance tracking in an intuitive
+                                interface.
+                            </p>
+
+                            <div class="space-y-4 mb-8">
+                                <div class="flex items-center">
+                                    <span class="text-green-400 mr-3">✓</span>
+                                    <span class="text-gray-300"
+                                        >Real-time transaction explorer</span
+                                    >
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-green-400 mr-3">✓</span>
+                                    <span class="text-gray-300"
+                                        >Governance policy viewer</span
+                                    >
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-green-400 mr-3">✓</span>
+                                    <span class="text-gray-300"
+                                        >Entity registry management</span
+                                    >
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-green-400 mr-3">✓</span>
+                                    <span class="text-gray-300"
+                                        >Compliance status dashboard</span
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="text-center">
+                                <a
+                                    href="http://gofs.xyz:8080"
+                                    target="_blank"
+                                    class="btn-primary text-lg px-8 py-3 inline-block"
+                                >
+                                    Launch Explorer
+                                </a>
+                                <p class="text-sm text-gray-500 mt-2">
+                                    Port: 8080
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Fault Detection System Demo -->
+                        <div class="card group">
+                            <div
+                                class="text-6xl mb-6 text-center transition-transform group-hover:scale-110"
+                            >
+                                🛡️
+                            </div>
+                            <h3
+                                class="text-3xl font-bold mb-4 text-red-400 text-center"
+                            >
+                                Fault Detection System
+                            </h3>
+                            <p class="text-lg text-gray-300 mb-6 text-center">
+                                Experience our advanced real-time monitoring
+                                system that prevents fraud before it happens
+                                with AI-powered anomaly detection and mempool
+                                interception.
+                            </p>
+
+                            <div class="space-y-4 mb-8">
+                                <div class="flex items-center">
+                                    <span class="text-red-400 mr-3">⚡</span>
+                                    <span class="text-gray-300"
+                                        >Mempool transaction monitoring</span
+                                    >
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-red-400 mr-3">🤖</span>
+                                    <span class="text-gray-300"
+                                        >AI-powered anomaly detection</span
+                                    >
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-red-400 mr-3">🚨</span>
+                                    <span class="text-gray-300"
+                                        >Real-time alert system</span
+                                    >
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-red-400 mr-3">📊</span>
+                                    <span class="text-gray-300"
+                                        >Risk assessment dashboard</span
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="text-center">
+                                <a
+                                    href="http://gofs.xyz:9000"
+                                    target="_blank"
+                                    class="btn-primary text-lg px-8 py-3 inline-block"
+                                    style="
+                                        background: linear-gradient(
+                                            135deg,
+                                            #dc2626,
+                                            #ef4444
+                                        );
+                                    "
+                                >
+                                    Launch FDS
+                                </a>
+                                <p class="text-sm text-gray-500 mt-2">
+                                    Port: 9000
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Vietnam Applications Section -->
+            <section
+                id="vietnam-apps"
+                class="py-24 bg-gradient-to-b from-transparent to-gray-900/20 section-reveal"
+            >
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-5xl font-bold font-space mb-6">
+                            Practical Applications for
+                            <span class="red-gradient-text">Vietnam</span>
+                            <span class="gradient-text">e-VND</span>
+                        </h2>
+                        <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                            Transforming Vietnam's financial landscape with
+                            cutting-edge blockchain technology
+                        </p>
+                    </div>
+
+                    <div class="card max-w-4xl mx-auto">
+                        <h3
+                            class="text-3xl font-bold mb-8 text-center gradient-text"
+                        >
+                            e-VND - Vietnam's Central Bank Digital Currency
+                        </h3>
+                        <ul class="space-y-4 text-lg text-gray-300">
+                            <li class="flex items-start">
+                                <span class="text-green-400 mr-3 mt-1">💸</span>
+                                <span
+                                    >Attract foreign liquidity, capital, and
+                                    investment flows</span
+                                >
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-blue-400 mr-3 mt-1">🎛️</span>
+                                <span
+                                    >Comprehensive digital asset
+                                    management</span
+                                >
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-purple-400 mr-3 mt-1"
+                                    >📊</span
+                                >
+                                <span>Solve tax collection inefficiencies</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-yellow-400 mr-3 mt-1"
+                                    >🏢</span
+                                >
+                                <span>Tokenize real assets and securities</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-red-400 mr-3 mt-1">🔍</span>
+                                <span
+                                    >Transparency and anti-money
+                                    laundering</span
+                                >
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-cyan-400 mr-3 mt-1">🏛️</span>
+                                <span
+                                    >Multi-level implementation: organizations,
+                                    banks, and national level</span
+                                >
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-pink-400 mr-3 mt-1">🌍</span>
+                                <span
+                                    >Compliance and integration with global
+                                    financial institutions</span
+                                >
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA Section -->
+            <section id="contact" class="py-24 section-reveal">
+                <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+                    <h2
+                        class="text-5xl font-bold font-space gradient-text mb-6"
+                    >
+                        Ready to Shape the Future?
+                    </h2>
+                    <p class="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
+                        Join us in revolutionizing digital currency systems and
+                        positioning Vietnam at the forefront of the financial
+                        technology revolution.
+                    </p>
+
+                    <div
+                        class="flex flex-col sm:flex-row gap-6 justify-center items-center"
+                    >
+                        <a
+                            href="#demo"
+                            class="btn-primary text-xl px-10 py-4 animate-glow"
+                        >
+                            Try Live Demo
+                        </a>
+                        <a
+                            href="#vision"
+                            class="btn-secondary text-xl px-10 py-4"
+                        >
+                            Learn More
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer
+            class="relative py-16 bg-gradient-to-t from-black/50 to-transparent"
+        >
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div
+                    class="flex flex-col md:flex-row justify-between items-center"
+                >
+                    <div class="flex items-center mb-8 md:mb-0">
+                        <img
+                            src="media/gofs-logo.jpg"
+                            alt="GOFS Logo"
+                            class="h-12 w-12 rounded-lg mr-4 shadow-lg"
+                        />
+                        <div>
+                            <div class="text-2xl font-bold font-space">
+                                <span class="gradient-text">GOFS</span>
+                                <span class="red-gradient-text ml-1"
+                                    >e-VND</span
+                                >
+                            </div>
+                            <p class="text-gray-400">
+                                Governable Onchain Finance System
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="text-center md:text-right">
+                        <p class="text-gray-400 mb-2">
+                            &copy; 2025 GOFS – e-VND. All rights reserved.
+                        </p>
+                        <p class="text-sm text-gray-500">
+                            Positioning Vietnam at the forefront of financial
+                            innovation
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+        <script>
+            // Initialize Mermaid
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: "default",
+                themeVariables: {
+                    primaryColor: "#3b82f6",
+                    primaryTextColor: "#1f2937",
+                    primaryBorderColor: "#1e40af",
+                    lineColor: "#6b7280",
+                    secondaryColor: "#f3f4f6",
+                    tertiaryColor: "#f9fafb",
+                },
+            })
+
+            // Mobile menu toggle
+            function toggleMobileMenu() {
+                const menu = document.getElementById("mobile-menu")
+                menu.classList.toggle("hidden")
+            }
+
+            // Navbar scroll effect
+            window.addEventListener("scroll", function () {
+                const navbar = document.getElementById("navbar")
+                if (window.scrollY > 50) {
+                    navbar.classList.add("scrolled")
+                } else {
+                    navbar.classList.remove("scrolled")
+                }
+            })
+
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+                anchor.addEventListener("click", function (e) {
+                    e.preventDefault()
+                    const target = document.querySelector(
+                        this.getAttribute("href")
+                    )
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                        })
+                    }
+                })
+            })
+
+            // Intersection Observer for animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: "0px 0px -50px 0px",
+            }
+
+            const observer = new IntersectionObserver(function (entries) {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("visible")
+                    }
+                })
+            }, observerOptions)
+
+            // Observe all sections with reveal animation
+            document.querySelectorAll(".section-reveal").forEach((section) => {
+                observer.observe(section)
+            })
+
+            // Add nav link active states
+            const navLinks = document.querySelectorAll(".nav-link")
+            navLinks.forEach((link) => {
+                link.addEventListener("mouseenter", function () {
+                    this.style.transform = "translateY(-2px)"
+                })
+                link.addEventListener("mouseleave", function () {
+                    this.style.transform = "translateY(0)"
+                })
+            })
+
+            // Counter animation for stats
+            function animateCounter(element, target) {
+                let current = 0
+                const increment = target / 100
+                const timer = setInterval(() => {
+                    current += increment
+                    if (current >= target) {
+                        current = target
+                        clearInterval(timer)
+                    }
+                    element.textContent = Math.floor(current)
+                }, 20)
+            }
+
+            // Trigger counter animations when visible
+            const statsObserver = new IntersectionObserver(function (entries) {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const counters =
+                            entry.target.querySelectorAll(".stats-counter")
+                        counters.forEach((counter) => {
+                            const text = counter.textContent
+                            if (text.includes("$200B+")) {
+                                counter.textContent = "$200B+"
+                            } else if (text.includes("100%")) {
+                                counter.textContent = "100%"
+                            } else if (text.includes("24/7")) {
+                                counter.textContent = "24/7"
+                            }
+                        })
+                        statsObserver.unobserve(entry.target)
+                    }
+                })
+            })
+
+            document.querySelectorAll(".stats-counter").forEach((counter) => {
+                statsObserver.observe(counter.parentElement.parentElement)
+            })
+        </script>
+    </body>
+</html>

@@ -27,6 +27,9 @@ func runSpam(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+    // load verified users
+	handlers.LoadVerifiedUsers(config)
+	
 	for {
 		choice := rand.Intn(2)
 		if choice == 0 {
