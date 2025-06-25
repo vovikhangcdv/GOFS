@@ -1,0 +1,50 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ERC721Collection.vue > Should display a message if the address is not a contract 1`] = `
+"<div class="v-container v-container--fluid v-locale--is-ltr">
+  <div class="v-row align-center justify-center" style="min-height: 400px;">
+    <div class="v-col-sm-8 v-col-md-6 v-col-lg-4 v-col-12 text-center"><i class="mdi-file mdi v-icon notranslate v-theme--light text-primary mb-4" style="font-size: 100px; height: 100px; width: 100px; opacity: 0.25;" aria-hidden="true"></i>
+      <div class="text-h6 mb-2">No Contract Found</div>
+      <div class="text-body-1 text-medium-emphasis">There doesn't seem to be a contract at this address.</div>
+    </div>
+  </div>
+</div>"
+`;
+
+exports[`ERC721Collection.vue > Should display contract info 1`] = `
+"<div class="v-container v-container--fluid v-locale--is-ltr">
+  <h2 class="text-h6 font-weight-medium"> Token <span class="text-body-2 text-medium-emphasis">Amalfi</span></h2>
+  <hr class="v-divider v-theme--light my-4" aria-orientation="horizontal" role="separator"><!-- TokenHeader -->
+  <token-header-stub contract="[object Object]" stats="[object Object]" loading-contract="false"></token-header-stub><!-- Navigation Chips -->
+  <base-chip-group-stub modelvalue="transfers" mandatory=""></base-chip-group-stub><!-- Tab Content -->
+  <div>
+    <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
+      <!---->
+      <div class="v-card__loader">
+        <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+          <!---->
+          <div class="v-progress-linear__background"></div>
+          <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+          <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+            <div class="v-progress-linear__indeterminate">
+              <div class="v-progress-linear__indeterminate long"></div>
+              <div class="v-progress-linear__indeterminate short"></div>
+            </div>
+          </transition-stub>
+          <!---->
+        </div>
+      </div>
+      <!---->
+      <!---->
+      <div class="v-card-text">
+        <e-r-c721-token-transfers-stub address="0x123" headers="[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]"></e-r-c721-token-transfers-stub>
+      </div>
+      <!---->
+      <!----><span class="v-card__underlay"></span>
+    </div>
+  </div>
+  <!--v-if-->
+  <!--v-if-->
+  <!--v-if-->
+</div>"
+`;

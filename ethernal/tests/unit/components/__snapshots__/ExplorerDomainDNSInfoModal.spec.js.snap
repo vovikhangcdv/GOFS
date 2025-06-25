@@ -1,0 +1,94 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ExplorerDomainDNSInfoModal.vue > Should display DNS info 1`] = `
+"<div class="v-dialog-stub" max-width="600">
+  <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
+    <!---->
+    <div class="v-card__loader">
+      <div class="v-progress-linear v-theme--light v-locale--is-ltr" style="top: 0px; height: 0px; --v-progress-linear-height: 2px;" role="progressbar" aria-hidden="true" aria-valuemin="0" aria-valuemax="100">
+        <!---->
+        <div class="v-progress-linear__background"></div>
+        <div class="v-progress-linear__buffer" style="width: 0%;"></div>
+        <transition-stub name="fade-transition" appear="false" persisted="false" css="true">
+          <div class="v-progress-linear__indeterminate">
+            <div class="v-progress-linear__indeterminate long"></div>
+            <div class="v-progress-linear__indeterminate short"></div>
+          </div>
+        </transition-stub>
+        <!---->
+      </div>
+    </div>
+    <!---->
+    <!---->
+    <div class="v-card-title"><template></template>
+      <div class="v-spacer"></div><button type="button" class="v-btn v-btn--elevated v-btn--icon v-theme--light v-btn--density-default v-btn--size-default v-btn--variant-elevated"><span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+        <!----><span class="v-btn__content" data-no-activator=""><i class="mdi-close mdi v-icon notranslate v-theme--light v-icon--size-default" aria-hidden="true"></i></span>
+        <!---->
+        <!---->
+      </button>
+    </div>
+    <div class="v-card-text">
+      <div class="v-list v-theme--light v-list--density-default v-list--one-line" tabindex="0" role="listbox">
+        <div class="v-list-item v-theme--light v-list-item--density-default v-list-item--one-line rounded-0 v-list-item--variant-text">
+          <!----><span class="v-list-item__underlay"></span>
+          <!---->
+          <div class="v-list-item__content" data-no-activator="">
+            <!---->
+            <!----> Last updated 1 minute ago:
+          </div>
+          <!---->
+        </div>
+        <div class="v-list-item v-theme--light v-list-item--density-default v-list-item--one-line rounded-0 v-list-item--variant-text">
+          <!----><span class="v-list-item__underlay"></span>
+          <!---->
+          <div class="v-list-item__content" data-no-activator="">
+            <!---->
+            <!----><i class="mdi-check mdi v-icon notranslate v-theme--light v-icon--size-default mr-1 success--text" aria-hidden="true" aria-describedby="v-tooltip-3"></i> APX Hits
+            <!--teleport start-->
+            <!--teleport end-->
+          </div>
+          <!---->
+        </div>
+        <div class="v-list-item v-theme--light v-list-item--density-default v-list-item--one-line rounded-0 v-list-item--variant-text">
+          <!----><span class="v-list-item__underlay"></span>
+          <!---->
+          <div class="v-list-item__content" data-no-activator="">
+            <!---->
+            <!----><i class="mdi-close mdi v-icon notranslate v-theme--light v-icon--size-default mr-1 error--text" aria-hidden="true" aria-describedby="v-tooltip-5"></i> DNS
+            <!--teleport start-->
+            <!--teleport end-->
+          </div>
+          <!---->
+        </div>
+        <div class="v-list-item v-theme--light v-list-item--density-default v-list-item--one-line rounded-0 v-list-item--variant-text">
+          <!----><span class="v-list-item__underlay"></span>
+          <!---->
+          <div class="v-list-item__content" data-no-activator="">
+            <!---->
+            <!----><i class="mdi-check mdi v-icon notranslate v-theme--light v-icon--size-default mr-1 success--text" aria-hidden="true" aria-describedby="v-tooltip-7"></i> Resolving requests
+            <!--teleport start-->
+            <!--teleport end-->
+          </div>
+          <!---->
+        </div>
+        <div class="v-list-item v-theme--light v-list-item--density-default v-list-item--one-line rounded-0 v-list-item--variant-text">
+          <!----><span class="v-list-item__underlay"></span>
+          <!---->
+          <div class="v-list-item__content" data-no-activator="">
+            <!---->
+            <!----><i class="mdi-close mdi v-icon notranslate v-theme--light v-icon--size-default mr-1 error--text" aria-hidden="true" aria-describedby="v-tooltip-9"></i> SSL active
+            <!--teleport start-->
+            <!--teleport end-->
+          </div>
+          <!---->
+        </div>
+      </div>
+      <div class="mb-1">Log in to the account you have with your DNS provider, and add the following record:</div>
+      <div style="border-radius: 5px;" class="pa-2 bg-black text-white font-weight-medium">ethernal.com A 37.16.1.34</div>
+      <div class="text-caption">Current DNS: 37.16.1.34</div>
+    </div>
+    <!---->
+    <!----><span class="v-card__underlay"></span>
+  </div>
+</div>"
+`;

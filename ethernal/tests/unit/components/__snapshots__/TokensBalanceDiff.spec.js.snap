@@ -1,0 +1,105 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`TokensBalanceDiff.vue > Should display formatted token balances difference with contract info 1`] = `
+"<div data-v-6a8cf8d1="" class="balance-diff pa-0 rounded">
+  <!-- Loading State -->
+  <!-- Balance Changes List -->
+  <div data-v-6a8cf8d1="" class="balance-changes-list">
+    <div data-v-6a8cf8d1="" class="balance-item px-0 rounded-sm mb-3">
+      <div data-v-6a8cf8d1="" class="d-flex flex-justify-between">
+        <!-- Address cell -->
+        <div data-v-6a8cf8d1="" style="min-width: 200px;"><span data-v-6a8cf8d1="" class="font-weight-medium"><hash-link-stub data-v-6a8cf8d1="" type="address" hash="0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266" fullhash="false" withname="true" notcopiable="false" withtokenname="false" xshash="false" unlink="false" loadcontract="false" truncate="true"></hash-link-stub></span></div><!-- Balance changes cell -->
+        <div data-v-6a8cf8d1="" class="flex-grow-1">
+          <div data-v-6a8cf8d1="">
+            <!-- Balance info row -->
+            <div data-v-6a8cf8d1="" class="d-flex align-center mb-1"><i data-v-6a8cf8d1="" class="mdi-arrow-down-bold mdi v-icon notranslate v-theme--light v-icon--size-x-small text-error mr-2" aria-hidden="true"></i><!-- Token amount change --><span data-v-6a8cf8d1="" class="text-error font-weight-medium">-10 Ethernal</span><!-- Token symbol/contract --><span data-v-6a8cf8d1="" class="text-medium-emphasis ml-1">(ETL)</span><!-- Previous and current balance --><button data-v-6a8cf8d1="" type="button" class="v-btn v-btn--icon v-theme--light v-btn--density-comfortable v-btn--size-small v-btn--variant-text ml-2 text-medium-emphasis" aria-describedby="v-tooltip-0"><span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+                <!----><span class="v-btn__content" data-no-activator=""><i class="mdi-history mdi v-icon notranslate v-theme--light v-icon--size-default" aria-hidden="true"></i></span>
+                <!---->
+                <!---->
+              </button>
+              <!--teleport start-->
+              <!--teleport end-->
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr data-v-6a8cf8d1="" class="v-divider v-theme--light my-2" aria-orientation="horizontal" role="separator">
+    </div>
+    <div data-v-6a8cf8d1="" class="balance-item px-0 rounded-sm mb-3">
+      <div data-v-6a8cf8d1="" class="d-flex flex-justify-between">
+        <!-- Address cell -->
+        <div data-v-6a8cf8d1="" style="min-width: 200px;"><span data-v-6a8cf8d1="" class="font-weight-medium"><hash-link-stub data-v-6a8cf8d1="" type="address" hash="0x2d481eeb2ba97955cd081cf218f453a817259ab1" fullhash="false" withname="true" notcopiable="false" withtokenname="false" xshash="false" unlink="false" loadcontract="false" truncate="true"></hash-link-stub></span></div><!-- Balance changes cell -->
+        <div data-v-6a8cf8d1="" class="flex-grow-1">
+          <div data-v-6a8cf8d1="">
+            <!-- Balance info row -->
+            <div data-v-6a8cf8d1="" class="d-flex align-center mb-1"><i data-v-6a8cf8d1="" class="mdi-arrow-up-bold mdi v-icon notranslate v-theme--light v-icon--size-x-small text-success mr-2" aria-hidden="true"></i><!-- Token amount change --><span data-v-6a8cf8d1="" class="text-success font-weight-medium">+10 Ethernal</span><!-- Token symbol/contract --><span data-v-6a8cf8d1="" class="text-medium-emphasis ml-1">(ETL)</span><!-- Previous and current balance --><button data-v-6a8cf8d1="" type="button" class="v-btn v-btn--icon v-theme--light v-btn--density-comfortable v-btn--size-small v-btn--variant-text ml-2 text-medium-emphasis" aria-describedby="v-tooltip-2"><span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+                <!----><span class="v-btn__content" data-no-activator=""><i class="mdi-history mdi v-icon notranslate v-theme--light v-icon--size-default" aria-hidden="true"></i></span>
+                <!---->
+                <!---->
+              </button>
+              <!--teleport start-->
+              <!--teleport end-->
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--v-if-->
+    </div>
+  </div><!-- Pagination -->
+  <!--v-if-->
+</div>"
+`;
+
+exports[`TokensBalanceDiff.vue > Should display token balances difference without contract info 1`] = `
+"<div data-v-6a8cf8d1="" class="balance-diff pa-0 rounded">
+  <!-- Loading State -->
+  <!-- Balance Changes List -->
+  <div data-v-6a8cf8d1="" class="balance-changes-list">
+    <div data-v-6a8cf8d1="" class="balance-item px-0 rounded-sm mb-3">
+      <div data-v-6a8cf8d1="" class="d-flex flex-justify-between">
+        <!-- Address cell -->
+        <div data-v-6a8cf8d1="" style="min-width: 200px;"><span data-v-6a8cf8d1="" class="font-weight-medium"><hash-link-stub data-v-6a8cf8d1="" type="address" hash="0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266" fullhash="false" withname="true" notcopiable="false" withtokenname="false" xshash="false" unlink="false" loadcontract="false" truncate="true"></hash-link-stub></span></div><!-- Balance changes cell -->
+        <div data-v-6a8cf8d1="" class="flex-grow-1">
+          <div data-v-6a8cf8d1="">
+            <!-- Balance info row -->
+            <div data-v-6a8cf8d1="" class="d-flex align-center mb-1"><i data-v-6a8cf8d1="" class="mdi-arrow-down-bold mdi v-icon notranslate v-theme--light v-icon--size-x-small text-error mr-2" aria-hidden="true"></i><!-- Token amount change --><span data-v-6a8cf8d1="" class="text-error font-weight-medium">-10000000000000000000</span><!-- Token symbol/contract -->
+              <!--v-if-->
+              <!-- Previous and current balance --><button data-v-6a8cf8d1="" type="button" class="v-btn v-btn--icon v-theme--light v-btn--density-comfortable v-btn--size-small v-btn--variant-text ml-2 text-medium-emphasis" aria-describedby="v-tooltip-0"><span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+                <!----><span class="v-btn__content" data-no-activator=""><i class="mdi-history mdi v-icon notranslate v-theme--light v-icon--size-default" aria-hidden="true"></i></span>
+                <!---->
+                <!---->
+              </button>
+              <!--teleport start-->
+              <!--teleport end-->
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr data-v-6a8cf8d1="" class="v-divider v-theme--light my-2" aria-orientation="horizontal" role="separator">
+    </div>
+    <div data-v-6a8cf8d1="" class="balance-item px-0 rounded-sm mb-3">
+      <div data-v-6a8cf8d1="" class="d-flex flex-justify-between">
+        <!-- Address cell -->
+        <div data-v-6a8cf8d1="" style="min-width: 200px;"><span data-v-6a8cf8d1="" class="font-weight-medium"><hash-link-stub data-v-6a8cf8d1="" type="address" hash="0x2d481eeb2ba97955cd081cf218f453a817259ab1" fullhash="false" withname="true" notcopiable="false" withtokenname="false" xshash="false" unlink="false" loadcontract="false" truncate="true"></hash-link-stub></span></div><!-- Balance changes cell -->
+        <div data-v-6a8cf8d1="" class="flex-grow-1">
+          <div data-v-6a8cf8d1="">
+            <!-- Balance info row -->
+            <div data-v-6a8cf8d1="" class="d-flex align-center mb-1"><i data-v-6a8cf8d1="" class="mdi-arrow-up-bold mdi v-icon notranslate v-theme--light v-icon--size-x-small text-success mr-2" aria-hidden="true"></i><!-- Token amount change --><span data-v-6a8cf8d1="" class="text-success font-weight-medium">+10000000000000000000</span><!-- Token symbol/contract -->
+              <!--v-if-->
+              <!-- Previous and current balance --><button data-v-6a8cf8d1="" type="button" class="v-btn v-btn--icon v-theme--light v-btn--density-comfortable v-btn--size-small v-btn--variant-text ml-2 text-medium-emphasis" aria-describedby="v-tooltip-2"><span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+                <!----><span class="v-btn__content" data-no-activator=""><i class="mdi-history mdi v-icon notranslate v-theme--light v-icon--size-default" aria-hidden="true"></i></span>
+                <!---->
+                <!---->
+              </button>
+              <!--teleport start-->
+              <!--teleport end-->
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--v-if-->
+    </div>
+  </div><!-- Pagination -->
+  <!--v-if-->
+</div>"
+`;
